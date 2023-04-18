@@ -1,0 +1,15 @@
+{
+  "extends": "@quasar/app-webpack/tsconfig-preset",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "es2020",
+    "lib": ["es2020", "dom"],
+    "module": "esnext", // add this line
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "typeRoots": ["./src/@types"]
+    // "types": ["./src/@types/common"]
+  }
+}

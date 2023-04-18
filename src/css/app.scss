@@ -1,0 +1,93 @@
+// app global css in SCSS form
+
+.q-header::after {
+  content: ' ';
+  height: 8px;
+  display: block;
+  background: linear-gradient(var(--q-accent) 50%, var(--q-primary) 50%);
+}
+.q-footer::before {
+  content: ' ';
+  height: 8px;
+  display: block;
+  background: linear-gradient(var(--q-primary) 50%, var(--q-accent) 50%);
+}
+
+.introduce-judge {
+  height: 70px;
+  line-height: 70px;
+  text-align: center;
+  width: 100%;
+  border: 1px solid black;
+  background: grey;
+  color: white;
+  margin: 3px;
+  cursor: pointer;
+}
+
+.competitor-number {
+  height: 70px;
+  line-height: 70px;
+  text-align: center;
+  width: 16%;
+  border: 1px solid black;
+  max-width: 90vw;
+  background: grey;
+  color: white;
+  margin: 3px;
+  cursor: pointer;
+}
+
+.competitor-add {
+  height: 70px;
+  line-height: 70px;
+  width: 23%;
+  border: 1px solid black;
+  max-width: 90vw;
+  // background: red;
+  color: white;
+  font-size: 225%;
+  margin: 3px;
+  cursor: pointer;
+}
+
+.underlined-after::after {
+  content: ' ';
+  height: 8px;
+  display: block;
+  background: linear-gradient(var(--q-accent) 50%, var(--q-primary) 50%);
+}
+.underlined-before::before {
+  content: ' ';
+  height: 8px;
+  display: block;
+  background: linear-gradient(var(--q-accent) 50%, var(--q-primary) 50%);
+}
+.border-primary {
+  border: 2px solid $primary;
+  border-radius: 8px;
+}
+
+.mobile {
+  .q-table__top {
+    padding-top: 1px;
+    padding-left: 8px;
+    padding-right: 1px;
+  }
+}
+.mobile .noLeft {
+  .q-table__top {
+    padding-top: 1px;
+    padding-left: 1px;
+    padding-right: 1px;
+  }
+}
+.tablet {
+  .q-table__top {
+    padding-right: 5px;
+  }
+}
+.drag-handle {
+	cursor: move;
+	cursor: -webkit-grabbing;
+}

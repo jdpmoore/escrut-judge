@@ -1,0 +1,334 @@
+.my-table-border {
+	border-left: solid $primary 1.5px;
+	border-right: solid $primary 1.5px;
+}
+
+.my-sticky-virtscroll-table {
+  /* max height is important */
+  background-color: white;
+  /* this will be the loading indicator */;
+}
+
+.my-sticky-virtscroll-table tr th {
+	position: sticky;
+    /* higher than z-index for td below */
+	z-index: 2;
+    /* bg color is important; just specify one */
+	background: white;
+}
+
+.my-sticky-virtscroll-table .q-table__top,
+  .my-sticky-virtscroll-table .q-table__bottom,
+  .my-sticky-virtscroll-table thead tr:first-child th {
+	background-color: $primary;
+	color: white;
+}
+
+.validatonError .q-table__bottom {
+	background-color: $negative !important;
+	color: white;
+}
+
+.my-sticky-virtscroll-table thead tr th {
+	position: sticky;
+	z-index: 1;
+}
+
+.my-sticky-virtscroll-table thead tr:last-child th {
+    /* height of all previous header rows */
+	top: 48px;
+}
+
+.my-sticky-virtscroll-table thead tr:first-child th {
+	top: 0;
+}
+
+.my-sticky-virtscroll-table .q-table__title,
+.my-sticky-virtscroll-table .q-field__native,
+.my-sticky-virtscroll-table .q-select__dropdown-icon {
+    color: white;
+}
+
+.my-sticky-virtscroll-table .q-table__bottom .q-btn__content {
+    color: lightblue;
+}
+
+.my-sticky-header-column-table {
+  /* specifying max-width so the example can
+    highlight the sticky column on any browser window max-width: 600px */
+  /* max height is important */
+	background: #555;
+	/* bg color is important for td; just specify one */
+  /* this will be the loading indicator */;
+}
+
+.my-sticky-header-column-table .q-table__middle {
+	max-height: 75vh;
+}
+
+.my-sticky-header-column-table tr th {
+	position: sticky;
+    /* higher than z-index for td below */
+	z-index: 50;
+    /* bg color is important; just specify one */
+	background: #ff1;
+}
+
+.my-sticky-header-column-table thead tr:last-child th {
+    /* height of all previous header rows */
+	top: 48px;
+    /* highest z-index */
+	z-index: 60;
+}
+
+.my-sticky-header-column-table thead tr:first-child th {
+	top: 0;
+	z-index: 1;
+}
+
+.my-sticky-header-column-table tr:first-child th:first-child {
+    /* highest z-index */
+	z-index: 600;
+}
+
+.my-sticky-header-column-table td:first-child {
+	z-index: 1;
+}
+
+.my-sticky-header-column-table td:first-child, .my-sticky-header-column-table th:first-child {
+	position: sticky;
+	left: 0;
+}
+
+.my-sticky-header-column-table .q-table__top,
+  .my-sticky-header-column-table .q-table__bottom,
+  .my-sticky-header-column-table thead tr:first-child th {
+	background-color: lightyellow;
+}
+
+.profileTable {
+  background: var(--q-dark);
+  color: #FFF;
+  // min-width: 50vw;
+}
+
+.profileTable table {
+  border-collapse: separate !important;
+  border-spacing: 0 2px !important;
+}
+
+.profileTable tr td:nth-child(2n-1) {
+  background: $primary;
+  font-weight: 500;
+  // background: #e2e8f7;
+  border-radius: 5px 0px 0px 5px;
+  border-bottom: 1px solid $accent;
+  border-top: 1px solid $accent;
+  border-left: 1px solid $accent;
+  border-right: 8px solid $accent;
+  padding: 6px 24px;
+  vertical-align: middle;
+}
+
+.profileTable tr td:nth-child(2n) {
+  background: #FFF;
+  max-width:1000px;
+  color: black;
+  border-radius: 0px 5px 5px 0px;
+  border-bottom: 1px solid $accent;
+  border-top: 1px solid $accent;
+  border-right: 1px solid $accent;
+  padding: 8px 20px;
+  vertical-align: middle;
+}
+
+.profileTable tr td .q-badge {
+  padding: 4px 8px;
+  border: none; 
+  border-radius: 4px; 
+}
+
+.profileTable .q-table tbody td:before {
+    background: rgba(0, 0, 0, 0);
+}
+
+// .profileTable tr:hover {
+//   background: inherit;
+//   opacity: 1.0;
+// }
+
+.editingProfileTable tr td:nth-child(2n):hover  {
+  background: $accent-highlight;
+  color: white;
+  // opacity: 0.3;
+  // color: $brand-cream;
+}
+
+.noHover:hover {
+  background-color: white !important;
+  color: black !important;
+  // opacity: 0.3;
+  // color: $brand-cream;
+}
+
+.wrapping {
+  /* don't shorten cell contents */
+  white-space: normal !important;
+  min-width: 130px;
+}
+
+.tapGrid {
+  background: var(--q-brand-cream);
+}
+.tapGrid .q-table tbody td:before {
+    background: rgba(0, 0, 0, 0);
+}
+
+ .tapGrid table {
+  table-layout: fixed ;
+  width: 100%;
+  border-collapse: separate !important;
+  // border-spacing: 0 1px !important;
+  border-radius: 5px 0px 0px 5px;
+}
+
+.tapGrid tr td {
+  width: 13% !important;
+  // width: 150px;
+  border-right: 1px solid var(--q-primary);
+  border-bottom: 1px solid var(--q-primary);
+}
+
+.tapGrid tr:first-child {
+  text-align: center;
+  background: var(--q-secondary) !important;
+  font-weight: 500;
+  color: var(--q-secondary-inv);
+  // background: #e2e8f7;
+  // border-radius: 5px 0px 0px 5px;
+  border-bottom: 1px solid var(--q-primary);
+  border-top: 0;
+  border-left: 1px solid var(--q-primary);
+  border-right: 8px solid var(--q-primary);
+  // padding: 6px 24px;
+  vertical-align: middle;
+}
+
+.tapGrid tr td:first-child {
+  width: 22% !important;
+  background: var(--q-secondary);
+  font-weight: 500;
+  color: var(--q-secondary-inv);
+  // background: #e2e8f7;
+  // border-radius: 5px 0px 0px 5px;
+  border-bottom: 1px solid var(--q-primary);
+  border-top: 0;
+  border-left: 1px solid var(--q-primary);
+  border-right: 8px solid var(--q-primary);
+  // padding: 6px 24px;
+  vertical-align: middle;
+}
+
+.teamGrid {
+  background: var(--q-brand-cream);
+}
+
+.teamGrid .q-table tbody td:before {
+  background: rgba(0, 0, 0, 0);
+}
+
+.teamGrid table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: separate !important;
+  // border-spacing: 0 1px !important;
+  border-radius: 5px 0px 0px 5px;
+}
+
+.teamGrid tr td {
+  text-align: center;
+  width: 13% !important;
+  // width: 150px;
+  border-right: 1px solid var(--q-primary);
+  border-bottom: 1px solid var(--q-primary);
+}
+
+.teamGrid tr:first-child {
+  text-align: center;
+  background: var(--q-secondary) !important;
+  font-weight: 500;
+  color: var(--q-secondary-inv);
+  // background: #e2e8f7;
+  // border-radius: 5px 0px 0px 5px;
+  border-bottom: 1px solid var(--q-primary);
+  border-top: 0;
+  border-left: 1px solid var(--q-primary);
+  border-right: 8px solid var(--q-primary);
+  // padding: 6px 24px;
+  vertical-align: middle;
+}
+
+.teamGrid tr td:first-child {
+  // width: 5% !important;
+  background: var(--q-secondary);
+  font-weight: 500;
+  color: var(--q-secondary-inv);
+  // background: #e2e8f7;
+  // border-radius: 5px 0px 0px 5px;
+  border-bottom: 1px solid var(--q-primary);
+  border-top: 0;
+  border-left: 1px solid var(--q-primary);
+  border-right: 1px solid var(--q-primary);
+  // padding: 6px 24px;
+  vertical-align: middle;
+}
+
+.teamGrid tr td:nth-child(2) {
+  // width: 5% !important;
+  background: var(--q-secondary);
+  font-weight: 500;
+  color: var(--q-secondary-inv);
+  // background: #e2e8f7;
+  // border-radius: 5px 0px 0px 5px;
+  border-bottom: 1px solid var(--q-primary);
+  border-top: 0;
+  border-left: 1px solid var(--q-primary);
+  border-right: 8px solid var(--q-primary);
+  // padding: 6px 24px;
+  vertical-align: middle;
+}
+
+
+.amalgGrid {
+  background: var(--q-brand-cream);
+}
+
+.amalgGrid .q-table tbody td:before {
+  background: rgba(0, 0, 0, 0);
+}
+
+.amalgGrid table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: separate !important;
+  // border-spacing: 0 1px !important;
+  border-radius: 5px 0px 0px 5px;
+}
+
+.amalgGrid tr td {
+  text-align: center;
+  width: 13% !important;
+    background: var(--q-secondary) !important;
+      color: var(--q-secondary-inv);
+  // width: 150px;
+  border-right: 1px solid var(--q-primary);
+  border-bottom: 1px solid var(--q-primary);
+}
+
+.hoverHighlight:hover  {
+  background: $accent-highlight;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 1);
+  border: 2px solid rgba(255, 0, 0, 1);
+  // opacity: 0.3;
+  // color: $brand-cream;
+}

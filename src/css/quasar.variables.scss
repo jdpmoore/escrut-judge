@@ -1,0 +1,169 @@
+// Quasar SCSS (& Sass) Variables
+// --------------------------------------------------
+// To customize the look and feel of this app, you can override
+// the Sass/SCSS variables found in Quasar's source Sass/SCSS files.
+
+// Check documentation for full list of Quasar variables
+
+// Your own variables (that are declared here) and Quasar's own
+// ones will be available out of the box in your .vue/.scss/.sass files
+
+
+$primary   : #0D68B1;
+$accent    : #B4191D;
+$secondary : lightyellow;
+// #26A69A;
+// $accent    : #B4191D;
+$dark      : #333333;
+
+$accent-highlight : #9C120033;
+$highlight : #f2c0376e;
+$highlighted: yellow;
+
+$positive  : #21BA45;
+$negative  : #C10015;
+$info      : #31CCEC;
+$warning   : #F2C037;
+
+
+$primary-inv: #fff;
+$secondary-inv: #000;
+$accent-inv: #fff;
+$dark-inv: #fff;
+$positive-inv: #000;
+$negative-inv: #fff;
+$info-inv: #000;
+$warning-inv: #000;
+
+:root {
+  --q-color-highlighted: yellow;
+  --q-color-primary-inv:#fff;
+  --q-color-secondary-inv: #000;
+  --q-color-accent-inv:#fff;
+  --q-color-dark-inv: #fff;
+  --q-color-dark: #333;
+  --q-color-positive-inv:#000;
+  --q-color-negative-inv: #fff;
+  --q-color-info-inv:#000;
+  --q-color-warning-inv: #000;
+}
+
+// .text-white {
+//   color: $brand-cream !important;
+//   color: var(--q-color-brand-cream) !important;
+// }
+// .text-black {
+//   color: $normal !important;
+//   color: var(--q-color-normal) !important;
+// }
+
+.bg-accent-highlighted {
+  background-color: $highlighted;
+  background-color: var(--q-color-highlighted) !important;
+}
+.text-accent-highlighted {
+  color: $highlighted;
+  color: var(--q-color-highlighted) !important;
+}
+
+.bg-highlighted {
+  background-color: $highlighted;
+  background-color: var(--q-color-highlighted) !important;
+}
+.text-highlighted {
+  color: $highlighted;
+  color: var(--q-color-highlighted) !important;
+}
+
+.bg-primary-inv {
+  background-color: var(--q-color-primary-inv) !important;
+}
+.text-primary-inv {
+  color: var(--q-color-primary-inv) !important;
+}
+.bg-secondary-inv {
+  background-color: var(--q-color-secondary-inv) !important;
+}
+.text-secondary-inv {
+  color: var(--q-color-secondary-inv) !important;
+}
+.bg-accent-inv {
+  background-color: var(--q-color-accent-inv) !important;
+}
+.text-accent-inv {
+  color: var(--q-color-accent-inv) !important;
+}
+.bg-dark-inv {
+  background-color: var(--q-color-dark-inv) !important;
+}
+.text-dark-inv {
+  color: var(--q-color-dark-inv) !important;
+}
+.text-dark {
+  color: var(--q-color-dark) !important;
+}
+.bg-positive-inv {
+  background-color: var(--q-color-positive-inv) !important;
+}
+.text-positive-inv {
+  color: var(--q-color-positive-inv) !important;
+}
+.bg-negative-inv {
+  background-color: var(--q-color-negative-inv) !important;
+}
+.text-negative-inv {
+  color: var(--q-color-negative-inv) !important;
+}
+.bg-info-inv {
+  background-color: var(--q-color-info-inv) !important;
+}
+.text-info-inv {
+  color: var(--q-color-info-inv) !important;
+}
+.bg-warning-inv {
+  background-color: var(--q-color-warning-inv) !important;
+}
+.text-warning-inv {
+  color: var(--q-color-warning-inv) !important;
+}
+
+.bg-oxford-blue {
+  background-color: #002147 !important;
+}
+.text-oxford-blue {
+  color: #002147 !important;
+}
+.bg-oxford-blue-inv {
+  background-color: #FFF !important;
+}
+.text-oxford-blue-inv {
+  color: #FFF !important;
+}
+
+.bg-cambridge-blue {
+  background-color: #a3c1ad !important;
+}
+.text-cambridge-blue {
+  color: #a3c1ad !important;
+}
+
+.text-cambridge-blue-inv {
+  color: #000 !important;
+}
+.bg-cambridge-blue-inv {
+  background-color: #000 !important;
+}
+
+
+
+:export {
+  primary: $primary;
+  secondary: $secondary;
+  accent: $accent;
+  dark: $dark;
+  positive: $positive;
+  negative: $negative;
+  info: $info;
+  warning: $warning;
+}
+
