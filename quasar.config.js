@@ -202,6 +202,7 @@ module.exports = configure(function (ctx) {
 
       manifest: {
         name: 'eScrut Judges application',
+        version: version, //updateVersion(version, process.env),
         short_name: 'eScrut Judges application',
         description: '',
         display: 'standalone',
