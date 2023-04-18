@@ -23,7 +23,7 @@
       <q-card-section class="bg-dark text-white shadow-2 text-center q-pa-sm">
         <div class="row items-center no-wrap">
           <div class="col">
-            <q-btn>Submit</q-btn>
+            <q-btn @click="submitTest">Submit OCR</q-btn>
           </div>
         </div>
       </q-card-section>
@@ -87,6 +87,96 @@ export default defineComponent({
     this.configureCanvas()
   },
   methods: {
+    b64toBlob(dataURI) {
+      var byteString = atob(dataURI.split(',')[1])
+      var ab = new ArrayBuffer(byteString.length)
+      var ia = new Uint8Array(ab)
+
+      for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i)
+      }
+      return new Blob([ab], { type: 'image/jpeg' })
+    },
+    getReadResult(location) {
+      this.$axios
+        .get(location, {
+          headers: {
+            'Ocp-Apim-Subscription-Key': '8ee41f217f384caca024bd97364c93d9',
+          },
+        })
+        .then(({ data }) => {
+          if (data.status !== 'succeeded') {
+            setTimeout(() => {
+              this.getReadResult(location)
+            }, 2000)
+          }
+          const { readResults } = data.analyzeResult
+          const numbers = this.$_.uniq(
+            readResults
+              .map((res) => {
+                return res.lines.map((line) => {
+                  return Number(line.text)
+                })
+              })
+              .flat()
+          ).sort((a, b) => a - b)
+          this.$common.popup({
+            title: 'numbers',
+            message: numbers.join(', '),
+          })
+        })
+    },
+    getOCR() {
+      console.log('are we here?!?')
+      let vpt = this.canvas.viewportTransform
+      console.log(vpt)
+      this.resizeCanvas(this.sketchProperties)
+      console.log('what about here?')
+      console.log(this.canvas.getWidth())
+      console.log(this.sketchProperties)
+      vpt[4] = this.canvas.getWidth() / 2 - this.sketchProperties.width / 2
+      vpt[5] = this.canvas.getHeight() / 2 - this.sketchProperties.height / 2
+      console.log(vpt)
+      this.canvas.renderAll()
+      this.canvas.setZoom(1)
+      this.canvas.renderAll()
+      console.log('third part')
+      const jpgDownload = this.canvas.toDataURL({
+        format: 'jpeg',
+        quality: 1.0,
+        width: this.sketchProperties.width - 2,
+        height: this.sketchProperties.height - 2,
+        left: 1,
+        top: 1,
+      })
+      this.resizeCanvas()
+      let vpt2 = this.canvas.viewportTransform
+      vpt2[4] = this.canvas.getWidth() / 2 - this.sketchProperties.width / 2
+      vpt2[5] = this.canvas.getHeight() / 2 - this.sketchProperties.height / 2
+      this.canvas.renderAll()
+      const jpgBlob = this.b64toBlob(jpgDownload)
+      this.$axios
+        .post(
+          'https://escrut.cognitiveservices.azure.com/vision/v3.2/read/analyze',
+          jpgBlob,
+          {
+            headers: {
+              'Content-Type': 'application/octet-stream',
+              'Ocp-Apim-Subscription-Key': '8ee41f217f384caca024bd97364c93d9',
+            },
+          }
+        )
+        .then(({ headers }) => {
+          setTimeout(() => {
+            this.getReadResult(headers['operation-location'])
+          }, 2000)
+        })
+        .catch(this.$GOcommon.axiosError)
+    },
+    submitTest() {
+      console.log('now we submit the test')
+      this.getOCR()
+    },
     configureCanvas() {
       const ref = this.$refs.judgepad
       this.canvas = new fabric.Canvas(ref, {

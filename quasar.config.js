@@ -83,8 +83,8 @@ module.exports = configure(function (ctx) {
           : 'https://dev.app.escrut.com/api',
         ECHO: process.env.LIVE
           ? 'https://app.escrut.com:6003'
-          : 'http://homestead.escrut:6002',
-        // : 'https://dev.app.escrut.com:6002',
+          : // : 'http://homestead.escrut:6002',
+            'https://dev.app.escrut.com:6002',
         VERSION_CHECK: `/system/webapp/version/judge${
           process.env.LIVE === 'true' ? '' : '/dev'
         }`,
