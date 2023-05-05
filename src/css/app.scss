@@ -26,28 +26,28 @@
 }
 
 .competitor-number {
-  height: 70px;
-  line-height: 70px;
+  height: 88px;
+  line-height: 88px;
   text-align: center;
-  width: 16%;
+  width: 20%;
   border: 1px solid black;
   max-width: 90vw;
   background: grey;
   color: white;
-  margin: 3px;
+  margin: 9px;
   cursor: pointer;
 }
 
 .competitor-add {
-  height: 70px;
-  line-height: 70px;
-  width: 23%;
+  height: 88px;
+  line-height: 88px;
+  width: 20%;
   border: 1px solid black;
   max-width: 90vw;
   // background: red;
   color: white;
   font-size: 225%;
-  margin: 3px;
+  margin: 9px;
   cursor: pointer;
 }
 
@@ -88,6 +88,6 @@
   }
 }
 .drag-handle {
-	cursor: move;
-	cursor: -webkit-grabbing;
+  cursor: move;
+  cursor: -webkit-grabbing;
 }
