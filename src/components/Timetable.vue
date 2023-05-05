@@ -3,8 +3,8 @@
     <!--        :sublabel="event.name" color="red"-->
     <q-item-label header dark class="bg-primary text-white text-h6"
       ><div class="row justify-between items-center">
-        Timetable
-        <q-btn
+        Event order
+        <!-- <q-btn
           dense
           flat
           color="warning"
@@ -12,9 +12,9 @@
           :disable="!Boolean(selectF)"
           icon="settings"
           @click="timetableOptions"
-        />
+        /> -->
       </div>
-      <q-select
+      <!-- <q-select
         v-model="selectF"
         dark
         behavior="menu"
@@ -23,7 +23,8 @@
         option-label="name"
         class="text-white"
         color="positive"
-    /></q-item-label>
+    /> -->
+    </q-item-label>
     <div
       v-for="event in filteredTimetable"
       :key="event.timetableOrder"
@@ -33,7 +34,8 @@
     >
       <q-item multiline :class="activeCol(event)">
         <q-item-section avatar>{{
-          formatTime(event.startTime)
+          // formatTime(event.startTime)
+          event.timetableOrder
         }}</q-item-section>
         <q-item-section>
           <q-item-label>{{ event.title }}</q-item-label>
@@ -89,7 +91,8 @@ export default defineComponent({
   computed: {
     ...mapState('command', ['floors', 'timetable', 'userDetails']),
     filteredTimetable(): v2.TimetableItem[] {
-      return this.$store.getters['command/timetableByFloor'](this.selectF)
+      return this.$store.state.command.timetable
+      // getters['command/timetableByFloor'](this.selectF)
     },
     userRoles() {
       return this.userDetails.roles
@@ -254,19 +257,19 @@ export default defineComponent({
       const message = 'Please select from the following options'
       const current = this.$store.state.command.current
       const items = [
-        { label: 'Compere this round', value: '1', color: 'positive' },
+        { label: 'Judge this round', value: '1', color: 'positive' },
       ]
       if (round.round) {
-        if (
-          this.userRoles.includes('sysAdmin') ||
-          this.userRoles.includes('scrutineer')
-        ) {
-          items.push({
-            label: 'Scrutineer this round',
-            value: '2',
-            color: 'warning',
-          })
-        }
+        // if (
+        //   this.userRoles.includes('sysAdmin') ||
+        //   this.userRoles.includes('scrutineer')
+        // ) {
+        //   items.push({
+        //     label: 'Scrutineer this round',
+        //     value: '2',
+        //     color: 'warning',
+        //   })
+        // }
         items.push({ label: 'View competitors', value: '4', color: 'positive' })
       }
       if (round.id > current.id) {
@@ -319,7 +322,7 @@ export default defineComponent({
           }
           switch (option) {
             case '1':
-              this.$router.push('/compere/main')
+              this.$router.push('/judge')
               break
             case '2':
               this.$router.push('/scrutineer/main')
@@ -332,6 +335,7 @@ export default defineComponent({
                   this.$q.loading.hide()
                 })
               this.$store.commit('command/setCurrentNext')
+              this.$router.push('/judge')
               break
             case '4':
               this.viewCompetitors(round)

@@ -12,7 +12,14 @@
           @click="showTimetable = !showTimetable"
         />
         <q-avatar v-if="!$q.screen.lt.sm" size="40px" class="q-ma-sm">
-          <img src="assets/ivda/ivda_logo_only.svg" />
+          <!-- <img src="assets/ivda/ivda_logo_only.svg" /> -->
+          <q-icon v-if="isConnected" color="positive" name="wifi" size="md" />
+          <q-icon
+            v-if="!isConnected"
+            color="negative"
+            name="wifi_off"
+            size="md"
+          />
         </q-avatar>
         <q-toolbar-title>
           {{ toolbarTitle }}
@@ -250,12 +257,16 @@ export default defineComponent({
     },
     toolbarTitle(): string {
       let toReturn = 'eScrutineer: Judges'
+      const user = this.$store.state.command.userDetails
+      if (user.firstName) {
+        toReturn = `${user.firstName} ${user.lastName}`
+      }
       if (this.$store.state.command.competition.id > 0) {
-        toReturn = this.$store.state.command.competition.title
+        toReturn = `${toReturn}: ${this.$store.state.command.competition.title}`
       }
-      if (this.$store.state.command.floor.id > 0) {
-        toReturn = `${toReturn} (${this.$store.state.command.floor.name})`
-      }
+      // if (this.$store.state.command.floor.id > 0) {
+      //   toReturn = `${toReturn} (${this.$store.state.command.floor.name})`
+      // }
       return toReturn
     },
   },
@@ -333,7 +344,7 @@ export default defineComponent({
           console.log('version check', localVersion, cloudVersion)
           if (updateNeeded) {
             this.$axios
-              .get('/system/release-notes/command/latest')
+              .get('/system/release-notes/judges/latest')
               .then(({ data }) => {
                 this.$q
                   .dialog({

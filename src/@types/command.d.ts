@@ -304,7 +304,7 @@ export namespace v2 {
     recall: number
     dances: Dance[]
     adjudicators: ShortJudge[]
-    floor: { id: number; name: string }
+    floor: Floor
     round: string | number
     isQualifier: boolean
     isFirstRound: boolean
@@ -318,7 +318,7 @@ export namespace v2 {
     dances: number[]
     danceOrder: number[] | undefined
     round: ShortRound
-    floor: { id: number }
+    floor: Floor
     floorId: number
     floorName: string
     heats: number

@@ -32,6 +32,7 @@ interface Scrutineering {
 // }
 
 export interface CommandStateInterface {
+  handwriting: boolean
   version: string
   offline: boolean
   competition: v1.Competition
@@ -106,7 +107,7 @@ export const blankRound: v2.TimetableItem = {
     id: 0,
     heats: 0,
     recall: 0,
-    floor: { id: 0, name: '' },
+    floor: blankFloor,
     adjudicators: [],
     dances: [],
     danceOrder: [],
@@ -114,9 +115,7 @@ export const blankRound: v2.TimetableItem = {
     isQualifier: false,
     isFirstRound: false,
   },
-  floor: {
-    id: 0,
-  },
+  floor: blankFloor,
   floorId: 0,
   floorName: '',
   heats: 0,
@@ -137,6 +136,7 @@ export function initialState(): CommandStateInterface {
     domain = 'localhost'
   }
   const defaultState: CommandStateInterface = {
+    handwriting: true,
     version: process.env.version ? process.env.version : '1.0.0',
     offline: false,
     userDetails: { avatar: '', roles: [''], firstName: '', lastName: '' },

@@ -229,29 +229,29 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
         .get(`/comp/${context.state.competition.id}/floors`)
         .then(({ data }) => {
           context.commit('storeFloors', _.values(data))
-          if (context.state.floors.length === 1) {
-            context.commit('setFloor', context.state.floors[0])
-            resolve()
-          } else {
-            const floorOptions = context.getters.floorOptions
-            Dialog.create({
-              dark: true,
-              title: 'Select floor',
-              message: 'Please select the floor:',
-              options: {
-                type: 'radio',
-                model: floorOptions[0].value,
-                items: floorOptions,
-              },
-              class: 'bg-primary',
-              persistent: true,
-              // cancel: { label: 'Close', outline: true, flat: true, color: 'amber' },
-              ok: { label: 'Ok', outline: true, flat: true, color: 'positive' },
-            }).onOk((floor: v1.Floor) => {
-              context.commit('setFloor', floor)
-              resolve()
-            })
-          }
+          // if (context.state.floors.length === 1) {
+          context.commit('setFloor', context.state.floors[0])
+          resolve()
+          // } else {
+          //   const floorOptions = context.getters.floorOptions
+          //   Dialog.create({
+          //     dark: true,
+          //     title: 'Select floor',
+          //     message: 'Please select the floor:',
+          //     options: {
+          //       type: 'radio',
+          //       model: floorOptions[0].value,
+          //       items: floorOptions,
+          //     },
+          //     class: 'bg-primary',
+          //     persistent: true,
+          //     // cancel: { label: 'Close', outline: true, flat: true, color: 'amber' },
+          //     ok: { label: 'Ok', outline: true, flat: true, color: 'positive' },
+          //   }).onOk((floor: v1.Floor) => {
+          //     context.commit('setFloor', floor)
+          //     resolve()
+          //   })
+          // }
           context.commit('saveState')
         })
         .catch((err) => {
@@ -337,7 +337,7 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
     const { id } = context.state.competition
     if (id > 0) {
       axiosInstance
-        .get(`/competition/${id}/timetable`)
+        .get(`/competition/${id}/mytimetable`)
         .then(({ data }: { data: v2.TimetableItem[] }) => {
           data.forEach((timetableItem) => {
             if (timetableItem.danceOrder) {
@@ -353,8 +353,9 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
   getTimetable(context, loadingDialog) {
     return new Promise<void>((resolve, reject) => {
       // if (context.state.competition) {
+      // competition/{id}/mytimetable
       axiosInstance
-        .get(`/competition/${context.state.competition.id}/timetable`)
+        .get(`/competition/${context.state.competition.id}/mytimetable`)
         .then(({ data }: { data: v2.TimetableItem[] }) => {
           data.forEach((timetableItem) => {
             if (timetableItem.danceOrder) {

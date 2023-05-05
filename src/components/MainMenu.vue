@@ -65,7 +65,37 @@
         </div>
       </q-item-section>
     </q-item>
+    <q-item v-ripple clickable class="bg-dark text-white">
+      <!-- <q-item-section avatar>
+        <q-icon name="settings" class="text-positive" />
+      </q-item-section> -->
+      <q-item-section>
+        <!-- <q-item-label class="text-white">Data dump</q-item-label> -->
+        <q-toggle
+          v-model="padMode"
+          :label="padModeLabel"
+          color="positive"
+          keep-color
+        ></q-toggle>
+      </q-item-section>
+    </q-item>
     <q-item
+      v-if="isLoggedIn"
+      v-ripple
+      label="data"
+      clickable
+      class="bg-dark text-white"
+      @click="dataDump"
+    >
+      <q-item-section avatar>
+        <q-icon name="settings" class="text-warning" />
+      </q-item-section>
+      <q-item-section>
+        <q-item-label class="text-white">Data dump</q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-item
+      v-if="!isLoggedIn"
       v-ripple
       label="Test"
       clickable
@@ -235,6 +265,17 @@ export default defineComponent({
     }
   },
   computed: {
+    padMode: {
+      get() {
+        return this.$store.state.command.handwriting
+      },
+      set(val) {
+        this.$store.commit('command/setHandwriting', val)
+      },
+    },
+    padModeLabel() {
+      return this.padMode ? 'Handwriting' : 'Numbers'
+    },
     isAdminDev(): boolean {
       return !!(
         this.userDetails?.roles.includes('sysAdmin') &&
@@ -273,6 +314,9 @@ export default defineComponent({
     },
   },
   methods: {
+    dataDump() {
+      console.log(this.$store.state.command.scrutineering.tempMarks)
+    },
     clearLocalStorage() {
       this.$q
         .dialog({
@@ -298,10 +342,10 @@ export default defineComponent({
           color: 'primary',
         })
         .onOk(() => {
-          this.logout().then(() => {
-            this.$q.localStorage.clear()
-            this.forceUpdate()
-          })
+          // this.logout().then(() => {
+          this.$q.localStorage.clear()
+          this.forceUpdate()
+          // })
         })
     },
     uploadAvatar() {
@@ -324,7 +368,7 @@ export default defineComponent({
               class: 'bg-primary text-white',
               persistent: true,
               html: true,
-              message: `You are currently running ${localVersion} of the eScrut command module, and the latest version is ${cloudVersion}. You may trigger an immediate update, however this will also log you out.`,
+              message: `You are currently running ${localVersion} of the eScrut judges module, and the latest version is ${cloudVersion}. You may trigger an immediate update, however this will also log you out.`,
               cancel: {
                 label: 'force update',
                 // outline: true,

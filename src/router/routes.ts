@@ -8,6 +8,14 @@ const routes: RouteRecordRaw[] = [
       { path: '', component: () => import('pages/login.vue') },
       { path: '/login', component: () => import('pages/login.vue') },
       { path: '/pad', component: () => import('components/JudgePad.vue') },
+      {
+        path: '/judge',
+        component: () => import('pages/JudgePage.vue'),
+        meta: {
+          requiresAuth: true,
+          // title: 'Ju',
+        },
+      },
       { path: '/whiteboard', component: () => import('pages/whiteboard.vue') },
     ],
   },

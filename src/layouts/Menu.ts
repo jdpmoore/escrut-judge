@@ -113,12 +113,12 @@ function mainMenu(userRoles: string[]) {
     //     return o.title
     //   }),
     // },
-    {
-      location: '/release-notes',
-      title: 'Release notes',
-      icon: 'notes',
-      iconColor: 'positive',
-    },
+    // {
+    //   location: '/release-notes',
+    //   title: 'Release notes',
+    //   icon: 'notes',
+    //   iconColor: 'positive',
+    // },
     // {
     //   location: '/settings',
     //   title: 'Settings',

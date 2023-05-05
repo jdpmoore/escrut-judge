@@ -16,6 +16,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       const authToken = rootState.command.auth.authToken
         ? `Bearer ${rootState.command.auth.authToken}`
         : axiosInstance.defaults.headers.common.Authorization
+      console.log('we have auth token', authToken)
       const echo = new Echo({
         broadcaster: 'socket.io',
         host: process.env.ECHO,
@@ -28,6 +29,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           },
         },
       })
+      console.log(authToken, echo)
       echo.connector.socket.on('connect', () => {
         const time = new Date().toLocaleTimeString()
         console.log(`we connected at ${time}`)
@@ -75,23 +77,23 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       // })
     })
   },
-  joinDisplay({ commit, rootState, rootGetters, dispatch }, floorId) {
-    return new Promise<void>((resolve) => {
-      const display = window.echo.join(`es-display.${floorId}`)
-      const scrutineers = window.echo.join(
-        `es-comp.${rootState.command.competition.id}.scrutineers`
-      )
+  joinDisplay({ commit, rootState, rootGetters, dispatch }) {
+    return new Promise<void>(() => {
+      // const display = window.echo.join(`es-display.${floorId}`)
+      // const scrutineers = window.echo.join(
+      //   `es-comp.${rootState.command.competition.id}.scrutineers`
+      // )
       const judges = window.echo.join(
         `es-comp.${rootState.command.competition.id}.judges`
       )
-      commit('saveDisplay', display)
+      // commit('saveDisplay', display)
       commit('saveJudges', judges)
-      commit('saveScrutineers', scrutineers)
-      display.here((members: unknown) => {
-        commit('setConnected', true)
-        console.log('any members', members)
-        resolve()
-      })
+      // commit('saveScrutineers', scrutineers)
+      // display.here((members: unknown) => {
+      //   commit('setConnected', true)
+      //   console.log('any members', members)
+      //   resolve()
+      // })
       judges.here((members: unknown) => {
         commit('setConnected', true)
         console.log('any members on judges', members)
@@ -99,31 +101,31 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
         // state.members.judges = members
         // resolve()
       })
-      scrutineers.here((members: unknown) => {
-        commit('setConnected', true)
-        console.log('any members on scrutineers', members)
-        commit('setScrutineers', members)
-        // state.members.judges = members
-        // resolve()
-      })
-      display.listenForWhisper('round', (payload: string) => {
-        commit('clearNumbers')
-        commit('clearResults')
-        commit('setRound', payload)
-        commit('setStatus', 'round')
-      })
-      display.listenForWhisper('start', (payload: string) => {
-        commit('setRound', payload)
-        commit('setStatus', 'start')
-      })
-      display.listenForWhisper('competitor', (payload: string) => {
-        commit('setCurrentCompetitor', payload)
-        commit('setStatus', 'number')
-      })
-      scrutineers.listenForWhisper('scrutineer', (payload: string) => {
-        console.log('we received a whisper from a scrutineer', payload)
-        dispatch('command/echoScrutineer', payload, { root: true })
-      })
+      // scrutineers.here((members: unknown) => {
+      //   commit('setConnected', true)
+      //   console.log('any members on scrutineers', members)
+      //   commit('setScrutineers', members)
+      //   // state.members.judges = members
+      //   // resolve()
+      // })
+      // display.listenForWhisper('round', (payload: string) => {
+      //   commit('clearNumbers')
+      //   commit('clearResults')
+      //   commit('setRound', payload)
+      //   commit('setStatus', 'round')
+      // })
+      // display.listenForWhisper('start', (payload: string) => {
+      //   commit('setRound', payload)
+      //   commit('setStatus', 'start')
+      // })
+      // display.listenForWhisper('competitor', (payload: string) => {
+      //   commit('setCurrentCompetitor', payload)
+      //   commit('setStatus', 'number')
+      // })
+      // scrutineers.listenForWhisper('scrutineer', (payload: string) => {
+      //   console.log('we received a whisper from a scrutineer', payload)
+      //   dispatch('command/echoScrutineer', payload, { root: true })
+      // })
       judges.listenForWhisper(
         'completedRound',
         (payload: { roundId: number; timetableId: number }) => {
@@ -373,27 +375,28 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       }
     }
   },
-  scrutineeringMarks({ rootState, commit, dispatch }, scrut) {
+  judgesMarks({ rootState, commit, dispatch }, scrut) {
     // es-comp.{compId}.judges
+    console.log('now we whisper', scrut, window.echo)
     if (!window.echo) {
       commit('setConnected', false)
       dispatch('connectEcho').then(() => {
         window.echo
-          .join(`es-comp.${rootState.command.competition.id}.scrutineers`)
+          .join(`es-comp.${rootState.command.competition.id}.judges`)
           .here((members: unknown) => {
             commit('setConnected', true)
             console.log(
               `any members on judges channel for ${rootState.command.competition.title}`,
               members
             )
-            commit('setScrutineers', members)
+            // commit('setScrutineers', members)
           })
-          .whisper('scrutineer', scrut)
+          .whisper('judge', scrut)
         commit('setConnected', true)
       })
     } else {
       window.echo
-        .join(`es-comp.${rootState.command.competition.id}.scrutineers`)
+        .join(`es-comp.${rootState.command.competition.id}.judges`)
         .here((members: unknown) => {
           commit('setConnected', true)
           console.log(
@@ -402,7 +405,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           )
           commit('setScrutineers', members)
         })
-        .whisper('scrutineer', scrut)
+        .whisper('judge', scrut)
       commit('setConnected', true)
     }
   },

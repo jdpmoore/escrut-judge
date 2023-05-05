@@ -1,24 +1,24 @@
 <template>
-  <q-layout
+  <!-- <q-layout
     view="hHh LpR fFf"
     container
     :style="`height: calc(100vh - 64px);`"
     class="bg-primary"
   >
-    <q-page-container>
-      <div
-        v-if="showCanvas"
-        id="canvasWrap"
-        class="row full-width items-center justify-center bg-dark"
-      >
-        <canvas
-          ref="judgepad"
-          width="800"
-          height="800"
-          style="border: 1px solid black"
-        ></canvas>
-      </div>
-    </q-page-container>
+    <q-page-container> -->
+  <div
+    v-if="showCanvas"
+    id="canvasWrap"
+    class="row full-width items-center justify-center bg-dark"
+  >
+    <canvas
+      ref="judgepad"
+      :width="computedWidth"
+      :height="computedHeight"
+      style="border: 3px solid black"
+    ></canvas>
+  </div>
+  <!-- </q-page-container>
     <q-footer elevated>
       <q-card-section class="bg-dark text-white shadow-2 text-center q-pa-sm">
         <div class="row items-center no-wrap">
@@ -28,7 +28,7 @@
         </div>
       </q-card-section>
     </q-footer>
-  </q-layout>
+  </q-layout> -->
 </template>
 
 <script>
@@ -52,7 +52,9 @@ export default defineComponent({
   name: 'JudgePad',
   props: {
     modelValue: { type: Boolean, default: false },
+    trigger: { type: Boolean, default: false },
   },
+  emits: ['submit'],
   // : JudgePadInterface
   data() {
     return {
@@ -61,13 +63,19 @@ export default defineComponent({
       showCanvas: true,
       isDrawingMode: true,
       canvas: null, // new Canvas('judgepad'),
-      sketchProperties: { width: 1000, height: 1000 },
+      sketchProperties: { width: 300, height: 300 },
       backgroundColor: 'rgba(255,255,255,1)', // '#FFF',
       // ? this.$store.state.command.floor
       // : null,
     }
   },
   computed: {
+    computedHeight() {
+      return window.innerHeight - 186
+    },
+    computedWidth() {
+      return window.innerWidth
+    },
     ...mapState('command', ['floors', 'timetable', 'userDetails']),
     // : v2.TimetableItem[]
     filteredTimetable() {
@@ -78,6 +86,9 @@ export default defineComponent({
     },
   },
   watch: {
+    trigger() {
+      this.getOCR()
+    },
     '$store.state.command.floor'() {
       // console.log(this.$store.state.command.floor)
       this.selectF = this.$store.state.command.floor
@@ -154,7 +165,14 @@ export default defineComponent({
       vpt2[4] = this.canvas.getWidth() / 2 - this.sketchProperties.width / 2
       vpt2[5] = this.canvas.getHeight() / 2 - this.sketchProperties.height / 2
       this.canvas.renderAll()
-      const jpgBlob = this.b64toBlob(jpgDownload)
+      // const jpgBlob = this.b64toBlob(jpgDownload)
+      this.canvas.clear()
+      this.setBackground()
+      // this.clearHistory()
+      this.canvas.requestRenderAll()
+      this.$emit('submit', jpgDownload)
+    },
+    azure(jpgBlob) {
       this.$axios
         .post(
           'https://escrut.cognitiveservices.azure.com/vision/v3.2/read/analyze',
@@ -195,14 +213,19 @@ export default defineComponent({
     },
     // : { height: number; width: number }
     resizeCanvas(arg) {
+      console.log('resize', arg)
       if (arg && arg.height) {
         this.canvas.setHeight(arg.height, {})
         this.canvas.setWidth(arg.width, {})
         this.canvas.renderAll()
       } else {
-        this.canvas.setHeight(window.innerHeight - 64, {})
-        this.canvas.setWidth(window.innerWidth, {}) //- 58
-        this.canvas.renderAll()
+        this.canvas.setHeight(this.computedHeight, {})
+        this.canvas.setWidth(this.computedWidth, {}) //- 58
+        ;(this.sketchProperties = {
+          width: this.computedWidth,
+          height: this.computedHeight,
+        }),
+          this.canvas.renderAll()
       }
       // this.$d3
       //   .selectAll('#avatarSlot')

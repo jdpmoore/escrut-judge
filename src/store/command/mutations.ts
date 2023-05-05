@@ -12,6 +12,9 @@ import _ from 'lodash'
 import { LocalStorage, Cookies, extend } from 'quasar'
 
 const mutation: MutationTree<CommandStateInterface> = {
+  setHandwriting(state: CommandStateInterface, val: boolean) {
+    state.handwriting = val
+  },
   setOffline(state: CommandStateInterface, val: boolean) {
     state.offline = val
   },
@@ -183,26 +186,29 @@ const mutation: MutationTree<CommandStateInterface> = {
         // }
         // console.log(timetableEvent.round.floor.id === state.floor.id)
         // console.log(state.compere.completedRounds.has(timetableEvent.round.id))
-        const floorId =
-          timetableEvent.round?.floor?.id ?? timetableEvent.floor?.id
-        if (!floorId) {
-          return !state.compere.completedTimetableEvents.has(timetableEvent.id)
-        } else {
-          return (
-            floorId === state.floor.id &&
-            !(
-              timetableEvent.round?.id &&
-              state.compere.completedRounds.has(timetableEvent.round.id)
-            ) &&
-            !state.compere.completedTimetableEvents.has(timetableEvent.id)
-          )
-        }
+        // const floorId =
+        //   timetableEvent.round?.floor?.id ?? timetableEvent.floor?.id
+        // if (!floorId) {
+        return !state.compere.completedTimetableEvents.has(timetableEvent.id)
+        // } else {
+        //   return (
+        //     floorId === state.floor.id &&
+        //     !(
+        //       timetableEvent.round?.id &&
+        //       state.compere.completedRounds.has(timetableEvent.round.id)
+        //     ) &&
+        //     !state.compere.completedTimetableEvents.has(timetableEvent.id)
+        //   )
+        // }
       }),
       ['timetableOrder']
     )
     console.log('Set current and next', state.floor.id, floorEvents)
     if (floorEvents && floorEvents.length > 0) {
       state.current = floorEvents[0]
+      console.log('current set')
+      state.floor = floorEvents[0].round?.floor ?? floorEvents[0].floor
+      console.log('floor is', state.floor)
       if (floorEvents.length > 1) {
         state.next = floorEvents[1]
       } else {
@@ -210,14 +216,15 @@ const mutation: MutationTree<CommandStateInterface> = {
       }
     } else {
       const allFloorEvents = _.sortBy(
-        state.timetable.filter((timetableEvent) => {
-          const floorId =
-            timetableEvent.round?.floor?.id ?? timetableEvent.floor?.id
-          if (floorId) {
-            return floorId === state.floor.id
-          }
-          return false
-        }),
+        state.timetable,
+        // .filter((timetableEvent) => {
+        //   const floorId =
+        //     timetableEvent.round?.floor?.id ?? timetableEvent.floor?.id
+        //   if (floorId) {
+        //     return floorId === state.floor.id
+        //   }
+        //   return false
+        // }),
         ['timetableOrder']
       )
       state.current = allFloorEvents[allFloorEvents.length - 1]

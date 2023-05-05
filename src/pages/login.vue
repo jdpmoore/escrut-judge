@@ -211,7 +211,8 @@ export default defineComponent({
         // email: 'william.shedden@my.greenes.org.uk', // Student
         // email: 'sample.student@greenes.org.uk', // Student & Candidate
         // username: 'alex.gray',
-        email: 'ajm_gray@yahoo.com',
+        // email: 'ajm_gray@yahoo.com',
+        email: 'gary.foster@judge.escrut.com',
         // email: 'james@quakefire.com',
         // email: 'event.compere@compere.escrut.com',
         // email: 'event.compere@compere.escrut.com',
@@ -220,8 +221,10 @@ export default defineComponent({
         // password: '!!NsN1964@@'
         // email: 'thomas.paine@greenes.org.uk', // Student & Candidate
         // password: 'MxDx7d6TSMS77GxX',
-        password:
-          process.env.LOCAL === 'true' ? 'MxDx7d6TSMS77GxX' : '!!NsN1964@@',
+        password: 'MxDx7d6TSMS77GxX',
+        // process.env.LOCAL === 'true' || !process.env.LIVE
+        //   ? 'MxDx7d6TSMS77GxX'
+        //   : '!!NsN1964@@',
         // password: 'CeruleanTeddy#27'
         // password: '*aU@4WaPT'
       }
@@ -383,10 +386,7 @@ export default defineComponent({
     login() {
       this.loggingIn = true
       this.$axios
-        .post<{ firstName: string; lastName: string; firstTime: boolean }>(
-          '/auth/login',
-          this.credentials
-        )
+        .post('/auth/login', this.credentials)
         .then((response) => {
           console.log(response)
           this.$axios.defaults.headers.common.Authorization = `Bearer ${response.headers.authorization}`
@@ -426,15 +426,15 @@ export default defineComponent({
                 .then(() => {
                   this.$store.dispatch('echo/connectEcho')
                   this.loggingIn = false
-                  if (userDetails.firstTime) {
-                    this.firstLoginPopup()
+                  // if (userDetails.firstTime) {
+                  //   this.firstLoginPopup()
+                  // } else {
+                  if ('redirect' in this.$route.query) {
+                    this.$router.push(`${this.$route.query.redirect}`)
                   } else {
-                    if ('redirect' in this.$route.query) {
-                      this.$router.push(`${this.$route.query.redirect}`)
-                    } else {
-                      this.$router.push('/pad')
-                    }
+                    this.$router.push('/judge')
                   }
+                  // }
                 })
                 .catch(() => {
                   this.loggingIn = false

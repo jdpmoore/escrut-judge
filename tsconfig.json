@@ -6,10 +6,22 @@
     "lib": ["es2020", "dom"],
     "module": "esnext", // add this line
     "skipLibCheck": true,
-    "strict": true,
-    "noImplicitAny": true,
+    "strict": false,
+    "noImplicitAny": false,
     "noImplicitReturns": true,
     "typeRoots": ["./src/@types"]
     // "types": ["./src/@types/common"]
-  }
+  },
+  "exclude": [
+    // "node_modules/laravel-echo/src/channel/socketio-channel.ts",
+    // "node_modules/laravel-echo/src/channel/pusher-channel.ts",
+    // "node_modules/laravel-echo/src/util/event-formatter.ts",
+    // "node_modules/laravel-echo/src/channel/socketio-presence-channel.ts",
+    // "node_modules/laravel-echo/src/util/event-formatter.ts",
+    "node_modules",
+    "./node_modules",
+    "./node_modules/*",
+    "./node_modules/@types/node/index.d.ts",
+    "./node_modules/laravel-echo/src/**"
+  ]
 }
