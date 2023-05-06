@@ -86,6 +86,11 @@ const getters: GetterTree<CommandStateInterface, StateInterface> = {
       //   roundId in state.scrutineering.competitors,
       //   state.scrutineering.roundById.has(roundId)
       // )
+      console.log(
+        'we end up here',
+        state.scrutineering.competitors,
+        state.scrutineering.roundById.has(roundId)
+      )
       if (
         roundId in state.scrutineering.competitors &&
         state.scrutineering.roundById.has(roundId)

@@ -151,11 +151,27 @@ const mutation: MutationTree<CommandStateInterface> = {
     state.finalTimes = finalTimes
     state.startTimesByRoundId = startTimesByRoundId
   },
+  // completeScrutineeringSetup(
+  //   state: CommandStateInterface,
+  //   {
+  //     roundById,
+  //     roundIdToEventId,
+  //   }: {
+  //     roundById: Map<number, v1.Round>
+  //     roundIdToEventId: Map<number, number>
+  //   }
+  // ) {
+  //   state.scrutineering.roundById = roundById
+  //   state.scrutineering.roundIdToEventId = roundIdToEventId
+  // },
   storeCompetitorsByRoundId(
     state: CommandStateInterface,
     { competitors, roundId }: { competitors: v1.Competitor[]; roundId: number }
   ) {
     state.scrutineering.competitors[roundId] = competitors
+    // if (!state.scrutineering.roundById.has(roundId)) {
+    //   state.scrutineering.roundById.set(roundId, round)
+    // }
   },
   storeTimetable(state: CommandStateInterface, val: v2.TimetableItem[]) {
     state.timetable = val
@@ -176,6 +192,12 @@ const mutation: MutationTree<CommandStateInterface> = {
   overrideCurrent(state: CommandStateInterface, newCurrent: v2.TimetableItem) {
     state.current = newCurrent
     state.compere.timetableOrder = newCurrent.timetableOrder
+  },
+  setCurrent(state: CommandStateInterface, newCurrent: v2.TimetableItem) {
+    state.current = newCurrent
+  },
+  setNext(state: CommandStateInterface, newNext: v2.TimetableItem) {
+    state.next = newNext
   },
   setCurrentNext(state: CommandStateInterface) {
     console.log('set current and next', state.floor.id, state.timetable)

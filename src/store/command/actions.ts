@@ -333,7 +333,24 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
       // }
     })
   },
+  updateCurrent(context) {
+    if (context.state.current) {
+      const { id } = context.state.current
+      if (id > 0) {
+        axiosInstance
+          .get(`/timetableitem/${id}`)
+          .then(({ data: timetableItem }: { data: v2.TimetableItem }) => {
+            if (timetableItem.danceOrder) {
+              timetableItem.dances = timetableItem.danceOrder
+            }
+            context.commit('setCurrent', timetableItem)
+          })
+          .catch(axiosError)
+      }
+    }
+  },
   updateTimetable(context) {
+    console.log('now we update the timetable')
     const { id } = context.state.competition
     if (id > 0) {
       axiosInstance
@@ -342,6 +359,12 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
           data.forEach((timetableItem) => {
             if (timetableItem.danceOrder) {
               timetableItem.dances = timetableItem.danceOrder
+            }
+            if (timetableItem.id == context.state.current.id) {
+              context.commit('setCurrent', timetableItem)
+            }
+            if (timetableItem.id == context.state.next.id) {
+              context.commit('setNext', timetableItem)
             }
           })
           context.commit('storeTimetable', data)

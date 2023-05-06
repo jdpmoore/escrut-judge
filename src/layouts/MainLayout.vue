@@ -62,6 +62,23 @@
       :width="350"
       class="bg-dark text-white"
     >
+      <div
+        v-if="showTimetable"
+        class="q-mini-drawer-hide absolute"
+        style="top: 4px; right: -24px"
+      >
+        <q-btn
+          dense
+          round
+          unelevated
+          color="warning"
+          icon="chevron_left"
+          style="z-index: 667"
+          class="text-warning-inv guide"
+          size="lg"
+          @click="showTimetable = false"
+        />
+      </div>
       <!-- :width="$q.screen.lt.sm ? headerSize.width : 350" -->
       <Timetable v-model="showTimetable" />
     </q-drawer>
@@ -75,6 +92,24 @@
       :width="350"
       class="bg-dark text-white"
     >
+      <div
+        v-if="showMenu"
+        class="q-mini-drawer-hide absolute"
+        style="top: 4px; left: -24px"
+      >
+        <q-btn
+          dense
+          round
+          unelevated
+          color="warning"
+          icon="chevron_right"
+          size="lg"
+          class="text-warning-inv guide"
+          style="z-index: 666"
+          @click="showMenu = false"
+        />
+      </div>
+      <!--       @click="showMenu = !showMenu" -->
       <!-- :width="$q.screen.lt.sm ? headerSize.width : 350" -->
       <MainMenu />
     </q-drawer>
@@ -300,6 +335,7 @@ export default defineComponent({
       console.log(`Logged in for ${Math.round(diffMin)} min`)
       if (diffMin < 240) {
         this.$axios.defaults.headers.common.Authorization = 'Bearer ' + JWT
+        this.$store.dispatch('echo/connectEcho')
         // this.$store.commit('GOstore/connectEcho', 'Bearer ' + JWT)
         // this.$store.dispatch('GOstore/getUserDetails').then(() => {
         //   this.$store.dispatch('GOstore/joinEchoNotifications')
@@ -505,6 +541,7 @@ export default defineComponent({
     },
     updateTimetable() {
       this.$store.dispatch('command/updateTimetable')
+      this.$store.dispatch('command/getEvents')
     },
   },
   cron: [
@@ -513,7 +550,7 @@ export default defineComponent({
       method: 'checkAuthTimeout',
     },
     {
-      time: 90000,
+      time: 60000,
       method: 'updateTimetable',
     },
   ],

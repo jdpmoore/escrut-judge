@@ -38,7 +38,9 @@
           event.timetableOrder
         }}</q-item-section>
         <q-item-section>
-          <q-item-label>{{ event.title }}</q-item-label>
+          <q-item-label
+            >{{ event.section.name }} - {{ event.title }}</q-item-label
+          >
           <!-- {{ event.dances }}{{ event.round?.isQualifier ? ' (Qualifier)' : '' }} -->
           <!-- <q-item-label caption :class="activeCol(event)">{{
             roundIdtoRound(event.roundId)

@@ -1,5 +1,8 @@
 <template>
-  <q-page class="bg-dark row justify-center items-center">
+  <q-page
+    class="row justify-center items-center"
+    :class="isHandwriting ? 'bg-primary' : 'bg-dark'"
+  >
     <q-card
       v-touch-swipe.horizontal="handleSwipe"
       inline
@@ -11,17 +14,15 @@
         class="bg-primary text-white text-center q-pa-sm q-mb-none"
       >
         <div class="row full-width items-center no-wrap">
-          <!-- <div class="col-auto">
+          <div v-if="isHandwriting" class="col-auto">
             <q-btn
-              round
               dense
               color="accent"
-              icon="keyboard_arrow_left"
-              :disable="timetableOrders.indexOf(timetableOrder) === 0"
-              @click="eventChange(-1)"
-              ><q-tooltip> Previous event </q-tooltip></q-btn
-            >
-          </div> -->
+              icon="clear"
+              label="clear"
+              @click="clearPage"
+            ></q-btn>
+          </div>
           <div class="col">
             <div class="text-h6 text-bold">
               {{ roundText }}
@@ -55,7 +56,7 @@
         </div>
       </q-card-section>
       <q-separator inset />
-      <q-card-section v-if="!isHandwriting" class="bg-white">
+      <q-card-section v-if="!isHandwriting" class="bg-white q-pa-none">
         <!-- <q-page-sticky position="top-left" :offset="[18, 18]">
       <q-fab
         v-model="fab2"
@@ -71,8 +72,8 @@
         <q-fab-action color="accent" @click="onClick" icon="room" label="Map" />
       </q-fab>
       </q-page-sticky> -->
-        <div class="row">
-          <div style="width: 100%">
+        <div>
+          <div class="col justify-center" style="width: 100%">
             <!-- <q-btn
               color="accent"
               square
@@ -212,7 +213,7 @@
                   @click="restartRound"
                 /> -->
               </div>
-              <div v-else style="font-size: 125%">
+              <div v-else style="font-size: 100%">
                 Heat {{ heat }}, {{ dance?.name }}: {{ computedNumCouples }}
                 {{ isTeam ? 'teams' : 'couples' }}
                 <!-- <q-btn
@@ -230,175 +231,154 @@
                 >/ {{ currentRound.round.recall }}</span
               >
             </div>
-            <q-card-section
-              horizontal
-              class="text-center q-pa-sm q-mb-none q-mt-md"
-            >
-              <!-- <div class="row flex-center full-width">
-                <q-btn
-                  v-if="isCurrentEvent && heat === activeHeat"
-                  class="full-width"
-                  :class="computedAnnounceClass"
-                  icon="announcement"
-                  :label="`${announceRestart}${
-                    announceRestart === 'Activate display'
-                      ? ' and introduce'
-                      : ''
-                  }`"
-                  style="font-size: 150%"
-                  :disable="heat !== activeHeat"
-                  @click="announce"
-                />
-                <q-btn
-                  v-if="endOfDays"
-                  class="full-width"
-                  :class="
-                    active
-                      ? 'bg-primary text-primary-inv'
-                      : 'bg-warning text-warning-inv guide'
-                  "
-                  icon="announcement"
-                  :label="announceRestart"
-                  style="font-size: 150%"
-                  @click="announceEndOfDays"
-                />
-              </div> -->
-            </q-card-section>
-            <!-- <AnnounceResults
-              v-if="isResults"
-              :active="!booleanVarSub"
-              :results-trigger="resultsTrigger"
-              :results="results"
-              @allAnnounced="allAnnounced = true"
-            /> -->
-            <div class="row flex-center">
+            <div class="row justify-center" style="width: 100%">
               <div
-                v-for="(competitor, index) in competitors[heat - 1]"
-                :key="index"
-                :class="competitorClass(competitor.number)"
-                @click="markCompetitor(competitor)"
+                class="number-column items-center"
+                :style="`height: ${computedFlexBoxHeight}px; width: ${computedFlexBoxWidth}px;`"
               >
-                <div v-if="isOffbeat" class="q-ma-xs">
-                  <div
-                    style="font-size: 220%"
-                    :class="competitorClassDetails(competitor.number)"
-                  >
-                    {{ competitor.university?.name }}
+                <div
+                  v-for="(competitor, index) in computedCompetitors"
+                  :key="index"
+                  :class="competitorClass(competitor.number)"
+                  @click="markCompetitor(competitor)"
+                >
+                  <div v-if="isOffbeat" class="q-ma-xs">
+                    <div
+                      style="font-size: 220%"
+                      :class="competitorClassDetails(competitor.number)"
+                    >
+                      {{ competitor.university?.name }}
+                    </div>
+                    <div style="font-size: 180%">
+                      {{ competitor.title }}
+                    </div>
                   </div>
-                  <div style="font-size: 180%">
-                    {{ competitor.title }}
+                  <div v-else-if="showNames" class="q-ma-xs">
+                    <div
+                      class="text-left text-caption float-left text-bold"
+                      style="font-size: 120%"
+                      :class="competitorClassDetails(competitor.number)"
+                    >
+                      {{ competitor.number }}
+                    </div>
+                    <span v-if="isTeam" style="font-size: 120%">
+                      {{ competitor.university?.name }}
+                      {{
+                        competitor.university?.id != 99
+                          ? competitor.letter
+                          : competitor.description
+                      }}
+                    </span>
+                    <span v-else>
+                      {{ competitor.leader }} and {{ competitor.follower }} ({{
+                        competitor.university?.name
+                      }})
+                    </span>
                   </div>
-                </div>
-                <div v-else-if="showNames" class="q-ma-xs">
-                  <div
-                    class="text-left text-caption float-left text-bold"
-                    style="font-size: 120%"
-                    :class="competitorClassDetails(competitor.number)"
-                  >
+                  <div v-else class="text-center" style="font-size: 225%">
                     {{ competitor.number }}
                   </div>
-                  <span v-if="isTeam" style="font-size: 120%">
-                    {{ competitor.university?.name }}
-                    {{
-                      competitor.university?.id != 99
-                        ? competitor.letter
-                        : competitor.description
-                    }}
-                  </span>
-                  <span v-else>
-                    {{ competitor.leader }} and {{ competitor.follower }} ({{
-                      competitor.university?.name
-                    }})
-                  </span>
                 </div>
-                <div v-else class="text-center" style="font-size: 225%">
-                  {{ competitor.number }}
+                <div
+                  v-if="isFirstRound"
+                  class="text-center competitor-add bg-info text-info-inv"
+                  @click="addNumber"
+                >
+                  Add
                 </div>
-              </div>
-              <div
-                v-if="isFirstRound"
-                class="text-center competitor-add bg-info text-info-inv"
-                @click="addNumber"
-              >
-                Add
               </div>
             </div>
-            <q-card-section
-              horizontal
-              class="text-center q-pa-sm q-mb-none q-mt-md"
-            >
-              <div class="row full-width items-center no-wrap">
-                <div class="col-auto">
-                  <q-btn
-                    round
-                    color="primary"
-                    icon="keyboard_arrow_left"
-                    :disable="heat === 1 || isNonCompereEvent || endOfDays"
-                    @click="pageChange(-1)"
-                    ><q-tooltip> Previous heat </q-tooltip></q-btn
-                  >
-                </div>
-                <div class="col q-mx-xl">
-                  <q-btn
-                    v-if="
-                      isCurrentEvent &&
-                      !isNonCompereEvent &&
-                      heat === competitors.length
-                    "
-                    class="full-width bg-positive"
-                    icon="done"
-                    label="Submit marks"
+          </div>
+          <q-card-section
+            horizontal
+            class="text-center q-pa-sm q-mb-none q-mt-md"
+          >
+            <div class="row full-width items-center no-wrap">
+              <div class="col-auto">
+                <q-btn
+                  round
+                  color="primary"
+                  icon="keyboard_arrow_left"
+                  :disable="heat === 1 || isNonCompereEvent || endOfDays"
+                  @click="pageChange(-1)"
+                  ><q-tooltip> Previous heat </q-tooltip></q-btn
+                >
+              </div>
+              <div class="col q-mx-xl">
+                <!-- <q-btn
+                    v-if="isCurrentEvent && !isNonCompereEvent"
+                    class="bg-info text-info-inv q-mr-lg"
+                    icon="add"
+                    label="Add number(s)"
                     style="font-size: 150%"
                     @click="submitMarks"
-                  />
-                  <q-btn
-                    v-if="
-                      isCurrentEvent &&
-                      !isNonCompereEvent &&
-                      heat < competitors.length
-                    "
-                    class="full-width bg-warning"
-                    icon="keyboard_arrow_right"
-                    label="Next heat"
-                    style="font-size: 150%"
-                    @click="heat++"
-                  />
-                  <!-- :disable="booleanVarSub" -->
-                  <q-btn
-                    v-else-if="isCurrentEvent && isNonCompereEvent"
-                    class="full-width bg-primary text-warning-inv"
-                    icon="done"
-                    label="Goto next event"
-                    style="font-size: 150%"
-                    :class="allAnnounced || active ? 'guide bg-warning' : ''"
-                    :disable="booleanVarSub"
-                    @click="gotoNext"
-                  />
-                  <q-btn
-                    v-else-if="!endOfDays && !isCurrentEvent"
-                    class="full-width bg-info text-info-inv guide"
-                    icon="keyboard_return"
-                    label="Goto current event"
-                    style="font-size: 150%"
-                    @click="timetableOrder = current.timetableOrder"
-                  />
-                </div>
-                <div class="col-auto">
-                  <q-btn
-                    round
-                    color="primary"
-                    icon="keyboard_arrow_right"
-                    :disable="
-                      heat === competitors.length ||
-                      isNonCompereEvent ||
-                      endOfDays
-                    "
-                    @click="pageChange(1)"
-                    ><q-tooltip> Next heat </q-tooltip></q-btn
-                  >
-                </div>
+                  /> -->
+                <q-btn
+                  v-if="
+                    isCurrentEvent &&
+                    !isNonCompereEvent &&
+                    heat == competitors.length
+                  "
+                  class="full-width"
+                  :class="
+                    marked?.size == currentRound.round.recall &&
+                    currentRound.round.recall > 0
+                      ? 'bg-positive text-positive-inv'
+                      : 'bg-negative text-negative-inv'
+                  "
+                  icon="done"
+                  label="Submit marks"
+                  style="font-size: 150%"
+                  @click="submitMarks"
+                />
+                <q-btn
+                  v-if="
+                    isCurrentEvent &&
+                    !isNonCompereEvent &&
+                    heat < competitors.length
+                  "
+                  class="full-width bg-warning"
+                  icon="keyboard_arrow_right"
+                  label="Next heat"
+                  style="font-size: 150%"
+                  @click="heat++"
+                />
+                <!-- :disable="booleanVarSub" -->
+                <q-btn
+                  v-else-if="isCurrentEvent && isNonCompereEvent"
+                  class="full-width bg-primary text-warning-inv"
+                  icon="done"
+                  label="Goto next event"
+                  style="font-size: 150%"
+                  :class="allAnnounced || active ? 'guide bg-warning' : ''"
+                  :disable="booleanVarSub"
+                  @click="gotoNext"
+                />
+                <q-btn
+                  v-else-if="!endOfDays && !isCurrentEvent"
+                  class="full-width bg-info text-info-inv guide"
+                  icon="keyboard_return"
+                  label="Goto current event"
+                  style="font-size: 150%"
+                  @click="timetableOrder = current.timetableOrder"
+                />
               </div>
-              <!-- <q-btn
+              <div class="col-auto">
+                <q-btn
+                  round
+                  color="primary"
+                  icon="keyboard_arrow_right"
+                  :disable="
+                    heat === competitors.length ||
+                    isNonCompereEvent ||
+                    endOfDays
+                  "
+                  @click="pageChange(1)"
+                  ><q-tooltip> Next heat </q-tooltip></q-btn
+                >
+              </div>
+            </div>
+            <!-- <q-btn
           color="accent"
           flat
           label="(Restart)"
@@ -406,12 +386,15 @@
           style="top: 12px; right: 12px"
           @click="restartRound"
         /> -->
-            </q-card-section>
-          </div>
+          </q-card-section>
         </div>
       </q-card-section>
       <q-card-section v-else class="bg-white q-pa-none">
-        <JudgePad :trigger="handwritingTrigger" @submit="submitMarks" />
+        <JudgePad
+          :trigger="handwritingTrigger"
+          :to-clear="toClear"
+          @submit="submitMarks"
+        />
       </q-card-section>
       <q-card-section
         v-if="isHandwriting"
@@ -496,11 +479,13 @@ export default {
   },
   data() {
     return {
+      toClear: false,
       handwritingTrigger: false,
       allAnnounced: false,
       resultsTrigger: false,
       showNames: false,
       loadingState: false,
+      loadingDialog: null,
       // roundIdtoRound: this.$store.getters['command/roundIdtoRound'],
       roundById: this.$store.state.command.scrutineering.roundById,
       active: true,
@@ -575,6 +560,25 @@ export default {
     }
   },
   computed: {
+    computedCompetitors() {
+      return this.$_.sortBy(this.competitors[this.heat - 1], 'number')
+    },
+    computedCompetitorsNumbers() {
+      return this.computedCompetitors.map((o) => {
+        return o.number
+      })
+    },
+    computedFlexBoxHeight() {
+      return this.computedNumberColumns < 5 ? 640 : 742
+    },
+    computedNumberColumns() {
+      return Math.ceil((this.computedCompetitors.length + 1) / 6)
+    },
+    computedFlexBoxWidth() {
+      const colPx = 0.2 * window.innerWidth + 18
+      const nCols = Math.min(this.computedNumberColumns, 4)
+      return Math.round(nCols * colPx)
+    },
     isHandwriting: {
       get() {
         return this.$store.state.command.handwriting
@@ -744,8 +748,8 @@ export default {
       return 'bg-grey text-white'
     },
     competitors() {
-      console.log(this.competitorsCurrent)
-      console.log(this.timetableOrder, this.current.timetableOrder)
+      // console.log(this.competitorsCurrent)
+      // console.log(this.timetableOrder, this.current.timetableOrder)
       if (this.timetableOrder === this.current.timetableOrder) {
         return this.competitorsCurrent
       } else {
@@ -846,12 +850,12 @@ export default {
         //   })
         //   toReturn = `${toReturn} (${danceLetters})`
         // }
-        // const nDances = this.currentRound.round.dances.length
-        // if (nDances > 1) {
-        //   toReturn = `${toReturn} - dance ${
-        //     this.danceLetterIndex + 1
-        //   }/${nDances}`
-        // }
+        const nDances = this.currentRound.round.dances.length
+        if (nDances > 1) {
+          toReturn = `${toReturn} - dance ${
+            this.danceLetterIndex + 1
+          }/${nDances}`
+        }
         // if (this.isCurrentEvent && !this.isNonCompereEvent) {
         //   toReturn = `${toReturn}, heat ${this.activeHeat}`
         // }
@@ -943,12 +947,13 @@ export default {
         this.echoCompetitor
       )
     },
-    currentRound() {
-      console.log('current round changed')
-      this.marked = new Set()
-      this.considering = new Set()
-      this.heat = 1
-      this.activeHeat = 1
+    currentRound(oldValue, newValue) {
+      if (oldValue.id != newValue.id) {
+        this.marked = new Set()
+        this.considering = new Set()
+        this.heat = 1
+        this.activeHeat = 1
+      }
     },
   },
   created() {
@@ -984,6 +989,22 @@ export default {
     // void this.$store.dispatch('command/getTimetable')
   },
   methods: {
+    clearPage() {
+      this.$q
+        .dialog({
+          title: this.roundText,
+          message: `Are you sure you wish to clear the page for ${this.roundText} and start again?`,
+          focus: 'cancel',
+          dark: true,
+          class: 'bg-dark text-dark-inv',
+          cancel: { label: 'Cancel', color: 'positive', flat: true },
+          ok: { label: 'Yes', color: 'warning', flat: true },
+          focus: 'cancel',
+        })
+        .onOk(() => {
+          this.toClear = !this.toClear
+        })
+    },
     getDetails() {
       const message = `${this.competitors.flat().length} competitors, recall ${
         this.currentRound?.round?.recall
@@ -992,11 +1013,80 @@ export default {
                   this.currentRound?.round?.heats > 1
                     ? `${this.currentRound?.round?.heats} heats`
                     : '1 heat'
-                }`
-      this.$common.popup({ title: this.roundText, message })
+                }<br>
+                Heat ${this.heat}, ${this.dance?.name}: ${
+        this.computedNumCouples
+      }
+                ${this.isTeam ? 'teams' : 'couples'}`
+      this.$q
+        .dialog({
+          title: this.roundText,
+          message,
+          dark: true,
+          html: true,
+          class: 'bg-dark text-dark-inv',
+          cancel: { label: 'View competitors', color: 'warning', flat: true },
+          ok: { label: 'OK', color: 'positive', flat: true },
+          focus: 'ok',
+        })
+        .onCancel(() => {
+          this.viewCompetitors(this.currentRound)
+        })
+    },
+    viewCompetitors(timetableItem) {
+      const roundId = timetableItem.round.id
+      this.$store
+        .dispatch('command/getCompetitorsByRoundId', roundId)
+        // this.$axios
+        //   .get(`/round/${roundId}/competitors`)
+        .then(() => {
+          const competitors =
+            this.$store.getters['command/competitorsByRoundId'](roundId).flat()
+          console.log('view competitors in', timetableItem, competitors)
+          const evt = this.getEvent(roundId)
+          console.log(evt)
+          // const isFinal = timetableItem.round.round === 'F'
+          let title = ''
+          // if (isFinal) {
+          //   title = 'final'
+          // } else {
+          title = `round ${timetableItem.round.round}`
+          if (timetableItem.round.round === 'SF') {
+            title = 'semi-final'
+          } else if (timetableItem.round.round === 'F') {
+            title = 'final'
+          }
+          if (timetableItem.round.isQualifier) {
+            title = 'qualifier'
+          }
+          // }
+          if (evt) {
+            this.$q.dialog({
+              component: this.$customDialog.Competitors,
+              componentProps: {
+                title: `${evt.title}, ${title}`,
+                competitors,
+                isFinal: false,
+                team: evt.isTeam,
+                // team: this.event.team,
+                leftText: '',
+                // `${this.round.heats} heat${
+                //   this.round.heats > 1 ? 's' : ''
+                // }`,
+                rightText: '', //`${recalled.length} recalled`,
+              },
+            })
+          }
+        })
+        .catch(this.$common.axiosError)
     },
     startHandwritingSubmit() {
-      this.loadingState = true
+      // this.loadingDialog = this.$q.dialog({
+      //   message: 'Submitting marks',
+      //   progress: true, // we enable default settings
+      //   persistent: true, // we want the user to not be able to close it
+      //   ok: false, // we want the user to not be able to close it
+      // })
       this.handwritingTrigger = !this.handwritingTrigger
     },
     // markCompetitor({ number }) {
@@ -1207,6 +1297,7 @@ export default {
         })
     },
     getCompetitors() {
+      console.log('in get competitors', this.competitors)
       if (!this.$store.state.command.current.round) {
         return
       }
@@ -1224,6 +1315,7 @@ export default {
       if (this.competitors.length === 0) {
         this.loadingState = true
       }
+      this.$store.dispatch('command/updateCurrent')
       this.$store
         .dispatch(
           'command/getCompetitorsByRoundId',
@@ -1398,38 +1490,41 @@ export default {
           if (!(this.heat in this.additionalNumbers)) {
             this.additionalNumbers[this.heat] = new Set()
           }
+
           newNumbers.map((num) => {
             this.marked.add(num)
-            this.whisperMarks()
-            const competitor = this.$store.state.command.competitors.find(
-              (competitor) => {
-                return competitor.number === num
+            if (!this.computedCompetitorsNumbers.includes(num)) {
+              this.whisperMarks()
+              const competitor = this.$store.state.command.competitors.find(
+                (competitor) => {
+                  return competitor.number === num
+                }
+              )
+              if (competitor) {
+                this.additionalNumbers[this.heat].add(competitor)
+              } else {
+                // this.$q.notify({
+                //   message: `Number ${num} not found - exception generated`,
+                //   type: 'warning',
+                //   color: 'warning',
+                //   position: 'top',
+                //   closeBtn: true,
+                //   timeout: 2000,
+                // })
+                // FIXME: generation EXCEPTION for adding a new competitor - they need a name and follower etc.
+                // let toAnnounce = {
+                //  type: 'Add competitor', floorId: this.floorId, floor: this.floors[this.floorId].name, roundId: this.roundId, adjudicatorLetters: this.judgeLetters, eventId: this.eventId, danceId: this.cDance, heat: this.heat, eventName: this.currentRound[this.floorId], danceLetter: this.danceLetters[this.floorId][this.cDance].danceLetter, number: data, added: 'Scrutineer', round: this.cRound, id: ('newCompetitor' + data), leader: leader, follower: follower, descriptor: descriptor
+                // }
+                // if (this.$q.localStorage.has('round-exceptions')) { this.roundExceptions = this.$q.localStorage.getItem('round-exceptions') } else { this.roundExceptions = [] }
+                const noCompetitor = {
+                  id: -1,
+                  number: num,
+                  leader: '',
+                  follower: '',
+                  descriptor: '',
+                }
+                this.additionalNumbers[this.heat].add(noCompetitor)
               }
-            )
-            if (competitor) {
-              this.additionalNumbers[this.heat].add(competitor)
-            } else {
-              // this.$q.notify({
-              //   message: `Number ${num} not found - exception generated`,
-              //   type: 'warning',
-              //   color: 'warning',
-              //   position: 'top',
-              //   closeBtn: true,
-              //   timeout: 2000,
-              // })
-              // FIXME: generation EXCEPTION for adding a new competitor - they need a name and follower etc.
-              // let toAnnounce = {
-              //  type: 'Add competitor', floorId: this.floorId, floor: this.floors[this.floorId].name, roundId: this.roundId, adjudicatorLetters: this.judgeLetters, eventId: this.eventId, danceId: this.cDance, heat: this.heat, eventName: this.currentRound[this.floorId], danceLetter: this.danceLetters[this.floorId][this.cDance].danceLetter, number: data, added: 'Scrutineer', round: this.cRound, id: ('newCompetitor' + data), leader: leader, follower: follower, descriptor: descriptor
-              // }
-              // if (this.$q.localStorage.has('round-exceptions')) { this.roundExceptions = this.$q.localStorage.getItem('round-exceptions') } else { this.roundExceptions = [] }
-              const noCompetitor = {
-                id: -1,
-                number: num,
-                leader: '',
-                follower: '',
-                descriptor: '',
-              }
-              this.additionalNumbers[this.heat].add(noCompetitor)
             }
           })
         })
@@ -1545,42 +1640,79 @@ export default {
       this.$store.dispatch('echo/judgesMarks', toPost)
     },
     submitMarks(jpgDownload) {
-      this.loadingState = true
-      if (this.isHandwriting) {
-        this.submitHandwritingMarks(jpgDownload)
-      } else {
-        this.whisperMarks()
-      }
-      this.heat = 1
-      this.activeHeat = 1
-      this.marked = new Set()
-      this.considering = new Set()
       this.$store.dispatch('command/getEvents')
       this.$store.dispatch('command/updateTimetable')
-      this.loadingState = false
-      console.log('we submit the marks!')
-      console.log(this.lastDance, 'is last dance', this.currentRound)
-      if (this.lastDance) {
-        this.danceLetterIndex = 0
-        if (this.currentRound.round) {
-          this.$store.commit(
-            'command/completedRound',
-            this.currentRound.round.id
-          )
-        }
-        console.log('completed timetable event', this.timetableId)
-        this.$store.commit('command/completedTimetableEvent', this.timetableId)
-        this.$store.commit('command/setCurrentNext')
-        this.$store.dispatch('command/getNextCompetitors')
-        const currentTimetableIndex = this.timetableOrders.indexOf(
-          this.timetableOrder
-        )
-        this.timetableOrder = this.timetableOrders[currentTimetableIndex + 1]
-        this.announced = new Set()
-        this.getCompetitors()
-      } else {
-        this.danceLetterIndex++
+      let message = `Are you sure you wish to submit your marks for ${this.roundText}`
+      const spotOn =
+        this.marked?.size == this.currentRound.round.recall ||
+        this.isHandwriting ||
+        this.currentRound.round.recall == 0
+      if (!spotOn) {
+        message = `${message}, you have recalled ${this.marked?.size} out of ${this.currentRound.round.recall}`
       }
+      this.$q
+        .dialog({
+          title: this.currentEvent.title,
+          message,
+          focus: 'cancel',
+          dark: true,
+          class: spotOn
+            ? 'bg-dark text-dark-inv'
+            : 'bg-negative text-negative-inv',
+          cancel: { label: 'Cancel', color: 'positive', flat: true },
+          ok: { label: 'Yes', color: 'warning', flat: true },
+          focus: 'cancel',
+        })
+        .onOk(() => {
+          this.toClear = !this.toClear
+          const loadingDialog = this.$q.dialog({
+            message: 'Processing marks...',
+            dark: true,
+            progress: true, // we enable default settings
+            persistent: true, // we want the user to not be able to close it
+            ok: false, // we want the user to not be able to close it
+          })
+          if (this.isHandwriting) {
+            this.submitHandwritingMarks(jpgDownload)
+          } else {
+            this.whisperMarks()
+          }
+          this.heat = 1
+          this.activeHeat = 1
+          this.marked = new Set()
+          this.considering = new Set()
+          this.additionalNumbers = {}
+          console.log(this.lastDance, 'is last dance', this.currentRound)
+          if (this.lastDance) {
+            this.danceLetterIndex = 0
+            if (this.currentRound.round) {
+              this.$store.commit(
+                'command/completedRound',
+                this.currentRound.round.id
+              )
+            }
+            console.log('completed timetable event', this.timetableId)
+            this.$store.commit(
+              'command/completedTimetableEvent',
+              this.timetableId
+            )
+            this.$store.commit('command/setCurrentNext')
+            this.$store.dispatch('command/getNextCompetitors')
+            const currentTimetableIndex = this.timetableOrders.indexOf(
+              this.timetableOrder
+            )
+            this.timetableOrder =
+              this.timetableOrders[currentTimetableIndex + 1]
+            this.announced = new Set()
+            this.getCompetitors()
+          } else {
+            this.danceLetterIndex++
+          }
+          console.log(loadingDialog)
+          setTimeout(() => {
+            loadingDialog.hide()
+          }, 350)
+        })
     },
     start() {
       // this.pingRecallAPI()

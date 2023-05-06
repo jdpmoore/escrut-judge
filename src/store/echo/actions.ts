@@ -127,6 +127,39 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       //   dispatch('command/echoScrutineer', payload, { root: true })
       // })
       judges.listenForWhisper(
+        'recalls',
+        (payload: { roundId: number; newRecalls: number }) => {
+          commit('command/updateNumberRecallsRoundId', payload, { root: true })
+        }
+      )
+      judges.listenForWhisper(
+        'heats',
+        (payload: { roundId: number; newHeats: number }) => {
+          commit('command/updateNumberHeatsRoundId', payload, { root: true })
+        }
+      )
+      judges.listenForWhisper(
+        'timetable',
+        ({ updateTimetable }: { updateTimetable: boolean }) => {
+          if (updateTimetable) {
+            dispatch(
+              'command/updateTimetable',
+              { updateTimetable },
+              {
+                root: true,
+              }
+            )
+            dispatch(
+              'command/getEvents',
+              { updateTimetable },
+              {
+                root: true,
+              }
+            )
+          }
+        }
+      )
+      judges.listenForWhisper(
         'completedRound',
         (payload: { roundId: number; timetableId: number }) => {
           commit('command/setDanceLetterIndex', 0, { root: true })

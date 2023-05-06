@@ -3,7 +3,7 @@
     <q-item v-if="isLoggedIn" class="q-pr-none">
       <q-item-section avatar class="q-pa-none q-pr-sm">
         <q-avatar size="140px">
-          <q-badge
+          <!-- <q-badge
             outline
             color="secondary"
             floating
@@ -15,7 +15,7 @@
               round
               flat
               @click="uploadAvatar"
-          /></q-badge>
+          /></q-badge> -->
           <img
             v-touch-pan.prevent.mouse="moveAvatar"
             :src="userAvatar"
@@ -274,7 +274,9 @@ export default defineComponent({
       },
     },
     padModeLabel() {
-      return this.padMode ? 'Handwriting' : 'Numbers'
+      return this.padMode
+        ? 'Set to number pad'
+        : 'Set to handwriting recognition'
     },
     isAdminDev(): boolean {
       return !!(

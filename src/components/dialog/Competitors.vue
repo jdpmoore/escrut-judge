@@ -25,7 +25,6 @@
       -->
       <q-card-section class="row items-center justify-center q-pa-none bg-dark">
         <div class="row items-center bg-dark">
-          Hey there
           <q-table
             ref="competitorTable"
             v-model:pagination="paginationJudges"

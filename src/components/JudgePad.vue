@@ -9,7 +9,7 @@
   <div
     v-if="showCanvas"
     id="canvasWrap"
-    class="row full-width items-center justify-center bg-dark"
+    class="row full-width items-center justify-center bg-primary"
   >
     <canvas
       ref="judgepad"
@@ -53,6 +53,7 @@ export default defineComponent({
   props: {
     modelValue: { type: Boolean, default: false },
     trigger: { type: Boolean, default: false },
+    toClear: { type: Boolean, default: false },
   },
   emits: ['submit'],
   // : JudgePadInterface
@@ -71,7 +72,7 @@ export default defineComponent({
   },
   computed: {
     computedHeight() {
-      return window.innerHeight - 186
+      return window.innerHeight - 200
     },
     computedWidth() {
       return window.innerWidth
@@ -88,6 +89,9 @@ export default defineComponent({
   watch: {
     trigger() {
       this.getOCR()
+    },
+    toClear() {
+      this.clearCanvas()
     },
     '$store.state.command.floor'() {
       // console.log(this.$store.state.command.floor)
@@ -137,6 +141,11 @@ export default defineComponent({
           })
         })
     },
+    clearCanvas() {
+      this.canvas.clear()
+      this.setBackground()
+      this.canvas.renderAll()
+    },
     getOCR() {
       console.log('are we here?!?')
       let vpt = this.canvas.viewportTransform
@@ -166,10 +175,10 @@ export default defineComponent({
       vpt2[5] = this.canvas.getHeight() / 2 - this.sketchProperties.height / 2
       this.canvas.renderAll()
       // const jpgBlob = this.b64toBlob(jpgDownload)
-      this.canvas.clear()
-      this.setBackground()
-      // this.clearHistory()
-      this.canvas.requestRenderAll()
+      // this.canvas.clear()
+      // this.setBackground()
+      // // this.clearHistory()
+      // this.canvas.requestRenderAll()
       this.$emit('submit', jpgDownload)
     },
     azure(jpgBlob) {
