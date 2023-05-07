@@ -324,7 +324,7 @@
                   </div>
                 </div>
                 <div
-                  v-if="isFirstRound"
+                  v-if="isFirstRound && !isFinal"
                   class="text-center competitor-add bg-info text-info-inv"
                   @click="addNumber"
                 >
@@ -1299,7 +1299,9 @@ export default {
       } else {
         toReturn = 'bg-positive text-positive-inv'
       }
-      toReturn = `${toReturn} competitor-number`
+      toReturn = `${toReturn} ${
+        this.isFinal ? 'competitor-number-final' : 'competitor-number'
+      }`
       return toReturn
     },
     placingClass(placing) {
@@ -1309,7 +1311,9 @@ export default {
       } else if (this.finalPlacings.has(placing.value)) {
         toReturn = 'bg-positive text-positive-inv'
       }
-      toReturn = `${toReturn} competitor-number`
+      toReturn = `${toReturn} ${
+        this.isFinal ? 'competitor-number-final' : 'competitor-number'
+      }`
       return toReturn
     },
     competitorClass(no) {
@@ -1351,7 +1355,9 @@ export default {
       // } else if (this.showNames) {
       //   toReturn = `${toReturn} competitor-names`
       // } else {
-      toReturn = `${toReturn} competitor-number`
+      toReturn = `${toReturn} ${
+        this.isFinal ? 'competitor-number-final' : 'competitor-number'
+      }`
       // }
       return toReturn
     },
