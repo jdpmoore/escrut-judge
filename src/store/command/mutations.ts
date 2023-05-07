@@ -402,6 +402,20 @@ const mutation: MutationTree<CommandStateInterface> = {
   ) {
     state.scrutineering.tempMarks[roundId] = marks
   },
+  newJudgeHeatTempImage(
+    state: CommandStateInterface,
+    {
+      roundId,
+      judgeHeat,
+      image,
+    }: { roundId: number; judgeHeat: string; image: string }
+  ) {
+    if (!state.scrutineering.tempImages[roundId]) {
+      state.scrutineering.tempImages[roundId] = new Map()
+    }
+    state.scrutineering.tempImages[roundId].set(judgeHeat, image)
+    // console.log('new set', state.scrutineering.tempMarks[roundId])
+  },
   newJudgeHeatTempMarks(
     state: CommandStateInterface,
     { roundId, judgeHeat }: { roundId: number; judgeHeat: string }

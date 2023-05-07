@@ -297,8 +297,15 @@ export namespace v2 {
     abbreviation: string
   }
 
+  export interface DanceMap {
+    round: number
+    oldDance: Dance
+    newDance: Dance
+  }
+
   export interface ShortRound {
     danceOrder: Dance[]
+    danceMapping: DanceMap[]
     id: number
     heats: number
     recall: number

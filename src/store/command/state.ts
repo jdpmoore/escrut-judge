@@ -8,6 +8,10 @@ export interface TempMarks {
   [roundId: number]: TempMark
 }
 
+export interface TempImages {
+  [roundId: number]: Map<string, string>
+}
+
 export interface TempMarksExport {
   [roundId: number]: [string, number[]][]
 }
@@ -16,6 +20,7 @@ interface Scrutineering {
   competitors: { [id: number]: v1.Competitor[] }
   marks: { [id: number]: number[] }
   tempMarks: TempMarks
+  tempImages: TempImages
   results: { [id: number]: number[] }
   roundIdToEventId: Map<number, number>
   roundById: Map<number, v1.Round>
@@ -109,6 +114,7 @@ export const blankRound: v2.TimetableItem = {
     recall: 0,
     floor: blankFloor,
     adjudicators: [],
+    danceMapping: [],
     dances: [],
     danceOrder: [],
     round: 0,
@@ -155,6 +161,7 @@ export function initialState(): CommandStateInterface {
       competitors: {},
       marks: {},
       tempMarks: {},
+      tempImages: {},
       results: {},
       roundIdToEventId: new Map(),
       roundById: new Map(),

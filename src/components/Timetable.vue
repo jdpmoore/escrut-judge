@@ -305,6 +305,7 @@ export default defineComponent({
           //   this.$store.state.command.floor.id
           // )
           if (round.round && option != '4') {
+            this.$store.commit('command/setDanceLetterIndex', 0)
             if (round.round.floor.id !== this.$store.state.command.floor.id) {
               this.$common.popup({
                 title: 'Changing floors',

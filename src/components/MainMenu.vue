@@ -256,6 +256,17 @@ interface MenuTypes {
   // } | null
   avatarPosition: string
 }
+interface DumpType {
+  roundId: number
+  compAdjId: number
+  danceId: number
+  type: string
+  marks?: {
+    marked: number[]
+    considered: number[]
+  }
+  fileData: string
+}
 export default defineComponent({
   name: 'MainMenu',
   props: {},
@@ -317,8 +328,70 @@ export default defineComponent({
   },
   methods: {
     dataDump() {
-      console.log(this.$store.state.command.scrutineering.tempMarks)
+      console.log('now we dump')
+      const { tempMarks, tempImages, roundById } =
+        this.$store.state.command.scrutineering
+      console.log(tempMarks, tempImages)
+      const toPostMarks = Object.keys(tempMarks)
+        .map((key) => {
+          const round = roundById.get(Number(key))
+          const myAdjudicator = round?.adjudicators.find(({ user }) => {
+            return user.id === this.userDetails.id
+          })
+          const roundMarks = tempMarks[key]
+          const toReturn = [...roundMarks.keys()]
+            .map((judgeHeat) => {
+              if (!judgeHeat) {
+                return false
+              }
+              const danceId = judgeHeat.split('-')[1]
+              return {
+                roundId: key,
+                compAdjId: myAdjudicator.id,
+                danceId,
+                type: 'array',
+                marks: {
+                  marked: [...roundMarks.get(judgeHeat)],
+                  considered: [],
+                },
+              }
+            })
+            .filter(Boolean)
+          return toReturn
+        })
+        .flat()
+      const toPostImages = Object.keys(tempImages)
+        .map((key) => {
+          const round = roundById.get(Number(key))
+          const myAdjudicator = round?.adjudicators.find(({ user }) => {
+            return user.id === this.userDetails.id
+          })
+          const roundMarks = tempImages[key]
+          return [...roundMarks.keys()].map((judgeHeat) => {
+            const danceId = judgeHeat.split('-')[1]
+            return {
+              roundId: key,
+              compAdjId: myAdjudicator.id,
+              danceId,
+              type: 'file',
+              fileData: roundMarks.get(judgeHeat),
+            }
+          })
+        })
+        .flat()
+      const toPost = [...toPostMarks, ...toPostImages]
+      Promise.all(
+        toPost.map((toP) => {
+          this.$axios.post('padmarks/add', toP)
+        })
+      ).then(() => {
+        this.$common.popup({
+          title: 'Data dump complete',
+          message: 'Data dump was a success',
+        })
+      })
     },
+
     clearLocalStorage() {
       this.$q
         .dialog({

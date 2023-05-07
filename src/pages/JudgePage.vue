@@ -214,7 +214,8 @@
                 /> -->
               </div>
               <div v-else style="font-size: 100%">
-                Heat {{ heat }}, {{ dance?.name }}: {{ computedNumCouples }}
+                Heat {{ heat }}, {{ dance?.name }}:
+                {{ computedNumCouples }}
                 {{ isTeam ? 'teams' : 'couples' }}
                 <!-- <q-btn
                   color="accent"
@@ -225,19 +226,62 @@
               </div>
               <!-- <div class="text-primary">Next: {{ nextRound.title }}</div> -->
               <span style="font-size: 225%; font-weight: bold">{{
-                marked?.size ?? 0
+                isFinal ? placedCompetitorNumbers.length : marked?.size ?? 0
               }}</span>
               <span style="font-size: 120%"
-                >/ {{ currentRound.round.recall }}</span
+                >/
+                {{
+                  isFinal
+                    ? computedCompetitors.length
+                    : currentRound.round.recall
+                }}</span
               >
             </div>
             <div class="row justify-center" style="width: 100%">
               <div
+                v-if="isFinal"
                 class="number-column items-center"
-                :style="`height: ${computedFlexBoxHeight}px; width: ${computedFlexBoxWidth}px;`"
+                :style="`height: ${computedFlexBoxHeight}px; width: ${
+                  isFinal ? computedFlexBoxWidth / 2 : computedFlexBoxWidth
+                }px;`"
               >
                 <div
-                  v-for="(competitor, index) in computedCompetitors"
+                  v-for="(placing, index) in placings"
+                  :key="index"
+                  :class="placingClass(placing)"
+                  @click="selectedFinalPlacing = placing"
+                >
+                  <div class="text-center" style="font-size: 225%">
+                    {{ placing.label }}
+                  </div>
+                </div>
+              </div>
+              <div
+                v-if="isFinal"
+                class="number-column items-center"
+                :style="`height: ${computedFlexBoxHeight}px; width: ${
+                  isFinal ? computedFlexBoxWidth / 2 : computedFlexBoxWidth
+                }px;`"
+              >
+                <div
+                  v-for="(placing, index) in placedCompetitors"
+                  :key="index"
+                  :class="placingClassCompetitors(placing)"
+                  @click="unsetPlacing(placing)"
+                >
+                  <div class="text-center" style="font-size: 225%">
+                    {{ placing.number }}
+                  </div>
+                </div>
+              </div>
+              <div
+                class="number-column items-center"
+                :style="`height: ${computedFlexBoxHeight}px; width: ${
+                  isFinal ? computedFlexBoxWidth / 2 : computedFlexBoxWidth
+                }px;`"
+              >
+                <div
+                  v-for="(competitor, index) in computedCompetitorsSuper"
                   :key="index"
                   :class="competitorClass(competitor.number)"
                   @click="markCompetitor(competitor)"
@@ -320,9 +364,14 @@
                     heat == competitors.length
                   "
                   class="full-width"
+                  :disable="
+                    isFinal && finalPlacings?.size != computedCompetitors.length
+                  "
                   :class="
-                    marked?.size == currentRound.round.recall &&
-                    currentRound.round.recall > 0
+                    (marked?.size == currentRound.round.recall &&
+                      currentRound.round.recall > 0) ||
+                    (isFinal &&
+                      finalPlacings?.size == computedCompetitors.length)
                       ? 'bg-positive text-positive-inv'
                       : 'bg-negative text-negative-inv'
                   "
@@ -495,8 +544,10 @@ export default {
       announced: new Set(),
       marked: new Set(),
       considering: new Set(),
+      finalPlacings: new Map(),
       additionalNumbers: {},
       tempHeat: 1,
+      selectedFinalPlacing: null,
       // liveJudges: [],
       // competitorsTeam: [],
       // lastDisplay: 200,
@@ -560,6 +611,59 @@ export default {
     }
   },
   computed: {
+    placedObject() {
+      const keys = [...this.finalPlacings.keys()]
+      const toReturn = {}
+      keys.forEach((key) => {
+        toReturn[key] = this.finalPlacings.get(key)
+      })
+      return toReturn
+    },
+    placedCompetitorNumbers() {
+      return [...this.finalPlacings.values()]
+    },
+    placedCompetitors() {
+      // const theCompetitors = this.computedCompetitors.map((competitor) => {
+      //   console.log(
+      //     this.placedCompetitorNumbers.includes(competitor.number),
+      //     competitor.number
+      //   )
+      //   const toReturn = { ...competitor }
+      //   if (!this.placedCompetitorNumbers.includes(competitor.number)) {
+      //     toReturn.number = ''
+      //   }
+      //   return toReturn
+      // })
+      const theReturn = this.placings.map((placing) => {
+        return (
+          this.computedCompetitors.find((competitor) => {
+            return this.finalPlacings.get(placing.value) == competitor.number
+          }) ?? { number: '' }
+        )
+      })
+      console.log('the return', theReturn)
+      return theReturn
+    },
+    placings() {
+      return new Array(this.computedCompetitors.length).fill(1).map((o, i) => {
+        const value = i + 1
+        return {
+          label: this.$common.ordinal_suffix_of(value),
+          value,
+          col: 'grey',
+          number: '',
+        }
+      })
+    },
+    computedCompetitorsSuper() {
+      if (this.isFinal) {
+        return this.computedCompetitors.filter((competitor) => {
+          // console.log(this.placedCompetitorNumbers, comp)
+          return !this.placedCompetitorNumbers.includes(competitor.number)
+        })
+      }
+      return this.computedCompetitors
+    },
     computedCompetitors() {
       return this.$_.sortBy(this.competitors[this.heat - 1], 'number')
     },
@@ -693,7 +797,7 @@ export default {
         if (this.isCurrentEvent) {
           return this.$store.state.command.compere.danceLetterIndex
         } else {
-          return 1
+          return 0
         }
       },
       set(val) {
@@ -840,21 +944,29 @@ export default {
         toReturn = `${this.currentRound.title}${this.isFirstRoundSFF}${this.isQualifierText}`
         // if (
         //   this.currentRound.round?.dances &&
-        //   this.currentRound.round.dances.length > 1
+        //   (this.currentRound.round.dances.length > 1 || this.isHandwriting)
         // ) {
         //   const danceIds =
         //     this.currentRound.round.danceOrder ?? this.currentRound.round.dances
-        //   const danceLetters = danceIds.map((danceId) => {
-        //     return this.$store.getters['command/danceById'](danceId)
-        //       ?.abbreviation
-        //   })
+        //   const danceLetters = danceIds
+        //     .map((danceId) => {
+        //       const key = this.isHandwriting ? 'name' : 'abbreviation'
+        //       return this.$store.getters['command/danceById'](danceId)?.[key]
+        //     })
+        //     .join(this.isHandwriting ? ', ' : '')
         //   toReturn = `${toReturn} (${danceLetters})`
+        // }
+        // if (this.isHandwriting) {
+        //   toReturn = `${toReturn} (${})`
         // }
         const nDances = this.currentRound.round.dances.length
         if (nDances > 1) {
           toReturn = `${toReturn} - dance ${
             this.danceLetterIndex + 1
           }/${nDances}`
+        }
+        if (this.isHandwriting) {
+          toReturn = `${toReturn} - ${this.dance?.name}`
         }
         // if (this.isCurrentEvent && !this.isNonCompereEvent) {
         //   toReturn = `${toReturn}, heat ${this.activeHeat}`
@@ -951,6 +1063,7 @@ export default {
       if (oldValue.id != newValue.id) {
         this.marked = new Set()
         this.considering = new Set()
+        this.finalPlacings = new Map()
         this.heat = 1
         this.activeHeat = 1
       }
@@ -958,6 +1071,12 @@ export default {
   },
   created() {
     // this.getState()
+    // POST padmarks (returns padmarks) - takes roundId, compAdjId
+    // this.$axios.post('padmarks', {
+    //   roundId: 400,
+    //   compAdjId: this.myAdjudicator.id,
+    //   danceId: 17,
+    // })
     this.submitButtonText = 'Start heat'
     if (this.$store.state.command.floor.id === 0) {
       this.$q
@@ -989,6 +1108,24 @@ export default {
     // void this.$store.dispatch('command/getTimetable')
   },
   methods: {
+    unsetPlacing(placing) {
+      const number = placing.number
+      const storedNumbers = [...this.finalPlacings.values()]
+      if (storedNumbers.includes(number)) {
+        const keys = [...this.finalPlacings.keys()]
+        keys.forEach((key) => {
+          if (this.finalPlacings.get(key) == number) {
+            this.finalPlacings.delete(key)
+          }
+        })
+      }
+
+      if (this.selectedFinalPlacing) {
+        const { value } = this.selectedFinalPlacing
+        this.finalPlacings.set(value, number)
+        this.selectedFinalPlacing = null
+      }
+    },
     clearPage() {
       this.$q
         .dialog({
@@ -1155,12 +1292,38 @@ export default {
       })
       return currentEvent
     },
+    placingClassCompetitors(competitor) {
+      let toReturn = ''
+      if (!competitor.number) {
+        toReturn = 'bg-white'
+      } else {
+        toReturn = 'bg-positive text-positive-inv'
+      }
+      toReturn = `${toReturn} competitor-number`
+      return toReturn
+    },
+    placingClass(placing) {
+      let toReturn = ''
+      if (this.selectedFinalPlacing?.value == placing.value) {
+        toReturn = 'bg-info text-info-inv'
+      } else if (this.finalPlacings.has(placing.value)) {
+        toReturn = 'bg-positive text-positive-inv'
+      }
+      toReturn = `${toReturn} competitor-number`
+      return toReturn
+    },
     competitorClass(no) {
       let toReturn = ''
       if (this.marked.has(no)) {
         toReturn = 'bg-positive text-positive-inv'
       } else if (this.considering.has(no)) {
         toReturn = 'bg-warning text-warning-inv'
+      }
+
+      if (this.isFinal) {
+        if (this.placedCompetitorNumbers.includes(no)) {
+          toReturn = 'bg-positive text-positive-inv'
+        }
       }
       // if (
       //   !this.marked.has(no) &&
@@ -1393,9 +1556,31 @@ export default {
       this.$store.dispatch('echo/announceEvent', toAnnounce)
       this.active = true
     },
+    markCompetitorFinal(number) {
+      console.log('now we place', this.selectedFinalPlacing, number)
+      if (!this.selectedFinalPlacing) {
+        return
+      }
+      const { value } = this.selectedFinalPlacing
+      const storedNumbers = [...this.finalPlacings.values()]
+      if (storedNumbers.includes(number)) {
+        const keys = [...this.finalPlacings.keys()]
+        keys.forEach((key) => {
+          if (this.finalPlacings.get(key) == number) {
+            this.finalPlacings.delete(key)
+          }
+        })
+      }
+      this.finalPlacings.set(value, number)
+      this.selectedFinalPlacing = null
+    },
     markCompetitor({ number }) {
       console.log(number, this.marked, this.considering)
       if (!this.isCurrentEvent) {
+        return
+      }
+      if (this.isFinal) {
+        this.markCompetitorFinal(number)
         return
       }
       if (this.marked.has(number)) {
@@ -1411,7 +1596,10 @@ export default {
     },
     whisperMarks() {
       const roundId = this.currentRound.round.id
-      const tapMarked = [...this.marked]
+      const placedList = this.placings.map((placing) => {
+        return this.placedObject[placing.value]
+      })
+      const tapMarked = this.isFinal ? placedList : [...this.marked]
       const danceIds =
         this.currentRound.round.danceOrder ?? this.currentRound.round.dances
       const toPost = {
@@ -1419,6 +1607,7 @@ export default {
         dance: danceIds[this.danceLetterIndex],
         judge: this.myAdjudicator,
         numbers: tapMarked,
+        isFinal: this.isFinal,
         handwriting: false,
       }
       if (!this.$store.state.command.scrutineering.tempMarks[roundId]) {
@@ -1592,13 +1781,19 @@ export default {
       const roundId = this.currentRound.round.id
       const danceIds =
         this.currentRound.round.danceOrder ?? this.currentRound.round.dances
+      const dance = danceIds[this.danceLetterIndex]
       const toPost = {
         roundId,
-        dance: danceIds[this.danceLetterIndex],
+        dance,
         judge: this.myAdjudicator,
         image: jpgDownload,
         handwriting: true,
       }
+      this.$store.commit('command/newJudgeHeatTempImage', {
+        roundId,
+        judgeHeat: `${this.myAdjudicator.letter}-${dance}`,
+        image: jpgDownload,
+      })
       // if (!this.$store.state.command.scrutineering.tempMarks[roundId]) {
       //   this.$store.commit('command/saveTempMarks', {
       //     roundId,
@@ -1642,12 +1837,14 @@ export default {
     submitMarks(jpgDownload) {
       this.$store.dispatch('command/getEvents')
       this.$store.dispatch('command/updateTimetable')
-      let message = `Are you sure you wish to submit your marks for ${this.roundText}`
+      let message = `Are you sure you wish to submit your ${
+        this.isFinal ? 'placings' : 'marks'
+      } for ${this.roundText}`
       const spotOn =
         this.marked?.size == this.currentRound.round.recall ||
         this.isHandwriting ||
         this.currentRound.round.recall == 0
-      if (!spotOn) {
+      if (!spotOn && !this.isFinal) {
         message = `${message}, you have recalled ${this.marked?.size} out of ${this.currentRound.round.recall}`
       }
       this.$q
@@ -1674,13 +1871,25 @@ export default {
           })
           if (this.isHandwriting) {
             this.submitHandwritingMarks(jpgDownload)
+            this.postPadMarks('file', jpgDownload)
           } else {
             this.whisperMarks()
+            if (this.isFinal) {
+              this.postPadMarks('array', {
+                placed: this.placedObject,
+              })
+            } else {
+              this.postPadMarks('array', {
+                marked: [...this.marked],
+                considered: [...this.considering],
+              })
+            }
           }
           this.heat = 1
           this.activeHeat = 1
           this.marked = new Set()
           this.considering = new Set()
+          this.finalPlacings = new Map()
           this.additionalNumbers = {}
           console.log(this.lastDance, 'is last dance', this.currentRound)
           if (this.lastDance) {
@@ -1714,6 +1923,21 @@ export default {
           }, 350)
         })
     },
+    postPadMarks(type, data) {
+      const toPost = {
+        roundId: this.currentRound.round.id,
+        compAdjId: this.myAdjudicator.id,
+        danceId: this.dance.id,
+        type,
+      }
+      if (type === 'file') {
+        toPost.fileData = data
+      } else {
+        toPost.marks = data
+      }
+      this.$axios.post('padmarks/add', toPost).catch(this.$common.axiosError)
+    },
+    // POST padmarks/add (adds padmarks) - takes roundId, compAdjId, type (file or array) - if type==file then fileData or if type==array then marks)
     start() {
       // this.pingRecallAPI()
       if (this.submitButtonText === 'Proceed to next event') {

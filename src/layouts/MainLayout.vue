@@ -62,7 +62,7 @@
       :width="350"
       class="bg-dark text-white"
     >
-      <div
+      <!-- <div
         v-if="showTimetable"
         class="q-mini-drawer-hide absolute"
         style="top: 4px; right: -24px"
@@ -78,7 +78,7 @@
           size="lg"
           @click="showTimetable = false"
         />
-      </div>
+      </div> -->
       <!-- :width="$q.screen.lt.sm ? headerSize.width : 350" -->
       <Timetable v-model="showTimetable" />
     </q-drawer>
@@ -92,7 +92,7 @@
       :width="350"
       class="bg-dark text-white"
     >
-      <div
+      <!-- <div
         v-if="showMenu"
         class="q-mini-drawer-hide absolute"
         style="top: 4px; left: -24px"
@@ -108,7 +108,7 @@
           style="z-index: 666"
           @click="showMenu = false"
         />
-      </div>
+      </div> -->
       <!--       @click="showMenu = !showMenu" -->
       <!-- :width="$q.screen.lt.sm ? headerSize.width : 350" -->
       <MainMenu />
@@ -540,8 +540,10 @@ export default defineComponent({
         })
     },
     updateTimetable() {
-      this.$store.dispatch('command/updateTimetable')
-      this.$store.dispatch('command/getEvents')
+      if (this.isLoggedIn) {
+        this.$store.dispatch('command/updateTimetable')
+        this.$store.dispatch('command/getEvents')
+      }
     },
   },
   cron: [
@@ -550,7 +552,7 @@ export default defineComponent({
       method: 'checkAuthTimeout',
     },
     {
-      time: 60000,
+      time: 30000,
       method: 'updateTimetable',
     },
   ],

@@ -206,15 +206,30 @@ const getters: GetterTree<CommandStateInterface, StateInterface> = {
       return ''
     },
   currentDanceLetters(state) {
-    const getDanceLetter = (id: unknown) => {
+    const getDanceLetter = (id) => {
       return state.dances.find((dance) => {
         return dance.id == id
       })
     }
     const dances =
       state.current.round?.danceOrder ?? state.current.round?.dances
-    // console.log('looking for a dance', dances, state.current)
-    const toReturn = dances?.map(getDanceLetter)
+    const danceMapping = state.current.round?.danceMapping
+    const danceMap = new Map()
+    if (danceMapping) {
+      for (const dMap of danceMapping) {
+        danceMap.set(dMap.oldDance.id, dMap.newDance.id)
+      }
+    }
+    const toReturn = dances?.map((danceId) => {
+      const innerReturn = { ...getDanceLetter(danceId) }
+      if (danceMap.has(danceId)) {
+        const otherDance = getDanceLetter(danceMap.get(danceId))
+        innerReturn.abbreviation = otherDance.abbreviation
+        innerReturn.name = otherDance.name
+      }
+      return innerReturn
+    })
+    console.log('we send back', toReturn)
     return toReturn
     // .split('')
   },
@@ -224,12 +239,32 @@ const getters: GetterTree<CommandStateInterface, StateInterface> = {
     //   state.compere.danceLetterIndex,
     //   getters.currentDanceLetters
     // )
+    console.log(
+      'is the problem here',
+      getters.currentDanceLetters,
+      state.compere.danceLetterIndex
+    )
     return getters.currentDanceLetters?.[state.compere.danceLetterIndex] ?? '0'
   },
   danceById: (state) => (danceId: number) => {
+    const danceMapping = state.current.round?.danceMapping
+    const danceMap = new Map()
+    if (danceMapping) {
+      for (const dMap of danceMapping) {
+        danceMap.set(dMap.oldDance.id, dMap.newDance.id)
+      }
+    }
     const foundDance = state.dances.find((dance) => {
       return dance.id == danceId
     })
+    if (danceMap.has(danceId)) {
+      const foundOtherDance = state.dances.find((dance) => {
+        return dance.id == danceMap.get(danceId)
+      })
+      foundDance.abbreviation = foundOtherDance.abbreviation
+      foundDance.name = foundOtherDance.name
+    }
+
     return foundDance
   },
   dance(state, getters) {
