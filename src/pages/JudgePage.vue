@@ -365,18 +365,25 @@
                   "
                   class="full-width"
                   :disable="
-                    isFinal && finalPlacings?.size != computedCompetitors.length
+                    isFinal &&
+                    finalPlacings?.size != computedCompetitors.length &&
+                    computedCompetitors.length > 1
                   "
                   :class="
                     (marked?.size == currentRound.round.recall &&
                       currentRound.round.recall > 0) ||
                     (isFinal &&
-                      finalPlacings?.size == computedCompetitors.length)
+                      finalPlacings?.size == computedCompetitors.length) ||
+                    computedCompetitorsSuper.length == 1
                       ? 'bg-positive text-positive-inv'
                       : 'bg-negative text-negative-inv'
                   "
                   icon="done"
-                  label="Submit marks"
+                  :label="
+                    computedCompetitorsSuper.length == 1
+                      ? 'Skip event'
+                      : 'Submit marks'
+                  "
                   style="font-size: 150%"
                   @click="submitMarks"
                 />
@@ -676,11 +683,15 @@ export default {
       return this.computedNumberColumns < 5 ? 640 : 742
     },
     computedNumberColumns() {
+      if (this.isFinal) {
+        return Math.max(Math.ceil((this.computedCompetitors.length + 1) / 6), 2)
+      }
       return Math.ceil((this.computedCompetitors.length + 1) / 6)
     },
     computedFlexBoxWidth() {
       const colPx = 0.2 * window.innerWidth + 18
       const nCols = Math.min(this.computedNumberColumns, 4)
+      console.log(nCols)
       return Math.round(nCols * colPx)
     },
     isHandwriting: {
@@ -1849,85 +1860,141 @@ export default {
       const spotOn =
         this.marked?.size == this.currentRound.round.recall ||
         this.isHandwriting ||
-        this.currentRound.round.recall == 0
+        this.currentRound.round.recall == 0 ||
+        this.computedCompetitorsSuper.length != 1
+
       if (!spotOn && !this.isFinal) {
         message = `${message}, you have recalled ${this.marked?.size} out of ${this.currentRound.round.recall}`
       }
-      this.$q
-        .dialog({
-          title: this.currentEvent.title,
-          message,
-          focus: 'cancel',
-          dark: true,
-          class: spotOn
-            ? 'bg-dark text-dark-inv'
-            : 'bg-negative text-negative-inv',
-          cancel: { label: 'Cancel', color: 'positive', flat: true },
-          ok: { label: 'Yes', color: 'warning', flat: true },
-          focus: 'cancel',
-        })
-        .onOk(() => {
-          this.toClear = !this.toClear
-          const loadingDialog = this.$q.dialog({
-            message: 'Processing marks...',
+      if (this.computedCompetitorsSuper.length != 1) {
+        this.$q
+          .dialog({
+            title: this.currentEvent.title,
+            message,
+            focus: 'cancel',
             dark: true,
-            progress: true, // we enable default settings
-            persistent: true, // we want the user to not be able to close it
-            ok: false, // we want the user to not be able to close it
+            class: spotOn
+              ? 'bg-dark text-dark-inv'
+              : 'bg-negative text-negative-inv',
+            cancel: { label: 'Cancel', color: 'positive', flat: true },
+            ok: { label: 'Yes', color: 'warning', flat: true },
+            focus: 'cancel',
           })
-          if (this.isHandwriting) {
-            this.submitHandwritingMarks(jpgDownload)
-            this.postPadMarks('file', jpgDownload)
-          } else {
-            this.whisperMarks()
-            if (this.isFinal) {
-              this.postPadMarks('array', {
-                placed: this.placedObject,
-              })
+          .onOk(() => {
+            this.toClear = !this.toClear
+            const loadingDialog = this.$q.dialog({
+              message: 'Processing marks...',
+              dark: true,
+              progress: true, // we enable default settings
+              persistent: true, // we want the user to not be able to close it
+              ok: false, // we want the user to not be able to close it
+            })
+            if (this.isHandwriting) {
+              this.submitHandwritingMarks(jpgDownload)
+              this.postPadMarks('file', jpgDownload)
             } else {
-              this.postPadMarks('array', {
-                marked: [...this.marked],
-                considered: [...this.considering],
-              })
+              this.whisperMarks()
+              if (this.isFinal) {
+                this.postPadMarks('array', {
+                  placed: this.placedObject,
+                })
+              } else {
+                this.postPadMarks('array', {
+                  marked: [...this.marked],
+                  considered: [...this.considering],
+                })
+              }
             }
-          }
-          this.heat = 1
-          this.activeHeat = 1
-          this.marked = new Set()
-          this.considering = new Set()
-          this.finalPlacings = new Map()
-          this.additionalNumbers = {}
-          console.log(this.lastDance, 'is last dance', this.currentRound)
-          if (this.lastDance) {
-            this.danceLetterIndex = 0
-            if (this.currentRound.round) {
+            this.heat = 1
+            this.activeHeat = 1
+            this.marked = new Set()
+            this.considering = new Set()
+            this.finalPlacings = new Map()
+            this.additionalNumbers = {}
+            console.log(this.lastDance, 'is last dance', this.currentRound)
+            if (this.lastDance) {
+              this.danceLetterIndex = 0
+              if (this.currentRound.round) {
+                this.$store.commit(
+                  'command/completedRound',
+                  this.currentRound.round.id
+                )
+              }
+              console.log('completed timetable event', this.timetableId)
               this.$store.commit(
-                'command/completedRound',
-                this.currentRound.round.id
+                'command/completedTimetableEvent',
+                this.timetableId
               )
+              this.$store.commit('command/setCurrentNext')
+              this.$store.dispatch('command/getNextCompetitors')
+              const currentTimetableIndex = this.timetableOrders.indexOf(
+                this.timetableOrder
+              )
+              this.timetableOrder =
+                this.timetableOrders[currentTimetableIndex + 1]
+              this.announced = new Set()
+              this.getCompetitors()
+            } else {
+              this.danceLetterIndex++
             }
-            console.log('completed timetable event', this.timetableId)
-            this.$store.commit(
-              'command/completedTimetableEvent',
-              this.timetableId
-            )
-            this.$store.commit('command/setCurrentNext')
-            this.$store.dispatch('command/getNextCompetitors')
-            const currentTimetableIndex = this.timetableOrders.indexOf(
-              this.timetableOrder
-            )
-            this.timetableOrder =
-              this.timetableOrders[currentTimetableIndex + 1]
-            this.announced = new Set()
-            this.getCompetitors()
+            console.log(loadingDialog)
+            setTimeout(() => {
+              loadingDialog.hide()
+            }, 350)
+          })
+      } else {
+        if (this.isHandwriting) {
+          this.submitHandwritingMarks(jpgDownload)
+          this.postPadMarks('file', jpgDownload)
+        } else {
+          this.whisperMarks()
+          if (this.isFinal) {
+            this.postPadMarks('array', {
+              placed: this.placedObject,
+            })
           } else {
-            this.danceLetterIndex++
+            this.postPadMarks('array', {
+              marked: [...this.marked],
+              considered: [...this.considering],
+            })
           }
-          console.log(loadingDialog)
-          setTimeout(() => {
-            loadingDialog.hide()
-          }, 350)
-        })
+        }
+        this.heat = 1
+        this.activeHeat = 1
+        this.marked = new Set()
+        this.considering = new Set()
+        this.finalPlacings = new Map()
+        this.additionalNumbers = {}
+        console.log(this.lastDance, 'is last dance', this.currentRound)
+        if (this.lastDance) {
+          this.danceLetterIndex = 0
+          if (this.currentRound.round) {
+            this.$store.commit(
+              'command/completedRound',
+              this.currentRound.round.id
+            )
+          }
+          console.log('completed timetable event', this.timetableId)
+          this.$store.commit(
+            'command/completedTimetableEvent',
+            this.timetableId
+          )
+          this.$store.commit('command/setCurrentNext')
+          this.$store.dispatch('command/getNextCompetitors')
+          const currentTimetableIndex = this.timetableOrders.indexOf(
+            this.timetableOrder
+          )
+          this.timetableOrder = this.timetableOrders[currentTimetableIndex + 1]
+          this.announced = new Set()
+          this.getCompetitors()
+        } else {
+          this.danceLetterIndex++
+        }
+        console.log(loadingDialog)
+        setTimeout(() => {
+          loadingDialog.hide()
+        }, 350)
+      }
     },
     postPadMarks(type, data) {
       const toPost = {

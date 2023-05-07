@@ -5,6 +5,7 @@ import client from 'socket.io-client'
 import Echo from 'laravel-echo'
 import { axiosInstance } from 'boot/axios'
 import { uid } from 'quasar'
+import { v2 } from 'src/@types/command'
 
 const actions: ActionTree<EchoStateInterface, StateInterface> = {
   connectEcho({ rootState, commit, dispatch }) {
@@ -130,6 +131,22 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
         'recalls',
         (payload: { roundId: number; newRecalls: number }) => {
           commit('command/updateNumberRecallsRoundId', payload, { root: true })
+        }
+      )
+      judges.listenForWhisper(
+        'markCompletedSetCurrent',
+        (payload: { round: v2.TimetableItem }) => {
+          // const { round } = payload
+          console.log('we have a round', payload)
+          const round = payload
+          commit('command/setDanceLetterIndex', 0, { root: true })
+          dispatch('command/getCompetitorsByRoundId', round.round.id, {
+            root: true,
+          })
+          commit('command/overrideCurrent', round, { root: true })
+          dispatch('command/getNextCompetitors', {}, { root: true })
+          dispatch('command/setAllPreviousComplete', round, { root: true })
+          commit('command/setCurrentNext', {}, { root: true })
         }
       )
       judges.listenForWhisper(
