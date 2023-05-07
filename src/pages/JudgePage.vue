@@ -1932,6 +1932,9 @@ export default {
               )
               this.timetableOrder =
                 this.timetableOrders[currentTimetableIndex + 1]
+              if (!this.timetableOrder) {
+                this.checkForNewTimetable(currentTimetableIndex + 1)
+              }
               this.announced = new Set()
               this.getCompetitors()
             } else {
@@ -1985,6 +1988,9 @@ export default {
             this.timetableOrder
           )
           this.timetableOrder = this.timetableOrders[currentTimetableIndex + 1]
+          if (!this.timetableOrder) {
+            this.checkForNewTimetable(currentTimetableIndex + 1)
+          }
           this.announced = new Set()
           this.getCompetitors()
         } else {
@@ -1995,6 +2001,16 @@ export default {
           loadingDialog.hide()
         }, 350)
       }
+    },
+    checkForNewTimetable(nextIndex) {
+      this.$store.dispatch('command/updateTimetable').then(() => {
+        this.timetableOrder = this.timetableOrders[nextIndex]
+        if (!this.timetableOrder) {
+          setTimeout(() => {
+            this.checkForNewTimetable(nextIndex)
+          }, 1500)
+        }
+      })
     },
     postPadMarks(type, data) {
       const toPost = {

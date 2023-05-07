@@ -350,28 +350,31 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
     }
   },
   updateTimetable(context) {
-    console.log('now we update the timetable')
-    const { id } = context.state.competition
-    if (id > 0) {
-      axiosInstance
-        .get(`/competition/${id}/mytimetable`)
-        .then(({ data }: { data: v2.TimetableItem[] }) => {
-          data.forEach((timetableItem) => {
-            if (timetableItem.danceOrder) {
-              timetableItem.dances = timetableItem.danceOrder
-            }
-            if (timetableItem.id == context.state.current.id) {
-              context.commit('setCurrent', timetableItem)
-            }
-            if (timetableItem.id == context.state.next.id) {
-              context.commit('setNext', timetableItem)
-            }
+    return new Promise<void>((resolve) => {
+      console.log('now we update the timetable')
+      const { id } = context.state.competition
+      if (id > 0) {
+        axiosInstance
+          .get(`/competition/${id}/mytimetable`)
+          .then(({ data }: { data: v2.TimetableItem[] }) => {
+            data.forEach((timetableItem) => {
+              if (timetableItem.danceOrder) {
+                timetableItem.dances = timetableItem.danceOrder
+              }
+              if (timetableItem.id == context.state.current.id) {
+                context.commit('setCurrent', timetableItem)
+              }
+              if (timetableItem.id == context.state.next.id) {
+                context.commit('setNext', timetableItem)
+              }
+            })
+            context.commit('storeTimetable', data)
+            context.commit('saveState')
+            resolve()
           })
-          context.commit('storeTimetable', data)
-          context.commit('saveState')
-        })
-        .catch(axiosError)
-    }
+          .catch(axiosError)
+      }
+    })
   },
   getTimetable(context, loadingDialog) {
     return new Promise<void>((resolve, reject) => {
