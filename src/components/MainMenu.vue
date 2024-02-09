@@ -1,4 +1,19 @@
 <template>
+  <q-toolbar
+    class="bg-primary text-white shadow-2 q-pr-xs"
+    style="position: fixed; top: 0px; z-index: 666; height: 56px"
+  >
+    <!--  -->
+    <q-toolbar-title class="col">Menu</q-toolbar-title>
+    <q-badge v-if="isLive && $q.platform.is.electron" color="positive"
+      >Live</q-badge
+    >
+    <q-badge v-if="!isLive" color="accent">Dev</q-badge>
+    <div class="col-auto">
+      <q-btn icon="close" round dense flat @click="$emit('close')" />
+    </div>
+  </q-toolbar>
+  <div style="height: 56px"></div>
   <q-list>
     <q-item v-if="isLoggedIn" class="q-pr-none">
       <q-item-section avatar class="q-pa-none q-pr-sm">
@@ -270,6 +285,7 @@ interface DumpType {
 export default defineComponent({
   name: 'MainMenu',
   props: {},
+  emits: ['close'],
   data(): MenuTypes {
     return {
       avatarPosition: 'object-position: 0% 0%;',
@@ -296,11 +312,7 @@ export default defineComponent({
       )
     },
     isLive() {
-      if (process.env.LIVE === 'true') {
-        return true
-      } else {
-        return false
-      }
+      return process.env.LIVE
     },
     isLoggedIn(): boolean {
       return this.$store.state.command.loggedIn

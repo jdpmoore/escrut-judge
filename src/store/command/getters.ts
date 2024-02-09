@@ -275,6 +275,13 @@ const getters: GetterTree<CommandStateInterface, StateInterface> = {
       state.compere.danceLetterIndex === getters.currentDanceLetters.length - 1
     )
   },
+  myJudge(state) {
+    const userId = state.userDetails.id
+    const adj = state.judges.find((judge) => {
+      return judge.user.id === userId
+    })
+    return adj
+  },
 }
 
 export default getters

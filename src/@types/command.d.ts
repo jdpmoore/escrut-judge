@@ -40,6 +40,7 @@ export namespace v1 {
   }
 
   export interface Judge {
+    user: UseDetails
     id: number
     adjudicatorId: number
     compAdjId: number

@@ -19,7 +19,7 @@
     /></q-card-section>
     <q-card-section class="q-pa-none">
       <q-editor
-        :model-value="modelValue"
+        :model-value="modelValue ? modelValue : ''"
         min-height="5rem"
         :max-height="maxHeight"
         :height="height"

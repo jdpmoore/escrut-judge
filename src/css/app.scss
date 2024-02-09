@@ -26,8 +26,8 @@
 }
 
 .competitor-number {
-  height: 88px;
-  line-height: 88px;
+  height: 72px;
+  line-height: 72px;
   text-align: center;
   width: 20vw;
   border: 1px solid black;
@@ -38,6 +38,30 @@
   cursor: pointer;
 }
 
+.number-pad {
+  height: 112px;
+  line-height: 112px;
+  text-align: center;
+  width: 28vw;
+  border: 1px solid black;
+  max-width: 90vw;
+  background: grey;
+  color: white;
+  margin: 9px;
+  cursor: pointer;
+}
+.number-pad-null {
+  height: 112px;
+  line-height: 112px;
+  text-align: center;
+  width: 28vw;
+  border: 1px solid white;
+  max-width: 90vw;
+  background: white;
+  color: white;
+  margin: 9px;
+  cursor: pointer;
+}
 .competitor-number-final {
   height: 62px;
   line-height: 62px;
@@ -52,8 +76,8 @@
 }
 
 .competitor-add {
-  height: 88px;
-  line-height: 88px;
+  height: 72px;
+  line-height: 72px;
   width: 20vw;
   border: 1px solid black;
   max-width: 90vw;

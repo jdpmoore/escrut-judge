@@ -11,21 +11,23 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 const { configure } = require('quasar/wrappers')
+require('dotenv').config()
 const fs = require('fs')
 const packageJson = fs.readFileSync('./package.json')
 const version = JSON.parse(packageJson).version || '0'
 
-function getDistDir(process, ctx) {
-  let distDir = `dist/${ctx.modeName}`
-  if (process.env.LIVE) {
-    distDir = `${distDir}/prod`
-  } else {
-    distDir = `${distDir}/dev`
-  }
-  return distDir
-}
+// function getDistDir(process, ctx) {
+//   let distDir = `dist/${ctx.modeName}`
+//   if (process.env.LIVE) {
+//     distDir = `${distDir}/prod`
+//   } else {
+//     distDir = `${distDir}/dev`
+//   }
+//   return distDir
+// }
 
 module.exports = configure(function (ctx) {
+  const isLive = JSON.parse(process.env.LIVE)
   return {
     // https://v2.quasar.dev/quasar-cli-webpack/supporting-ts
     supportTS: {
@@ -53,6 +55,7 @@ module.exports = configure(function (ctx) {
       'moment',
       'store',
       'router',
+      'flare',
     ],
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-css
@@ -75,35 +78,44 @@ module.exports = configure(function (ctx) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
     build: {
       env: {
-        // DEV: ctx.modeName,
-        API: process.env.LIVE
-          ? 'https://app.escrut.com/api'
-          : process.env.LOCAL
-          ? 'http://homestead.escrut/api'
-          : 'https://dev.app.escrut.com/api',
-        ECHO: process.env.LIVE
-          ? 'https://app.escrut.com:6003'
-          : // : 'http://homestead.escrut:6002',
-            'https://dev.app.escrut.com:6002',
-        VERSION_CHECK: `/system/webapp/version/judge${
-          process.env.LIVE === 'true' ? '' : '/dev'
-        }`,
-        // ECHO: process.env.LIVE
-        //   ? 'https://nsn.greenes.online:6005'
-        //   : 'https://beta.nsn.greenes.online:6005',
-        LIVE: process.env.LIVE ? 'true' : 'false',
-        LOCAL: process.env.LOCAL ? 'true' : 'false',
-        version: version, // updateVersion(version, process.env),
+        API: process.env.API,
+        PUSHER_APP_KEY: process.env.PUSHER_APP_KEY,
+        LIVE: isLive,
+        LOCAL: JSON.parse(process.env.LOCAL),
+        FLARE: process.env.FLARE,
+        credentials: JSON.parse(process.env.CREDENTIALS),
+        version: version,
+        VERSION_CHECK: `/system/webapp/version/judge${isLive ? '' : '/dev'}`,
       },
-      distDir: getDistDir(process, ctx),
+      // distDir: getDistDir(process, ctx),
+      distDir: isLive
+        ? 'dist/' + ctx.modeName + '/prod'
+        : 'dist/' + ctx.modeName + '/dev',
       vueRouterMode: 'hash', // available values: 'hash', 'history'
       uglifyOptions: {
-        compress: { drop_console: true },
+        compress: { drop_console: isLive ? true : false },
         // compress: false,
         // keep_fnames: true,
         // // keep_fargs: true,
         // mangle: false
         // { drop_console: true },
+      },
+      extendWebpack(cfg) {
+        const FlareWebpackPluginSourcemap = require('@flareapp/flare-webpack-plugin-sourcemap')
+        const flarePlugin = new FlareWebpackPluginSourcemap({
+          key: process.env.FLARE,
+        })
+        cfg.plugins.push(flarePlugin)
+        cfg.devtool = 'hidden-source-map'
+        // linting is slow in TS projects, we execute it only for production builds
+        // if (ctx.prod) {
+        //   cfg.module.rules.push({
+        //     enforce: 'pre',
+        //     test: /\.(js|vue)$/,.
+        //     loader: 'eslint-loader',
+        //     exclude: /node_modules/,
+        //   })
+        // }
       },
       // transpile: false,
       // publicPath: '/',

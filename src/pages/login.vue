@@ -160,6 +160,7 @@
 import { defineComponent } from 'vue'
 import { Common, userDetails, Versions } from '../@types/common'
 import Echo from 'laravel-echo'
+// import { flare } from '@flareapp/flare-client'
 // import client from 'socket.io-client'
 declare global {
   interface Window {
@@ -174,11 +175,6 @@ export default defineComponent({
     return {
       loggingIn: false,
       isPwd: true,
-      // FIXME: Add some code here which sets the credintials if in development mode
-      // credentials: {
-      //   email: 'alexander.gray@greenes.org.uk',
-      //   password: 'eP72w$p2K'
-      // }
       credentials: {
         email: '',
         password: '',
@@ -198,36 +194,13 @@ export default defineComponent({
     },
   },
   created() {
-    // console.log(this.school)
-    // this.$store.commit('GOstore/clearStore');
-    // console.log(this.isLive)
-    if (process.env.DEV) {
-      this.credentials = {
-        // email: 'thankont@yahoo.com', // Tutor
-        // email: 'sample.client@greenes.org.uk', // Client
-        // email: 'rueanbun.sathienkit@my.greenes.org.uk',
-        // email: 'celene_wilkinson@yahoo.co.uk', // Candidate
-        // email: 'james@quakefire.com', // Client
-        // email: 'william.shedden@my.greenes.org.uk', // Student
-        // email: 'sample.student@greenes.org.uk', // Student & Candidate
-        // username: 'alex.gray',
-        // email: 'ajm_gray@yahoo.com',
-        email: 'gary.foster@judge.escrut.com',
-        // email: 'james@quakefire.com',
-        // email: 'event.compere@compere.escrut.com',
-        // email: 'event.compere@compere.escrut.com',
-        // email: 'james.oudc@gmail.com',
-        // email: 'g040010@googlemail.com',
-        // password: '!!NsN1964@@'
-        // email: 'thomas.paine@greenes.org.uk', // Student & Candidate
-        // password: 'MxDx7d6TSMS77GxX',
-        password: 'MxDx7d6TSMS77GxX',
-        // process.env.LOCAL === 'true' || !process.env.LIVE
-        //   ? 'MxDx7d6TSMS77GxX'
-        //   : '!!NsN1964@@',
-        // password: 'CeruleanTeddy#27'
-        // password: '*aU@4WaPT'
-      }
+    // flare.test()
+    if (process.env.DEV && process.env.credentials) {
+      const cred = process.env.credentials as unknown as {
+        email: string
+        password: string
+      }[]
+      this.credentials = cred[0]
     }
   },
   methods: {

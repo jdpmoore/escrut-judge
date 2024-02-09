@@ -1,7 +1,8 @@
 import { ActionTree } from 'vuex'
 import { StateInterface } from '../index'
 import { EchoStateInterface } from './state'
-import client from 'socket.io-client'
+// import client from 'socket.io-client'
+import Pusher from 'pusher-js'
 import Echo from 'laravel-echo'
 import { axiosInstance } from 'boot/axios'
 import { uid } from 'quasar'
@@ -17,57 +18,65 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       const authToken = rootState.command.auth.authToken
         ? `Bearer ${rootState.command.auth.authToken}`
         : axiosInstance.defaults.headers.common.Authorization
-      console.log('we have auth token', authToken)
+      //configure Laravel Echo
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      window.Pusher = Pusher
       const echo = new Echo({
-        broadcaster: 'socket.io',
-        host: process.env.ECHO,
-        namespace: '',
-        client,
-        forceTLS: false,
+        broadcaster: 'pusher',
+        key: process.env.PUSHER_APP_KEY,
+        cluster: 'eu',
+        forceTLS: true,
+        authEndpoint: `${process.env.API}/../broadcasting/auth`,
         auth: {
           headers: {
             Authorization: authToken,
           },
         },
       })
-      console.log(authToken, echo)
-      echo.connector.socket.on('connect', () => {
+      // const echo = new Echo({
+      //   broadcaster: 'socket.io',
+      //   host: process.env.ECHO,
+      //   namespace: '',
+      //   client,
+      //   forceTLS: false,
+      //   auth: {
+      //     headers: {
+      //       Authorization: authToken,
+      //     },
+      //   },
+      // })
+      // console.log(authToken, echo)
+      echo.connector.pusher.connection.bind('initialized', () => {
+        const time = new Date().toLocaleTimeString()
+        commit('setConnected', false)
+        console.log(`we initialized at ${time}`)
+      })
+      echo.connector.pusher.connection.bind('connecting', () => {
+        const time = new Date().toLocaleTimeString()
+        commit('setConnected', false)
+        console.log(`we are connecting at ${time}`)
+      })
+      echo.connector.pusher.connection.bind('connected', () => {
         const time = new Date().toLocaleTimeString()
         console.log(`we connected at ${time}`)
         commit('setConnected', true)
       })
-      echo.connector.socket.on(
-        'disconnect',
-        (attemptNumber: number, no: number) => {
-          const time = new Date().toLocaleTimeString()
-          console.log(
-            `connection down (disconnect) at ${time}: `,
-            attemptNumber,
-            no
-          )
-          commit('setConnected', false)
-        }
-      )
-      echo.connector.socket.on(
-        'reconnecting',
-        (attemptNumber: number, no: number) => {
-          const time = new Date().toLocaleTimeString()
-          console.log(
-            `connection down (reconnecting) at ${time}: `,
-            attemptNumber,
-            no
-          )
-          commit('setConnected', false)
-        }
-      )
-      echo.connector.socket.on(
-        'subscription_error',
-        (err: string, status: string) => {
-          const time = new Date().toLocaleTimeString()
-          console.log(`subscription error at ${time}: `, err, status)
-          // commit('setConnected', false)
-        }
-      )
+      echo.connector.pusher.connection.bind('unavailable', () => {
+        const time = new Date().toLocaleTimeString()
+        commit('setConnected', false)
+        console.log(`we are unavailable at ${time}`)
+      })
+      echo.connector.pusher.connection.bind('failed', () => {
+        const time = new Date().toLocaleTimeString()
+        commit('setConnected', false)
+        console.log(`we failed at ${time}`)
+      })
+      echo.connector.pusher.connection.bind('disconnected', () => {
+        const time = new Date().toLocaleTimeString()
+        console.log(`connection down (disconnected) at ${time}: `)
+        commit('setConnected', false)
+      })
       commit('saveEcho', echo)
       dispatch('joinDisplay', rootState.command.floor.id).then(() => {
         resolve()
@@ -423,6 +432,33 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
         })
         commit('setConnected', true)
       }
+    }
+  },
+  shareStatus({ rootState, commit, dispatch }) {
+    const toWhisper = {
+      status: true,
+      current: {
+        round: rootState.command.current.title,
+        heat: rootState.command.currentHeat,
+        dance: rootState.command.currentDance,
+        // numCompetitors:
+      },
+      judgeUserId: rootState.command.userDetails.id,
+    }
+    console.log('status update', toWhisper)
+    if (!window.echo) {
+      commit('setConnected', false)
+      dispatch('connectEcho').then(() => {
+        window.echo
+          .join(`es-comp.${rootState.command.competition.id}.judges`)
+          .whisper('judge', toWhisper)
+        commit('setConnected', true)
+      })
+    } else {
+      window.echo
+        .join(`es-comp.${rootState.command.competition.id}.judges`)
+        .whisper('judge', toWhisper)
+      commit('setConnected', true)
     }
   },
   judgesMarks({ rootState, commit, dispatch }, scrut) {

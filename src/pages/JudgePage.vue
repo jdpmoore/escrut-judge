@@ -14,6 +14,17 @@
         class="bg-primary text-white text-center q-pa-sm q-mb-none"
       >
         <div class="row full-width items-center no-wrap">
+          <!-- <div class="col-auto">
+            <q-btn
+              round
+              dense
+              color="accent"
+              icon="keyboard_arrow_left"
+              :disable="timetableOrders.indexOf(timetableOrder) === 0"
+              @click="eventChange(-1)"
+              ><q-tooltip> Previous event </q-tooltip></q-btn
+            >
+          </div> -->
           <div v-if="isHandwriting" class="col-auto">
             <q-btn
               dense
@@ -34,11 +45,7 @@
                 @click="getDetails"
               />
             </div>
-            <!-- <div>
-              {{ dance?.name }}
-            </div> -->
           </div>
-          <!-- :disable="timetableOrder === lastDisplay" -->
           <!-- <div class="col-auto">
             <q-btn
               round
@@ -163,34 +170,15 @@
               </div>
             </div>
             <div v-else class="text-center" style="font-size: 175%">
-              <div v-if="!isFinal" style="font-size: 125%">
+              <!-- <div v-if="!isFinal" style="font-size: 125%">
                 {{ competitors.flat().length }} competitors,
-                <!-- <q-toggle
-                  v-model="showNames"
-                  label="Details"
-                  checked-icon="check"
-                  color="positive"
-                  style="font-size: 50%"
-                  unchecked-icon="clear"
-                /> -->
-                <!-- <br /> -->
                 recall {{ currentRound?.round?.recall }} from
                 {{
                   currentRound?.round?.heats > 1
                     ? `${currentRound?.round?.heats} heats`
                     : '1 heat'
                 }}
-                <!-- <q-btn
-                  v-if="
-                    (heat === 1 && activeHeat === 1) ||
-                    (!isCurrentEvent && !isCompleted)
-                  "
-                  color="primary"
-                  flat
-                  label="(Edit)"
-                  @click="editHeats"
-                /> -->
-              </div>
+              </div> -->
               <div v-if="isOffbeat" style="font-size: 125%">
                 {{ computedNumCouples }} teams
                 <!-- <q-btn
@@ -214,7 +202,8 @@
                 /> -->
               </div>
               <div v-else style="font-size: 100%">
-                Heat {{ heat }}, {{ dance?.name }}:
+                Heat {{ heat }}/{{ currentRound?.round?.heats }},
+                {{ dance?.name }}:
                 {{ computedNumCouples }}
                 {{ isTeam ? 'teams' : 'couples' }}
                 <!-- <q-btn
@@ -348,7 +337,7 @@
                   ><q-tooltip> Previous heat </q-tooltip></q-btn
                 >
               </div>
-              <div class="col q-mx-xl">
+              <div class="col q-mx-lg">
                 <!-- <q-btn
                     v-if="isCurrentEvent && !isNonCompereEvent"
                     class="bg-info text-info-inv q-mr-lg"
@@ -511,6 +500,7 @@
 
 <script>
 import JudgePad from 'components/JudgePad.vue'
+import AddNumber from 'components/dialog/AddNumber.vue'
 // import AnnounceResults from 'components/AnnounceResults.vue'
 // import { transmitR, stateGet } from './eScruit.js'
 // import { date } from 'quasar'
@@ -648,7 +638,7 @@ export default {
           }) ?? { number: '' }
         )
       })
-      console.log('the return', theReturn)
+      // console.log('the return', theReturn)
       return theReturn
     },
     placings() {
@@ -680,7 +670,7 @@ export default {
       })
     },
     computedFlexBoxHeight() {
-      return this.computedNumberColumns < 5 ? 640 : 742
+      return this.computedNumberColumns < 5 ? 540 : 642
     },
     computedNumberColumns() {
       if (this.isFinal) {
@@ -691,7 +681,7 @@ export default {
     computedFlexBoxWidth() {
       const colPx = 0.2 * window.innerWidth + 18
       const nCols = Math.min(this.computedNumberColumns, 4)
-      console.log(nCols)
+      // console.log(nCols)
       return Math.round(nCols * colPx)
     },
     isHandwriting: {
@@ -788,7 +778,7 @@ export default {
       return this.timetableOrder === this.current.timetableOrder
     },
     lastDance() {
-      console.log('the last dance', this.currentRound.round.dances, this.dance)
+      // console.log('the last dance', this.currentRound.round.dances, this.dance)
       return (
         this.currentRound.round.dances[
           this.currentRound.round.dances.length - 1
@@ -813,7 +803,7 @@ export default {
       },
       set(val) {
         if (this.isCurrentEvent) {
-          console.log(val)
+          // console.log(val)
           this.$store.commit('command/setDanceLetterIndex', val)
         }
       },
@@ -894,7 +884,7 @@ export default {
       }
       let toReturn =
         this.$store.getters['command/competitorsByRoundId'](roundId)
-      console.log('to return', toReturn)
+      // console.log('to return', toReturn)
       if (this.heat in this.additionalNumbers) {
         toReturn = [...toReturn]
         toReturn[this.heat - 1] = toReturn[this.heat - 1].concat([
@@ -991,7 +981,7 @@ export default {
       )?.title
     },
     computedNumCouples() {
-      console.log(this.competitors, this.heat, this.isOffbeat)
+      // console.log(this.competitors, this.heat, this.isOffbeat)
       if (this.isOffbeat) {
         return this.competitors.flat().length
       }
@@ -1076,6 +1066,7 @@ export default {
         this.considering = new Set()
         this.finalPlacings = new Map()
         this.heat = 1
+        this.$store.commit('command/setCurrentHeat', this.heat)
         this.activeHeat = 1
       }
     },
@@ -1190,9 +1181,9 @@ export default {
         .then(() => {
           const competitors =
             this.$store.getters['command/competitorsByRoundId'](roundId).flat()
-          console.log('view competitors in', timetableItem, competitors)
+          // console.log('view competitors in', timetableItem, competitors)
           const evt = this.getEvent(roundId)
-          console.log(evt)
+          // console.log(evt)
           // const isFinal = timetableItem.round.round === 'F'
           let title = ''
           // if (isFinal) {
@@ -1389,7 +1380,7 @@ export default {
         this.$store.getters['command/timetableEntryByTimetableOrder'](
           timetableOrder
         )
-      console.log('tOrder', tOrder)
+      // console.log('tOrder', tOrder)
       return tOrder.round?.id
       // const { roundId } =
       //   this.$store.getters['command/timetableEntryByTimetableOrder'](
@@ -1402,7 +1393,7 @@ export default {
       this.$axios
         .post(this.comp.id + '/state/update', toSubmit)
         .then(({ data }) => {
-          console.log(data)
+          // console.log(data)
           this.$q.notify({
             message: this.currentRound[this.floorId] + ' completed!',
             type: 'positive',
@@ -1455,7 +1446,7 @@ export default {
       this.$axios
         .get(this.$store.state.command.competition.id + '/state')
         .then(({ data }) => {
-          console.log(data)
+          // console.log(data)
           // let temp = response.data
           // this.activeEvents = []
           // this.nextEvents = []
@@ -1477,7 +1468,7 @@ export default {
         })
     },
     getCompetitors() {
-      console.log('in get competitors', this.competitors)
+      // console.log('in get competitors', this.competitors)
       if (!this.$store.state.command.current.round) {
         return
       }
@@ -1503,7 +1494,7 @@ export default {
         )
         .then((dat) => {
           this.loadingState = false
-          console.log(dat)
+          // console.log(dat)
           if (dat.length === 0) {
             setTimeout(() => {
               this.getCompetitors()
@@ -1574,7 +1565,7 @@ export default {
       this.active = true
     },
     markCompetitorFinal(number) {
-      console.log('now we place', this.selectedFinalPlacing, number)
+      // console.log('now we place', this.selectedFinalPlacing, number)
       if (!this.selectedFinalPlacing) {
         return
       }
@@ -1592,7 +1583,7 @@ export default {
       this.selectedFinalPlacing = null
     },
     markCompetitor({ number }) {
-      console.log(number, this.marked, this.considering)
+      // console.log(number, this.marked, this.considering)
       if (!this.isCurrentEvent) {
         return
       }
@@ -1647,7 +1638,7 @@ export default {
         [...savedMarks.get(judgeHeat)],
         toPost.numbers
       )
-      console.log(tapMarked, toAdd, toRemove)
+      // console.log(tapMarked, toAdd, toRemove)
       for (const no of toAdd) {
         this.$store.commit('command/judgeHeatTempMark', {
           roundId,
@@ -1676,27 +1667,20 @@ export default {
     addNumber() {
       this.$q
         .dialog({
-          title: 'Add number',
-          message: 'Add additional number to heat.',
-          prompt: {
-            model: '',
+          component: AddNumber,
+          componentProps: {
+            title: 'Add number',
           },
-          cancel: true,
-          dark: true,
-          class: 'bg-primary text-primary-inv',
         })
-        .onOk((newNumbers) => {
-          newNumbers = newNumbers
-            .split(',')
-            .map((num) => {
-              return parseInt(num, 10)
-            })
-            .filter(Number)
+        .onOk((newNumber) => {
+          console.log(newNumber)
+          console.log(Number(newNumber))
+          const newNumbers = [Number(newNumber)]
           if (newNumbers.length === 0) return
           if (!(this.heat in this.additionalNumbers)) {
             this.additionalNumbers[this.heat] = new Set()
           }
-
+          console.log(this.additionalNumbers)
           newNumbers.map((num) => {
             this.marked.add(num)
             if (!this.computedCompetitorsNumbers.includes(num)) {
@@ -1739,14 +1723,18 @@ export default {
       if (this.isHandwriting) {
         return
       }
+      console.log('swipg', info)
+      if (info.duration < 50) {
+        return
+      }
       const numHeats = this.currentRound?.round?.heats
-      console.log('swipg', info, this.heat, numHeats)
       if (info.direction === 'right' && this.heat > 1) {
         this.heat = this.heat - 1
       }
       if (info.direction === 'left' && this.heat < numHeats) {
         this.heat = this.heat + 1
       }
+      this.$store.commit('command/setCurrentHeat', this.heat)
       // native Javascript event
       // console.log(evt)
     },
@@ -1860,9 +1848,20 @@ export default {
       const spotOn =
         this.marked?.size == this.currentRound.round.recall ||
         this.isHandwriting ||
-        this.currentRound.round.recall == 0 ||
-        this.computedCompetitorsSuper.length != 1
-
+        this.currentRound.round.recall == 0
+      // ||
+      // this.computedCompetitorsSuper.length != 1
+      // console.log(
+      //   this.marked?.size,
+      //   this.currentRound.round.recall,
+      //   this.marked?.size == this.currentRound.round.recall,
+      //   this.isHandwriting,
+      //   this.currentRound.round.recall == 0,
+      //   this.computedCompetitorsSuper.length != 1,
+      //   spotOn,
+      //   this.computedCompetitorsSuper,
+      //   !this.isFinal
+      // )
       if (!spotOn && !this.isFinal) {
         message = `${message}, you have recalled ${this.marked?.size} out of ${this.currentRound.round.recall}`
       }
@@ -1906,12 +1905,13 @@ export default {
               }
             }
             this.heat = 1
+            this.$store.commit('command/setCurrentHeat', 1)
             this.activeHeat = 1
             this.marked = new Set()
             this.considering = new Set()
             this.finalPlacings = new Map()
             this.additionalNumbers = {}
-            console.log(this.lastDance, 'is last dance', this.currentRound)
+            // console.log(this.lastDance, 'is last dance', this.currentRound)
             if (this.lastDance) {
               this.danceLetterIndex = 0
               if (this.currentRound.round) {
@@ -1920,7 +1920,7 @@ export default {
                   this.currentRound.round.id
                 )
               }
-              console.log('completed timetable event', this.timetableId)
+              // console.log('completed timetable event', this.timetableId)
               this.$store.commit(
                 'command/completedTimetableEvent',
                 this.timetableId
@@ -1940,7 +1940,7 @@ export default {
             } else {
               this.danceLetterIndex++
             }
-            console.log(loadingDialog)
+            // console.log(loadingDialog)
             setTimeout(() => {
               loadingDialog.hide()
             }, 350)
@@ -1963,12 +1963,13 @@ export default {
           }
         }
         this.heat = 1
+        this.$store.commit('command/setCurrentHeat', 1)
         this.activeHeat = 1
         this.marked = new Set()
         this.considering = new Set()
         this.finalPlacings = new Map()
         this.additionalNumbers = {}
-        console.log(this.lastDance, 'is last dance', this.currentRound)
+        // console.log(this.lastDance, 'is last dance', this.currentRound)
         if (this.lastDance) {
           this.danceLetterIndex = 0
           if (this.currentRound.round) {
@@ -1977,7 +1978,7 @@ export default {
               this.currentRound.round.id
             )
           }
-          console.log('completed timetable event', this.timetableId)
+          // console.log('completed timetable event', this.timetableId)
           this.$store.commit(
             'command/completedTimetableEvent',
             this.timetableId
@@ -1996,7 +1997,7 @@ export default {
         } else {
           this.danceLetterIndex++
         }
-        console.log(loadingDialog)
+        // console.log(loadingDialog)
         setTimeout(() => {
           loadingDialog.hide()
         }, 350)
@@ -2035,6 +2036,7 @@ export default {
         this.announceRestart = 'Activate display'
         this.danceLetterIndex = 0
         this.heat = 1
+        this.$store.commit('command/setCurrentHeat', 1)
         this.activeHeat = 1
         this.active = false
         if (this.currentRound.round) {
@@ -2043,7 +2045,7 @@ export default {
             this.currentRound.round.id
           )
         }
-        console.log('completed timetable event', this.timetableId)
+        // console.log('completed timetable event', this.timetableId)
         this.$store.commit('command/completedTimetableEvent', this.timetableId)
         this.$store.commit('command/setCurrentNext')
         this.$store.dispatch('command/getNextCompetitors')
@@ -2064,6 +2066,7 @@ export default {
         this.subYes = 'bg-primary text-primary-inv'
         this.danceLetterIndex++
         this.heat = 1
+        this.$store.commit('command/setCurrentHeat', 1)
         this.activeHeat = 1
         this.active = false
         this.announced = new Set()
@@ -2093,7 +2096,7 @@ export default {
           // this.active = false
           // this.subYes = 'primary'
         } else {
-          console.log(this.lastDance)
+          // console.log(this.lastDance)
           if (this.lastDance) {
             this.submitButtonText = 'Proceed to next event'
             this.subYes = 'bg-warning text-warning-inv'
@@ -2271,6 +2274,7 @@ export default {
     },
     pageChange(direction) {
       this.heat = this.heat + direction
+      this.$store.commit('command/setCurrentHeat', this.heat)
     },
     editHeats() {
       this.$q
@@ -2297,7 +2301,7 @@ export default {
     },
     restartRound() {
       const foundDance = this.currentEvent.dances.find((o) => {
-        console.log(o.id, o.danceOrder)
+        // console.log(o.id, o.danceOrder)
         return o.id == o.danceOrder?.[0]
       })
       this.$q
@@ -2333,6 +2337,7 @@ export default {
           //   this.$q.localStorage.remove('compere-state')
           // }
           this.heat = 1
+          this.$store.commit('command/setCurrentHeat', this.heat)
           this.activeHeat = 1
           this.announceRestart = 'Activate display'
           // this.submittedJudges = []

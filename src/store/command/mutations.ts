@@ -12,6 +12,12 @@ import _ from 'lodash'
 import { LocalStorage, Cookies, extend } from 'quasar'
 
 const mutation: MutationTree<CommandStateInterface> = {
+  setCurrentHeat(state: CommandStateInterface, val: number) {
+    state.currentHeat = val
+  },
+  setCurrentDance(state: CommandStateInterface, val: string) {
+    state.currentDance = val
+  },
   setHandwriting(state: CommandStateInterface, val: boolean) {
     state.handwriting = val
   },

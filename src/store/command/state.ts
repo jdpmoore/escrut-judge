@@ -38,6 +38,8 @@ interface Scrutineering {
 
 export interface CommandStateInterface {
   handwriting: boolean
+  currentHeat: number
+  currentDance: string
   version: string
   offline: boolean
   competition: v1.Competition
@@ -142,7 +144,9 @@ export function initialState(): CommandStateInterface {
     domain = 'localhost'
   }
   const defaultState: CommandStateInterface = {
-    handwriting: true,
+    handwriting: false,
+    currentHeat: 1,
+    currentDance: '',
     version: process.env.version ? process.env.version : '1.0.0',
     offline: false,
     userDetails: { avatar: '', roles: [''], firstName: '', lastName: '' },

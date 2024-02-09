@@ -1,46 +1,54 @@
 <template>
+  <q-toolbar
+    class="bg-primary text-white shadow-2 q-pr-xs"
+    style="position: fixed; top: 0px; z-index: 666; height: 56px"
+  >
+    <q-toolbar-title class="col-10 q-mr-md">Timetable</q-toolbar-title>
+    <div class="col-auto">
+      <q-btn icon="close" round dense flat @click="$emit('close')" />
+    </div>
+  </q-toolbar>
+  <div style="height: 56px"></div>
   <q-list no-border link inset-delimiter>
     <!--        :sublabel="event.name" color="red"-->
-    <q-item-label header dark class="bg-primary text-white text-h6"
-      ><div class="row justify-between items-center">
-        Event order
-        <!-- <q-btn
-          dense
-          flat
-          color="warning"
-          label="options"
-          :disable="!Boolean(selectF)"
-          icon="settings"
-          @click="timetableOptions"
-        /> -->
-      </div>
-      <!-- <q-select
-        v-model="selectF"
-        dark
-        behavior="menu"
-        :options="floors"
-        option-value="id"
-        option-label="name"
-        class="text-white"
-        color="positive"
-    /> -->
-    </q-item-label>
+    <q-item class="bg-primary text-white text-center text-h6">
+      <q-btn
+        dense
+        flat
+        color="white"
+        icon="menu"
+        label="menu"
+        @click="$emit('menu')"
+      />
+    </q-item>
+
     <div
-      v-for="event in filteredTimetable"
+      v-for="event in filteredTimetableWithHeaders"
       :key="event.timetableOrder"
       :ref="`timetable-${event.timetableOrder}`"
-      style="cursor: pointer"
       @click="viewEventDetails(event)"
     >
-      <q-item multiline :class="activeCol(event)">
-        <q-item-section avatar>{{
-          // formatTime(event.startTime)
-          event.timetableOrder
-        }}</q-item-section>
+      <q-item
+        v-if="'header' in event"
+        class="bg-accent text-white text-center text-h6"
+      >
+        {{ event.section.name }}
+      </q-item>
+      <q-item
+        v-else
+        multiline
+        :class="activeCol(event)"
+        style="cursor: pointer"
+      >
+        <q-item-section avatar>
+          <!-- event.timetableOrder -->
+          {{ formatTime(event.startTime) }}</q-item-section
+        >
         <q-item-section>
-          <q-item-label
-            >{{ event.section.name }} - {{ event.title }}</q-item-label
-          >
+          <q-item-label>
+            {{ eventText(event) }}
+            <!-- {{ event.section.name }} - {{ event.title }} -->
+          </q-item-label>
           <!-- {{ event.dances }}{{ event.round?.isQualifier ? ' (Qualifier)' : '' }} -->
           <!-- <q-item-label caption :class="activeCol(event)">{{
             roundIdtoRound(event.roundId)
@@ -77,11 +85,17 @@ interface RoundStatus {
   icon: string
   color: string
 }
+interface HeaderItem {
+  section: { id: number; name: string }
+  header: true
+  timetableOrder: number
+}
 export default defineComponent({
   name: 'CompTimetable',
   props: {
     modelValue: { type: Boolean, default: false },
   },
+  emits: ['menu', 'close'],
   data(): TimetableData {
     return {
       selectF: this.$store.state.command.floor,
@@ -96,8 +110,42 @@ export default defineComponent({
       return this.$store.state.command.timetable
       // getters['command/timetableByFloor'](this.selectF)
     },
+    filteredTimetableWithHeaders(): (v2.TimetableItem | HeaderItem)[] {
+      const filteredTimetable = [...this.filteredTimetable]
+      let timetableOrder = 10000
+      if (filteredTimetable.length > 0) {
+        let currentSection = filteredTimetable[0].section
+        const toReturn: (v2.TimetableItem | HeaderItem)[] = [
+          {
+            header: true,
+            section: currentSection,
+            timetableOrder,
+          },
+        ]
+        for (const timetableItem of filteredTimetable) {
+          if (
+            timetableItem.section &&
+            timetableItem.section.id !== currentSection.id
+          ) {
+            currentSection = timetableItem.section
+            timetableOrder++
+            toReturn.push({
+              header: true,
+              section: currentSection,
+              timetableOrder,
+            })
+          }
+          toReturn.push(timetableItem)
+        }
+        return toReturn
+      }
+      return []
+    },
     userRoles() {
       return this.userDetails.roles
+    },
+    competitionId() {
+      return this.$store.state.command.competition.id
     },
   },
   watch: {
@@ -112,13 +160,37 @@ export default defineComponent({
     },
   },
   methods: {
+    theRoundText(evt) {
+      const roundId = evt.round?.round
+      const isResults = evt.result?.id
+      if (roundId === 'F') {
+        return ', Final'
+      } else if (roundId === 'SF') {
+        return ', Semi-final'
+      } else if (roundId === 'PO') {
+        return ', Play-off'
+      } else if (isResults) {
+        return ', Results'
+      } else if (roundId) {
+        return `, Round ${roundId}`
+      } else {
+        return ''
+      }
+    },
+    eventText(evt) {
+      if (this.competitionId > 20) {
+        const roundText = this.theRoundText(evt)
+        return `${evt.title}${roundText}`
+      }
+      return evt.title
+    },
     scrollToNow() {
       const toScroll = `timetable-${this.$store.state.command.current.timetableOrder}`
       const el = (this.$refs[toScroll] as HTMLElement[])?.[0]
       if (el) {
         const target = getScrollTarget(el)
-        const offset = el.offsetTop
-        const duration = 1000
+        const offset = el.offsetTop - 56
+        const duration = 1
         setVerticalScrollPosition(target, offset, duration)
       }
     },
@@ -406,7 +478,10 @@ export default defineComponent({
     formatTime(startTime: { date: string }): string {
       return this.$moment(`${startTime?.date}Z`).format('HH:mm')
     },
-    viewEventDetails(round: v2.TimetableItem) {
+    viewEventDetails(round: v2.TimetableItem | HeaderItem) {
+      if ('header' in round) {
+        return
+      }
       const title = round.title
       let message = ''
       if (round.round) {
@@ -418,27 +493,27 @@ export default defineComponent({
           .map((o) => {
             return o.letter
           })
+          .sort()
           .join('')}`
       } else {
         message = `This is a non-scrutineered event at ${this.formatTime(
           round.startTime
         )}`
       }
-      this.$q
-        .dialog({
-          dark: true,
-          title,
-          class: 'bg-primary text-white',
-          message,
-          html: true,
-          cancel: { label: 'Cancel', color: 'positive', flat: true },
-          ok: { label: 'Options', color: 'warning', flat: true },
-          focus: 'cancel',
-        })
-        .onOk(() => {
-          this.roundOptions(round)
-          // this.$store.commit('command/setCurrentNext')
-        })
+      this.$q.dialog({
+        dark: true,
+        title,
+        class: 'bg-primary text-white',
+        message,
+        html: true,
+        cancel: false, //{ label: 'Cancel', color: 'positive', flat: true },
+        ok: true, //{ label: 'Options', color: 'warning', flat: true },
+        focus: 'cancel',
+      })
+      // .onOk(() => {
+      //   this.roundOptions(round)
+      //   // this.$store.commit('command/setCurrentNext')
+      // })
     },
   },
 })

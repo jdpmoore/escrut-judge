@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh lpr fFf">
     <q-header elevated>
-      <q-toolbar class="bg-dark ivdalines">
+      <q-toolbar class="bg-dark ivdalines q-px-xs">
         <q-btn
           flat
           dense
@@ -11,9 +11,14 @@
           aria-label="Timetable"
           @click="showTimetable = !showTimetable"
         />
-        <q-avatar v-if="!$q.screen.lt.sm" size="40px" class="q-ma-sm">
+
+        <q-toolbar-title>
+          {{ toolbarTitle }}
+          <q-badge v-if="isChair" rounded color="positive"></q-badge>
+        </q-toolbar-title>
+        <q-avatar size="40px" class="q-ma-none">
           <!-- <img src="assets/ivda/ivda_logo_only.svg" /> -->
-          <q-icon v-if="isConnected" color="positive" name="wifi" size="md" />
+          <q-icon v-if="isConnected" color="positive" name="wifi" size="sm" />
           <q-icon
             v-if="!isConnected"
             color="negative"
@@ -21,9 +26,6 @@
             size="md"
           />
         </q-avatar>
-        <q-toolbar-title>
-          {{ toolbarTitle }}
-        </q-toolbar-title>
         <!-- <div class="row items-center no-wrap">
           <div class="col">
             <q-btn
@@ -39,27 +41,23 @@
             </q-btn>
           </div>
         </div> -->
-        <q-badge v-if="isLive && $q.platform.is.electron" color="positive"
-          >Live</q-badge
-        >
-        <q-badge v-if="!isLive" color="accent">Dev</q-badge>
-        <q-btn
+        <!-- <q-btn
           flat
           dense
           :label="$q.screen.lt.sm ? '' : 'Menu'"
           icon="menu"
           aria-label="Menu"
           @click="showMenu = !showMenu"
-        />
+        /> -->
       </q-toolbar>
     </q-header>
     <q-drawer
       v-model="showTimetable"
       overlay
       no-swipe-open
-      behavior="desktop"
+      behavior="mobile"
       elevated
-      :width="350"
+      :width="$q.screen.lt.sm ? $q.screen.width : 350"
       class="bg-dark text-white"
     >
       <!-- <div
@@ -80,16 +78,20 @@
         />
       </div> -->
       <!-- :width="$q.screen.lt.sm ? headerSize.width : 350" -->
-      <Timetable v-model="showTimetable" />
+      <Timetable
+        v-model="showTimetable"
+        @menu="showMenu = true"
+        @close="showTimetable = false"
+      />
     </q-drawer>
     <q-drawer
       v-model="showMenu"
       no-swipe-open
-      behavior="desktop"
+      behavior="mobile"
       overlay
       elevated
       side="right"
-      :width="350"
+      :width="$q.screen.lt.sm ? $q.screen.width : 350"
       class="bg-dark text-white"
     >
       <!-- <div
@@ -111,7 +113,7 @@
       </div> -->
       <!--       @click="showMenu = !showMenu" -->
       <!-- :width="$q.screen.lt.sm ? headerSize.width : 350" -->
-      <MainMenu />
+      <MainMenu @close="showMenu = false" />
     </q-drawer>
 
     <q-page-container>
@@ -228,6 +230,7 @@ export default defineComponent({
   mixins: [crono],
   data() {
     return {
+      versionCheckDialogShow: false,
       timeoutVisible: false,
       timeRemaining: 0,
       noCompetitionBool: true,
@@ -264,15 +267,100 @@ export default defineComponent({
     }
   },
   computed: {
+    timetableOrder() {
+      return this.$store.state.command.compere.timetableOrder
+    },
+    currentRound() {
+      if (this.isCurrentEvent) {
+        return this.$store.state.command.current
+      } else {
+        return this.$store.getters['command/timetableEntryByTimetableOrder'](
+          this.timetableOrder
+        )
+      }
+    },
+    danceLetterIndex() {
+      if (this.isCurrentEvent) {
+        return this.$store.state.command.compere.danceLetterIndex
+      } else {
+        return 0
+      }
+    },
+    dance() {
+      if (this.isCurrentEvent) {
+        return this.$store.getters['command/dance']
+      } else {
+        return this.currentRound.danceOrder ?? this.currentRound.dances
+      }
+    },
+    isQualifierText() {
+      if (
+        this.currentRound?.round?.isQualifier &&
+        this.currentRound.round?.isFirstRound
+      ) {
+        return ' (qualifier first round)'
+      } else if (
+        this.currentRound.round?.isRepechage &&
+        this.currentRound.round?.isFirstRound
+      ) {
+        return ' (repechage)'
+      }
+      return ''
+    },
+    isFirstRoundSFF() {
+      if (
+        this.currentRound.round?.isFirstRound &&
+        this.currentRound.round?.round != 1 &&
+        !this.currentRound.round?.isRepechage
+      ) {
+        return ' (first round)'
+      }
+      return ''
+    },
+    roundText() {
+      let toReturn = ''
+      if (this.endOfDays) {
+        return 'Competition completed!'
+      }
+      if (this.currentRound) {
+        toReturn = `${this.currentRound.title}${this.isFirstRoundSFF}${this.isQualifierText}`
+        // if (
+        //   this.currentRound.round?.dances &&
+        //   (this.currentRound.round.dances.length > 1 || this.isHandwriting)
+        // ) {
+        //   const danceIds =
+        //     this.currentRound.round.danceOrder ?? this.currentRound.round.dances
+        //   const danceLetters = danceIds
+        //     .map((danceId) => {
+        //       const key = this.isHandwriting ? 'name' : 'abbreviation'
+        //       return this.$store.getters['command/danceById'](danceId)?.[key]
+        //     })
+        //     .join(this.isHandwriting ? ', ' : '')
+        //   toReturn = `${toReturn} (${danceLetters})`
+        // }
+        // if (this.isHandwriting) {
+        //   toReturn = `${toReturn} (${})`
+        // }
+        const nDances = this.currentRound.round.dances.length
+        if (nDances > 1) {
+          toReturn = `${toReturn} - dance ${
+            this.danceLetterIndex + 1
+          }/${nDances}`
+        }
+        if (this.isHandwriting) {
+          toReturn = `${toReturn} - ${this.dance?.name}`
+        }
+        // if (this.isCurrentEvent && !this.isNonCompereEvent) {
+        //   toReturn = `${toReturn}, heat ${this.activeHeat}`
+        // }
+      }
+      return toReturn
+    },
     isConnected() {
       return this.$store.state.echo.connected
     },
     isLive() {
-      if (process.env.LIVE === 'true') {
-        return true
-      } else {
-        return false
-      }
+      return process.env.LIVE
     },
     timeRemainingProgress(): number {
       // const mins = Math.round(this.timeRemaining)
@@ -290,15 +378,29 @@ export default defineComponent({
     isLoggedIn(): boolean {
       return this.$store.state.command.loggedIn
     },
+    myAdj() {
+      return this.$store.getters['command/myJudge']
+    },
+    isChair() {
+      return this.myAdj?.isChair
+    },
     toolbarTitle(): string {
       let toReturn = 'eScrutineer: Judges'
+      // return this.roundText
       const user = this.$store.state.command.userDetails
       if (user.firstName) {
         toReturn = `${user.firstName} ${user.lastName}`
       }
-      if (this.$store.state.command.competition.id > 0) {
-        toReturn = `${toReturn}: ${this.$store.state.command.competition.title}`
+      if (this.$store.state.command.competition.id > 0 && this.myAdj) {
+        // if (this.isChair) {
+        //   toReturn = `${this.myAdj.letter}*: ${toReturn}`
+        // } else {
+        toReturn = `${this.myAdj.letter}: ${toReturn}`
+        // }
       }
+      // if (this.$store.state.command.competition.id > 0) {
+      //   toReturn = `${toReturn}: ${this.$store.state.command.competition.title}`
+      // }
       // if (this.$store.state.command.floor.id > 0) {
       //   toReturn = `${toReturn} (${this.$store.state.command.floor.name})`
       // }
@@ -378,7 +480,8 @@ export default defineComponent({
             updateNeeded = true
           }
           console.log('version check', localVersion, cloudVersion)
-          if (updateNeeded) {
+          if (updateNeeded && !this.versionCheckDialogShow) {
+            this.versionCheckDialogShow = true
             this.$axios
               .get('/system/release-notes/judges/latest')
               .then(({ data }) => {
@@ -419,6 +522,9 @@ export default defineComponent({
                         })
                       },
                     })
+                  })
+                  .onDismiss(() => {
+                    this.versionCheckDialogShow = false
                   })
               })
               .catch(axiosError)
@@ -545,6 +651,11 @@ export default defineComponent({
         this.$store.dispatch('command/getEvents')
       }
     },
+    shareStatus() {
+      if (this.isLoggedIn) {
+        this.$store.dispatch('echo/shareStatus')
+      }
+    },
   },
   cron: [
     {
@@ -554,6 +665,10 @@ export default defineComponent({
     {
       time: 30000,
       method: 'updateTimetable',
+    },
+    {
+      time: 15000,
+      method: 'shareStatus',
     },
   ],
 })

@@ -108,7 +108,8 @@ const mutation: MutationTree<EchoStateInterface> = {
     const { authToken, floorId } = dataIn
     console.log('now we open echo', authToken, floorId)
     if (window.echo) {
-      window.echo.connector.socket.close()
+      // window.echo.connector.socket.close()
+      window.echo.connector.pusher.disconnect()
       state.connected = false
     }
     console.log('now we connect', authToken, floorId)
@@ -154,7 +155,8 @@ const mutation: MutationTree<EchoStateInterface> = {
   },
   closeEcho(state) {
     if (window.echo) {
-      window.echo.connector.socket.close()
+      // window.echo.connector.socket.close()
+      window.echo.connector.pusher.disconnect()
       state.connected = false
     }
   },
