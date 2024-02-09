@@ -44,7 +44,13 @@
               <div
                 v-for="(num, index) in numbers"
                 :key="index"
-                :class="num === '' ? 'number-pad-null' : 'number-pad'"
+                :class="
+                  num === 'Clear'
+                    ? 'number-pad-negative'
+                    : num === 'Delete'
+                    ? 'number-pad-warning'
+                    : 'number-pad'
+                "
                 @click="clickNum(num)"
               >
                 <div class="text-center" style="font-size: 225%">
@@ -136,7 +142,7 @@ export default defineComponent({
   emits: ['hide', 'ok'],
   data() {
     return {
-      numbers: [1, 4, 7, 'clr', 2, 5, 8, 0, 3, 6, 9, 'del'],
+      numbers: [1, 4, 7, 'Clear', 2, 5, 8, 0, 3, 6, 9, 'Delete'],
       newNumber: '',
       options: {
         keyRandomize: false,
@@ -172,9 +178,9 @@ export default defineComponent({
   },
   methods: {
     clickNum(num) {
-      if (num === 'clr') {
+      if (num === 'Clear') {
         this.newNumber = ''
-      } else if (num === 'del') {
+      } else if (num === 'Delete') {
         if (this.newNumber.length > 0) {
           this.newNumber = this.newNumber.slice(0, -1)
         }

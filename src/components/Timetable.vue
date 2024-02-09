@@ -208,13 +208,13 @@ export default defineComponent({
       ) {
         return { tooltip: 'Completed', icon: 'done', color: 'positive' }
       }
-      if (
-        event.round &&
-        this.$store.state.command.scrutineering.competitors[event.round.id]
-          ?.length > 0
-      ) {
-        return { tooltip: 'Competitors ready', icon: 'people', color: 'white' }
-      }
+      // if (
+      //   event.round &&
+      //   this.$store.state.command.scrutineering.competitors[event.round.id]
+      //     ?.length > 0
+      // ) {
+      //   return { tooltip: 'Competitors ready', icon: 'people', color: 'white' }
+      // }
       return { tooltip: '', icon: '', color: 'dark' }
     },
     activeCol(event: v2.TimetableItem): string {

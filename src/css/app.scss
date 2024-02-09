@@ -43,7 +43,7 @@
   line-height: 112px;
   text-align: center;
   width: 28vw;
-  border: 1px solid black;
+  border: 2px solid black;
   max-width: 90vw;
   background: grey;
   color: white;
@@ -55,9 +55,33 @@
   line-height: 112px;
   text-align: center;
   width: 28vw;
-  border: 1px solid white;
+  border: 2px solid white;
   max-width: 90vw;
   background: white;
+  color: white;
+  margin: 9px;
+  cursor: pointer;
+}
+.number-pad-warning {
+  height: 112px;
+  line-height: 112px;
+  text-align: center;
+  width: 28vw;
+  border: 2px solid black;
+  max-width: 90vw;
+  background: var(--q-warning);
+  color: black;
+  margin: 9px;
+  cursor: pointer;
+}
+.number-pad-negative {
+  height: 112px;
+  line-height: 112px;
+  text-align: center;
+  width: 28vw;
+  border: 2px solid black;
+  max-width: 90vw;
+  background: var(--q-negative);
   color: white;
   margin: 9px;
   cursor: pointer;

@@ -8,6 +8,7 @@
       inline
       flat
       class="full-width full-height bg-dark q-pa-none"
+      style="user-select: none"
     >
       <q-card-section
         horizontal
@@ -324,7 +325,7 @@
           </div>
           <q-card-section
             horizontal
-            class="text-center q-pa-sm q-mb-none q-mt-md"
+            class="text-center q-pa-sm q-mb-none q-mt-xs"
           >
             <div class="row full-width items-center no-wrap">
               <div class="col-auto">
@@ -408,7 +409,7 @@
                   @click="timetableOrder = current.timetableOrder"
                 />
               </div>
-              <div class="col-auto">
+              <!-- <div class="col-auto">
                 <q-btn
                   round
                   color="primary"
@@ -421,7 +422,7 @@
                   @click="pageChange(1)"
                   ><q-tooltip> Next heat </q-tooltip></q-btn
                 >
-              </div>
+              </div> -->
             </div>
             <!-- <q-btn
           color="accent"
@@ -1145,6 +1146,9 @@ export default {
         })
     },
     getDetails() {
+      const approx = Math.round(
+        this.currentRound?.round?.recall / this.currentRound?.round?.heats
+      )
       const message = `${this.competitors.flat().length} competitors, recall ${
         this.currentRound?.round?.recall
       } from
@@ -1153,24 +1157,25 @@ export default {
                     ? `${this.currentRound?.round?.heats} heats`
                     : '1 heat'
                 }<br>
+                <span class="text-body1">(recall approx. ${approx} per heat)</span>
+                <br><br>
                 Heat ${this.heat}, ${this.dance?.name}: ${
         this.computedNumCouples
       }
                 ${this.isTeam ? 'teams' : 'couples'}`
-      this.$q
-        .dialog({
-          title: this.roundText,
-          message,
-          dark: true,
-          html: true,
-          class: 'bg-dark text-dark-inv',
-          cancel: { label: 'View competitors', color: 'warning', flat: true },
-          ok: { label: 'OK', color: 'positive', flat: true },
-          focus: 'ok',
-        })
-        .onCancel(() => {
-          this.viewCompetitors(this.currentRound)
-        })
+      this.$q.dialog({
+        title: this.roundText,
+        message,
+        dark: true,
+        html: true,
+        class: 'bg-dark text-dark-inv text-subtitle1',
+        cancel: false,
+        ok: { label: 'OK', color: 'positive', flat: true },
+        focus: 'ok',
+      })
+      // .onCancel(() => {
+      //   this.viewCompetitors(this.currentRound)
+      // })
     },
     viewCompetitors(timetableItem) {
       const roundId = timetableItem.round.id
@@ -1724,7 +1729,7 @@ export default {
         return
       }
       console.log('swipg', info)
-      if (info.duration < 50) {
+      if (info.duration < 25) {
         return
       }
       const numHeats = this.currentRound?.round?.heats
