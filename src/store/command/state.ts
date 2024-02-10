@@ -37,6 +37,7 @@ interface Scrutineering {
 // }
 
 export interface CommandStateInterface {
+  canSubmit: Set<number>
   handwriting: boolean
   currentHeat: number
   currentDance: string
@@ -135,6 +136,7 @@ export const blankRound: v2.TimetableItem = {
     timezone: '',
   },
   timetableOrder: 0,
+  status: '',
 }
 
 export function initialState(): CommandStateInterface {
@@ -144,6 +146,7 @@ export function initialState(): CommandStateInterface {
     domain = 'localhost'
   }
   const defaultState: CommandStateInterface = {
+    canSubmit: new Set(),
     handwriting: false,
     currentHeat: 1,
     currentDance: '',
@@ -236,6 +239,7 @@ export function initialState(): CommandStateInterface {
     savedState.scrutineering.tempMarks = getSavedTempMarks()
     savedState.compere.completedRounds =
       checkSavedSet<number>('completedRounds')
+    savedState.canSubmit = checkSavedSet<number>('canSubmit')
     savedState.compere.completedTimetableEvents = checkSavedSet<number>(
       'completedTimetableEvents'
     )

@@ -217,7 +217,15 @@ const mutation: MutationTree<CommandStateInterface> = {
         // const floorId =
         //   timetableEvent.round?.floor?.id ?? timetableEvent.floor?.id
         // if (!floorId) {
+        console.log(timetableEvent.status)
+        if (timetableEvent.status === 'skipped') {
+          return false
+        }
+        if (timetableEvent.status === 'completed') {
+          return false
+        }
         return !state.compere.completedTimetableEvents.has(timetableEvent.id)
+        // ||        ['new', 'active'].includes(timetableEvent.status)
         // } else {
         //   return (
         //     floorId === state.floor.id &&
@@ -309,6 +317,7 @@ const mutation: MutationTree<CommandStateInterface> = {
     saveMapSet('finalTimes', state.finalTimes)
     saveMapSet('startTimesByRoundId', state.startTimesByRoundId)
     saveMapSet('timetableOrder', state.timetableOrder)
+    saveMapSet('canSubmit', state.canSubmit)
     saveTempMarks(state.scrutineering.tempMarks)
     state.auth.authToken = authToken
   },
@@ -359,6 +368,66 @@ const mutation: MutationTree<CommandStateInterface> = {
   },
   setTimetableOrder(state: CommandStateInterface, val: number) {
     state.compere.timetableOrder = val
+  },
+  setTimetableOrderToNext(state: CommandStateInterface) {
+    const active = state.timetable.find((t) => {
+      return t.status === 'active'
+    })
+    if (active) {
+      state.compere.timetableOrder = active.timetableOrder
+    } else {
+      const newTimeTableOrders = state.timetable
+        .filter((t) => {
+          return t.status === 'new'
+        })
+        .map((ti) => {
+          return ti.timetableOrder
+        })
+      state.compere.timetableOrder = Math.min(...newTimeTableOrders)
+    }
+  },
+
+  timetableOrders() {
+    return this.timetable.map((o) => {
+      return o.timetableOrder
+    })
+  },
+  forceCurrentTimetableOrder(state: CommandStateInterface, id: number) {
+    console.log('this should force the order', id)
+    state.timetable.forEach((ti) => {
+      if (ti.id == id) {
+        ti.status = 'active'
+        state.compere.timetableOrder = ti.timetableOrder
+      }
+    })
+  },
+  setTimetableIdActive(state: CommandStateInterface, id: number) {
+    console.log('we set it active now...')
+    state.timetable.forEach((ti) => {
+      if (ti.id == id) {
+        ti.status = 'active'
+      }
+    })
+    if (state.current?.id === id) {
+      state.current.status = 'active'
+    }
+  },
+  setTimetableIdSkipped(state: CommandStateInterface, id: number) {
+    console.log('we set it skipped now...')
+    state.timetable.forEach((ti) => {
+      if (ti.id == id) {
+        ti.status = 'skipped'
+      }
+    })
+    if (state.current?.id === id) {
+      state.current.status = 'skipped'
+    }
+  },
+  setCanSubmit(state: CommandStateInterface, id: number) {
+    if (!state.canSubmit) {
+      state.canSubmit = new Set()
+    }
+    state.canSubmit.add(id)
   },
   setTimetableOrderToCurrent(state: CommandStateInterface) {
     state.compere.timetableOrder = state.current.timetableOrder

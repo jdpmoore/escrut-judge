@@ -142,9 +142,19 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           commit('command/updateNumberRecallsRoundId', payload, { root: true })
         }
       )
+      judges.listenForWhisper('forceCurrent', (payload: v2.TimetableItem) => {
+        // id is the timetable id
+        commit('command/overrideCurrent', payload, { root: true })
+        commit('command/forceCurrentTimetableOrder', payload.id, { root: true })
+        dispatch('command/getCompetitorsByRoundId', payload.round.id, {
+          root: true,
+        })
+        dispatch('command/getNextCompetitors', {}, { root: true })
+        // commit('command/setCurrentNext', {}, { root: true })
+      })
       judges.listenForWhisper(
         'markCompletedSetCurrent',
-        (payload: { round: v2.TimetableItem }) => {
+        (payload: { id: number; round: v2.TimetableItem }) => {
           // const { round } = payload
           console.log('we have a round', payload)
           const round = payload
@@ -153,7 +163,12 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
             root: true,
           })
           commit('command/overrideCurrent', round, { root: true })
+          commit('command/forceCurrentTimetableOrder', payload.id, {
+            root: true,
+          })
           dispatch('command/getNextCompetitors', {}, { root: true })
+          // commit('command/setTimetableIdSkipped', payload.id, { root: true })
+          // commit('command/setTimetableOrderToNext')
           dispatch('command/setAllPreviousComplete', round, { root: true })
           commit('command/setCurrentNext', {}, { root: true })
         }
@@ -162,6 +177,37 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
         'heats',
         (payload: { roundId: number; newHeats: number }) => {
           commit('command/updateNumberHeatsRoundId', payload, { root: true })
+        }
+      )
+      judges.listenForWhisper(
+        'round',
+        (payload: {
+          heat: number
+          round: { heats: number }
+          current: { id: number; timetableOrder: number }
+        }) => {
+          const { id } = payload.current
+          commit('command/setTimetableIdActive', id, { root: true })
+          const isLastHeat = payload.heat === payload.round.heats
+          if (isLastHeat) {
+            commit('command/setCanSubmit', id, { root: true })
+          }
+          // const foundTimetableById = rootState.command.timetable.find((ti) => {
+          //   return ti.id == id
+          // })
+          // if (
+          //   foundTimetableById &&
+          //   foundTimetableById.timetableOrder == timetableOrder
+          // ) {
+          //   // commit('command/setTimetableOrder', timetableOrder, { root: true })
+          //   console.log('set timetable order', timetableOrder)
+          // } else {
+          //   console.log('we get new timetable then set it!')
+          // }
+          // console.log('we received', payload, rootState.command.timetable)
+          // FIXME: If timetable order matches with found Id then go for it - but if not trigger get new timetable immedaitely then do it
+          // commit('command/setTimetableOrder', val, { root: true })
+          // commit('command/updateNumberHeatsRoundId', payload, { root: true })
         }
       )
       judges.listenForWhisper(

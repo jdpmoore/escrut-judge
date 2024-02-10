@@ -61,7 +61,9 @@
             left
             :text-color="roundStatus(event).color"
             :icon="roundStatus(event).icon"
-            ><q-tooltip>{{ roundStatus(event).tooltip }}</q-tooltip>
+            ><q-tooltip v-if="roundStatus(event).tooltip">{{
+              roundStatus(event).tooltip
+            }}</q-tooltip>
           </q-avatar></q-item-section
         >
       </q-item>
@@ -106,6 +108,26 @@ export default defineComponent({
   },
   computed: {
     ...mapState('command', ['floors', 'timetable', 'userDetails']),
+    current() {
+      return this.filteredTimetable.find((t) => {
+        return t.status === 'active'
+      })
+    },
+    next() {
+      return this.filteredTimetable
+        .filter((t) => {
+          return t.status === 'new'
+        })
+        .reduce((prev, curr) => {
+          if (!prev) {
+            return curr
+          } else if (prev && curr.timetableOrder < prev.timetableOrder) {
+            return curr
+          } else {
+            return prev
+          }
+        })
+    },
     filteredTimetable(): v2.TimetableItem[] {
       return this.$store.state.command.timetable
       // getters['command/timetableByFloor'](this.selectF)
@@ -114,18 +136,19 @@ export default defineComponent({
       const filteredTimetable = [...this.filteredTimetable]
       let timetableOrder = 10000
       if (filteredTimetable.length > 0) {
+        const toReturn: (v2.TimetableItem | HeaderItem)[] = []
         let currentSection = filteredTimetable[0].section
-        const toReturn: (v2.TimetableItem | HeaderItem)[] = [
-          {
+        if (currentSection) {
+          toReturn.push({
             header: true,
             section: currentSection,
             timetableOrder,
-          },
-        ]
+          })
+        }
         for (const timetableItem of filteredTimetable) {
           if (
             timetableItem.section &&
-            timetableItem.section.id !== currentSection.id
+            timetableItem.section.id !== currentSection?.id
           ) {
             currentSection = timetableItem.section
             timetableOrder++
@@ -185,7 +208,13 @@ export default defineComponent({
       return evt.title
     },
     scrollToNow() {
-      const toScroll = `timetable-${this.$store.state.command.current.timetableOrder}`
+      // const toScroll = `timetable-${this.$store.state.command.current.timetableOrder}`
+      let toScroll = ''
+      if (this.current) {
+        toScroll = `timetable-${this.current.timetableOrder}`
+      } else {
+        toScroll = `timetable-${this.next.timetableOrder}`
+      }
       const el = (this.$refs[toScroll] as HTMLElement[])?.[0]
       if (el) {
         const target = getScrollTarget(el)
@@ -196,6 +225,12 @@ export default defineComponent({
     },
     roundStatus(event: v2.TimetableItem): RoundStatus {
       // console.log(event.round, this.$store.state.command.compere.completedRounds, this.$store.state.command.compere.completedTimetableEvents )
+      if (event.status === 'skipped') {
+        return { tooltip: 'Skipped', icon: 'close', color: 'negative' }
+      }
+      // if (event.status === 'completed') {
+      //   return { tooltip: 'Skipped', icon: 'close', color: 'negative' }
+      // }
       if (
         event.round &&
         this.$store.state.command.compere.completedRounds.has(event.round.id)
@@ -218,22 +253,22 @@ export default defineComponent({
       return { tooltip: '', icon: '', color: 'dark' }
     },
     activeCol(event: v2.TimetableItem): string {
-      const current = this.$store.state.command.current
-      const next = this.$store.state.command.next
-      if (event.id === current.id) {
+      const current = this.current //this.$store.state.command.current
+      const next = this.next //this.$store.state.command.next
+      if (event.id === current?.id) {
         return 'bg-positive text-black'
-      } else if (event.id === next.id) {
+      } else if (event.id === next?.id) {
         return 'bg-warning text-black'
       } else if (
         event.round?.id &&
-        current.round?.id &&
-        event.round.id === current.round.id
+        current?.round?.id &&
+        event.round.id === current?.round.id
       ) {
         return 'bg-positive text-black'
       } else if (
         event.round?.id &&
-        next.round?.id &&
-        event.round.id === next.round.id
+        next?.round?.id &&
+        event.round.id === next?.round.id
       ) {
         return 'bg-warning text-black'
       }

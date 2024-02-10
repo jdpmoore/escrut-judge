@@ -3,7 +3,44 @@
     class="row justify-center items-center"
     :class="isHandwriting ? 'bg-primary' : 'bg-dark'"
   >
+    <!-- {{ timetableOrder }} {{ current }} -->
     <q-card
+      v-if="noCurrentOrIsNewOrSkippedEvent"
+      inline
+      flat
+      class="full-width full-height bg-dark q-pa-none"
+      style="user-select: none"
+    >
+      <q-card-section
+        horizontal
+        class="bg-primary text-white text-center q-pa-sm q-mb-none"
+      >
+        <div class="row full-width items-center no-wrap">
+          <div class="col">
+            <div class="text-h6 text-bold">{{ competitionTitle }}</div>
+          </div>
+        </div>
+      </q-card-section>
+      <q-separator inset />
+      <q-card-section class="bg-white q-pa-none">
+        <div class="col justify-center" style="width: 100%">
+          <div class="text-center" style="font-size: 175%">
+            <div class="row flex-center q-mb-lg q-pt-lg">Welcome to eScrut</div>
+            <div class="row flex-center q-mb-lg">
+              This page will appear between rounds and when there are no couples
+              to mark.
+            </div>
+            <div class="row flex-center q-mb-lg">
+              When the next event is announced the numbers will appear here.
+            </div>
+            <q-spinner color="primary" size="3em" :thickness="10" />
+            <div style="font-size: 125%" class="q-mt-lg">Please wait...</div>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+    <q-card
+      v-else
       v-touch-swipe.horizontal="handleSwipe"
       inline
       flat
@@ -13,6 +50,7 @@
       <q-card-section
         horizontal
         class="bg-primary text-white text-center q-pa-sm q-mb-none"
+        style="max-height: 56px"
       >
         <div class="row full-width items-center no-wrap">
           <!-- <div class="col-auto">
@@ -189,7 +227,7 @@
                   @click="restartRound"
                 /> -->
               </div>
-              <div v-else-if="isFinal" style="font-size: 125%">
+              <div v-else-if="isFinal" style="font-size: 100%">
                 Placing {{ computedNumCouples }}
                 {{ isTeam ? 'teams' : 'couples' }} in {{ dance?.name
                 }}<span v-if="isOxbridgeVarsity"
@@ -313,9 +351,13 @@
                     {{ competitor.number }}
                   </div>
                 </div>
+                <!-- && !isFinal
+                
+                                  -->
                 <div
-                  v-if="isFirstRound && !isFinal"
-                  class="text-center competitor-add bg-info text-info-inv"
+                  v-if="isFirstRound"
+                  class="text-center bg-info text-info-inv"
+                  :class="isFinal ? 'competitor-add-final' : 'competitor-add'"
                   @click="addNumber"
                 >
                   Add
@@ -364,17 +406,18 @@
                       currentRound.round.recall > 0) ||
                     (isFinal &&
                       finalPlacings?.size == computedCompetitors.length) ||
-                    computedCompetitorsSuper.length == 1
+                    (computedCompetitorsSuper.length == 1 && !isFinal)
                       ? 'bg-positive text-positive-inv'
                       : 'bg-negative text-negative-inv'
                   "
                   icon="done"
                   :label="
-                    computedCompetitorsSuper.length == 1
+                    computedCompetitorsSuper.length == 1 && !isFinal
                       ? 'Skip event'
                       : 'Submit marks'
                   "
                   style="font-size: 150%"
+                  :disabled="!canSubmit"
                   @click="submitMarks"
                 />
                 <q-btn
@@ -526,6 +569,8 @@ export default {
   },
   data() {
     return {
+      triggerPlacingUpdate: false,
+      showPlacings: true,
       toClear: false,
       handwritingTrigger: false,
       allAnnounced: false,
@@ -609,6 +654,19 @@ export default {
     }
   },
   computed: {
+    competitionTitle() {
+      return this.$store.state.command.competition.title
+    },
+    canSubmit() {
+      if (this.current) {
+        const isCompleted = this.current.status === 'completed'
+        const inCanSubmit = this.$store.state.command.canSubmit?.has(
+          this.current.id
+        )
+        return isCompleted || inCanSubmit
+      }
+      return false
+    },
     placedObject() {
       const keys = [...this.finalPlacings.keys()]
       const toReturn = {}
@@ -643,7 +701,11 @@ export default {
       return theReturn
     },
     placings() {
-      return new Array(this.computedCompetitors.length).fill(1).map((o, i) => {
+      const fir = this.triggerPlacingUpdate ? 1 : 0
+      let size = fir
+      size = size + this.competitors[this.heat - 1].length
+      size = size - fir
+      const toReturn = new Array(size).fill(1).map((o, i) => {
         const value = i + 1
         return {
           label: this.$common.ordinal_suffix_of(value),
@@ -652,6 +714,8 @@ export default {
           number: '',
         }
       })
+      console.log('we are returning', toReturn)
+      return toReturn
     },
     computedCompetitorsSuper() {
       if (this.isFinal) {
@@ -671,6 +735,9 @@ export default {
       })
     },
     computedFlexBoxHeight() {
+      if (this.isFinal) {
+        return 560
+      }
       return this.computedNumberColumns < 5 ? 540 : 642
     },
     computedNumberColumns() {
@@ -736,6 +803,14 @@ export default {
     },
     timetableId() {
       return this.$store.state.command.current.id
+    },
+    noCurrentEvent() {
+      return Object.keys(this.currentEvent).length === 0
+    },
+    noCurrentOrIsNewOrSkippedEvent() {
+      return (
+        this.noCurrentEvent || ['new', 'skipped'].includes(this.current?.status)
+      )
     },
     currentEvent() {
       if (this.currentRound.round?.id) {
@@ -937,13 +1012,31 @@ export default {
     isFirstRound() {
       return this.currentRound?.round?.isFirstRound
     },
+    theRoundText() {
+      const roundId = this.currentRound?.round?.round
+      const isResults = this.currentRound?.result?.id
+      if (roundId === 'F') {
+        return ', Final'
+      } else if (roundId === 'SF') {
+        return ', Semi-final'
+      } else if (roundId === 'PO') {
+        return ', Play-off'
+      } else if (isResults) {
+        return ', Results'
+      } else if (roundId) {
+        return `, Round ${roundId}`
+      } else {
+        return ''
+      }
+    },
     roundText() {
       let toReturn = ''
       if (this.endOfDays) {
         return 'Competition completed!'
       }
       if (this.currentRound) {
-        toReturn = `${this.currentRound.title}${this.isFirstRoundSFF}${this.isQualifierText}`
+        // toReturn = `${this.currentRound.title}${this.isFirstRoundSFF}${this.isQualifierText}`
+        toReturn = `${this.currentRound.title}${this.theRoundText}${this.isFirstRoundSFF}${this.isQualifierText}`
         // if (
         //   this.currentRound.round?.dances &&
         //   (this.currentRound.round.dances.length > 1 || this.isHandwriting)
@@ -1041,6 +1134,11 @@ export default {
     timetable() {
       return this.$store.getters['command/timetableOrderByFloorId']()
     },
+    timetableCurrent() {
+      return this.timetable.find((t) => {
+        return t.status === 'active'
+      })
+    },
     timetableOrders() {
       return this.timetable.map((o) => {
         return o.timetableOrder
@@ -1048,6 +1146,9 @@ export default {
     },
   },
   watch: {
+    placings() {
+      //
+    },
     echoStatus() {
       if (newValue === 'round' && this.currentRound.id === this.echoRound.id) {
         //
@@ -1104,6 +1205,7 @@ export default {
     } else {
       this.getCompetitors()
     }
+    this.checkNoCurrentEvent()
     // void this.$store.dispatch('command/getFloors')
     // void this.$store.dispatch('command/getJudges')
     // void this.$store.dispatch('command/getCompetitors')
@@ -1111,6 +1213,18 @@ export default {
     // void this.$store.dispatch('command/getTimetable')
   },
   methods: {
+    checkNoCurrentEvent() {
+      if (this.noCurrentEvent) {
+        if (this.timetableCurrent) {
+          // console.log(
+          //   'checking for current event',
+          //   this.timetableOrder,
+          //   this.timetableCurrent
+          // )
+          this.timetableOrder = this.timetableCurrent.timetableOrder
+        }
+      }
+    },
     unsetPlacing(placing) {
       const number = placing.number
       const storedNumbers = [...this.finalPlacings.values()]
@@ -1678,6 +1792,7 @@ export default {
           },
         })
         .onOk((newNumber) => {
+          // this.showPlacings = false
           console.log(newNumber)
           console.log(Number(newNumber))
           const newNumbers = [Number(newNumber)]
@@ -1687,7 +1802,9 @@ export default {
           }
           console.log(this.additionalNumbers)
           newNumbers.map((num) => {
-            this.marked.add(num)
+            if (!this.isFinal) {
+              this.marked.add(num)
+            }
             if (!this.computedCompetitorsNumbers.includes(num)) {
               this.whisperMarks()
               const competitor = this.$store.state.command.competitors.find(
@@ -1722,6 +1839,9 @@ export default {
               }
             }
           })
+          // setTimeout(() => {
+          //   this.showPlacings = true
+          // }, 1000)
         })
     },
     handleSwipe(info) {

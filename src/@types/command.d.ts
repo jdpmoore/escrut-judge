@@ -150,6 +150,7 @@ export namespace v1 {
     roundId: number
     startTime: string
     timetableOrder: number
+    status: string
   }
 }
 
@@ -319,6 +320,7 @@ export namespace v2 {
   }
 
   export interface TimetableItem {
+    status: string
     id: number
     title: string
     adjudicatorLetters: string

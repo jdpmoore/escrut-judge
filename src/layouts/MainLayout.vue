@@ -667,7 +667,7 @@ export default defineComponent({
       method: 'updateTimetable',
     },
     {
-      time: 15000,
+      time: 20000,
       method: 'shareStatus',
     },
   ],

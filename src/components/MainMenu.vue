@@ -86,12 +86,12 @@
       </q-item-section> -->
       <q-item-section>
         <!-- <q-item-label class="text-white">Data dump</q-item-label> -->
-        <q-toggle
+        <!-- <q-toggle
           v-model="padMode"
           :label="padModeLabel"
           color="positive"
           keep-color
-        ></q-toggle>
+        ></q-toggle> -->
       </q-item-section>
     </q-item>
     <q-item

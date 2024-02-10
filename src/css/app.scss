@@ -87,15 +87,15 @@
   cursor: pointer;
 }
 .competitor-number-final {
-  height: 62px;
-  line-height: 62px;
+  height: 60px;
+  line-height: 60px;
   text-align: center;
-  width: 20vw;
+  width: 23vw;
   border: 1px solid black;
   max-width: 90vw;
   background: grey;
   color: white;
-  margin: 9px;
+  margin: 5px;
   cursor: pointer;
 }
 
@@ -109,6 +109,19 @@
   color: white;
   font-size: 225%;
   margin: 9px;
+  cursor: pointer;
+}
+
+.competitor-add-final {
+  height: 60px;
+  line-height: 60px;
+  width: 23vw;
+  border: 1px solid black;
+  max-width: 90vw;
+  // background: red;
+  color: white;
+  font-size: 225%;
+  margin: 5px;
   cursor: pointer;
 }
 
