@@ -2,22 +2,39 @@
   <q-layout view="hHh lpr fFf">
     <q-header elevated>
       <q-toolbar class="bg-dark ivdalines q-px-xs">
-        <q-btn
-          flat
-          dense
-          :disable="$store.state.command.timetable.length === 0"
-          round
-          icon="schedule"
-          aria-label="Timetable"
-          @click="showTimetable = !showTimetable"
-        />
-
-        <q-toolbar-title>
-          {{ toolbarTitle }}
-          <q-badge v-if="isChair" rounded color="positive"></q-badge>
+        <tippy
+          ref="timetable-btn"
+          content="Tap here for your timetable"
+          trigger="manual"
+          allow-h-t-m-l
+          interactive
+          :hide-on-click="false"
+        >
+          <!-- v-tippy="'Timetable'" -->
+          <!-- v-tippy="{ trigger: 'custom', content: 'Timetable' }" -->
+          <q-btn
+            flat
+            dense
+            :disable="$store.state.command.timetable.length === 0"
+            round
+            icon="schedule"
+            aria-label="Timetable"
+            @click="showTheTimetable"
+          />
+        </tippy>
+        <q-toolbar-title class="row justify-between items-center">
+          <div>
+            {{ toolbarTitle }}
+            <q-badge v-if="isChair" rounded color="positive"></q-badge>
+          </div>
+          <div caption class="text-info text-caption">{{ floorName }}</div>
         </q-toolbar-title>
+        <!-- <q-avatar size="24px" :color="currentFloorColor" text-color="black">{{
+          currentFloorLetter
+        }}</q-avatar> -->
         <q-avatar size="40px" class="q-ma-none">
           <!-- <img src="assets/ivda/ivda_logo_only.svg" /> -->
+
           <q-icon v-if="isConnected" color="positive" name="wifi" size="sm" />
           <q-icon
             v-if="!isConnected"
@@ -81,7 +98,8 @@
       <Timetable
         v-model="showTimetable"
         @menu="showMenu = true"
-        @close="showTimetable = false"
+        @demo="startDemo"
+        @close="closeTimetable"
       />
     </q-drawer>
     <q-drawer
@@ -220,6 +238,8 @@ import { crono } from 'vue-crono'
 
 import { defineComponent } from 'vue'
 import { axiosError } from 'boot/axios'
+// import { useTippy } from 'vue-tippy'
+
 export default defineComponent({
   name: 'MainLayout',
   components: {
@@ -230,6 +250,8 @@ export default defineComponent({
   mixins: [crono],
   data() {
     return {
+      showTippy: false,
+      demoStep: 1,
       versionCheckDialogShow: false,
       timeoutVisible: false,
       timeRemaining: 0,
@@ -267,31 +289,36 @@ export default defineComponent({
     }
   },
   computed: {
+    timetableButton() {
+      return this.$refs['timetable-btn']
+    },
+    isDemo() {
+      return this.$store.state.command.demo
+    },
     timetableOrder() {
       return this.$store.state.command.compere.timetableOrder
     },
     currentRound() {
-      if (this.isCurrentEvent) {
-        return this.$store.state.command.current
-      } else {
-        return this.$store.getters['command/timetableEntryByTimetableOrder'](
-          this.timetableOrder
-        )
-      }
+      return this.$store.state.command.current
+    },
+    currentFloorLetter() {
+      return this.floor.name.slice(0, 1)
+    },
+    currentFloorColor() {
+      return this.currentFloorLetter == 'E' ? 'info' : 'warning'
+    },
+    floor() {
+      return this.currentRound?.floor
+      //this.$store.state.command.floor
+    },
+    floorName() {
+      return this.floor?.name ?? ''
     },
     danceLetterIndex() {
-      if (this.isCurrentEvent) {
-        return this.$store.state.command.compere.danceLetterIndex
-      } else {
-        return 0
-      }
+      return this.$store.state.command.compere.danceLetterIndex
     },
     dance() {
-      if (this.isCurrentEvent) {
-        return this.$store.getters['command/dance']
-      } else {
-        return this.currentRound.danceOrder ?? this.currentRound.dances
-      }
+      return this.$store.getters['command/dance']
     },
     isQualifierText() {
       if (
@@ -430,7 +457,6 @@ export default defineComponent({
     } else {
       JWT = this.$store.state.command.auth.authToken
     }
-    console.log('JWT', JWT)
     if (this.$store.state.command.auth && JWT !== '') {
       const diffMin =
         (Date.now() - this.$store.state.command.auth.timeStamp) / 60000
@@ -454,6 +480,56 @@ export default defineComponent({
     this.$store.commit('command/saveState')
   },
   methods: {
+    closeTimetable() {
+      console.log('we closed the timetable')
+      this.showTimetable = false
+      if (this.isDemo) {
+        this.$router.push('/demo')
+      }
+    },
+    showTheTimetable() {
+      this.showTimetable = !this.showTimetable
+      if (this.isDemo) {
+        // console.log('hide timetable button', this.timetableButton)
+        this.timetableButton.hide()
+      }
+    },
+    startDemo() {
+      this.showTimetable = false
+      if (!this.isDemo) {
+        this.$q
+          .dialog({
+            title: 'Start demo',
+            message: 'Are you ready to start the demo?',
+            cancel: true,
+            dark: true,
+            class: 'bg-primary text-primary-inv',
+          })
+          .onOk(() => {
+            this.timetableButton.show()
+            // useTippy('#timetable-btn', { content: 'prog Timetable' })
+            // console.log('with tippy', btn)
+            this.$store.commit('command/setDemo', true)
+            this.demoStep = 1
+          })
+      } else {
+        this.$q
+          .dialog({
+            title: 'End demo',
+            message: 'Do you wish to end the demo?',
+            cancel: true,
+            dark: true,
+            class: 'bg-primary text-primary-inv',
+          })
+          .onOk(() => {
+            // useTippy('#timetable-btn', { content: 'prog Timetable' })
+            // console.log('with tippy', btn)
+            this.$store.commit('command/setDemo', false)
+            this.$router.push('/judge')
+            this.demoStep = 1
+          })
+      }
+    },
     versionCheck() {
       this.$axios
         .post(`${process.env.VERSION_CHECK}`)

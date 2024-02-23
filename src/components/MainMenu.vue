@@ -271,17 +271,17 @@ interface MenuTypes {
   // } | null
   avatarPosition: string
 }
-interface DumpType {
-  roundId: number
-  compAdjId: number
-  danceId: number
-  type: string
-  marks?: {
-    marked: number[]
-    considered: number[]
-  }
-  fileData: string
-}
+// interface DumpType {
+//   roundId: number
+//   compAdjId: number
+//   danceId: number
+//   type: string
+//   marks?: {
+//     marked: number[]
+//     considered: number[]
+//   }
+//   fileData: string
+// }
 export default defineComponent({
   name: 'MainMenu',
   props: {},

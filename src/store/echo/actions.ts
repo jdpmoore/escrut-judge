@@ -6,14 +6,15 @@ import Pusher from 'pusher-js'
 import Echo from 'laravel-echo'
 import { axiosInstance } from 'boot/axios'
 import { uid } from 'quasar'
+// import _ from 'lodash'
 import { v2 } from 'src/@types/command'
 
 const actions: ActionTree<EchoStateInterface, StateInterface> = {
   connectEcho({ rootState, commit, dispatch }) {
     return new Promise<void>((resolve) => {
+      commit('setConnected', false)
       if (window.echo) {
         commit('closeEcho')
-        commit('setConnected', false)
       }
       const authToken = rootState.command.auth.authToken
         ? `Bearer ${rootState.command.auth.authToken}`
@@ -77,8 +78,12 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
         console.log(`connection down (disconnected) at ${time}: `)
         commit('setConnected', false)
       })
+      echo.connector.pusher.connection.bind('state_change', function (states) {
+        // states = {previous: 'oldState', current: 'newState'}
+        console.log('Channels current state is ' + states.current, states)
+      })
       commit('saveEcho', echo)
-      dispatch('joinDisplay', rootState.command.floor.id).then(() => {
+      dispatch('joinDisplay').then(() => {
         resolve()
       })
       // commit('openEcho', {
@@ -146,6 +151,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
         // id is the timetable id
         commit('command/overrideCurrent', payload, { root: true })
         commit('command/forceCurrentTimetableOrder', payload.id, { root: true })
+        commit('command/setDanceLetterIndex', 0, { root: true })
         dispatch('command/getCompetitorsByRoundId', payload.round.id, {
           root: true,
         })
@@ -481,10 +487,16 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
     }
   },
   shareStatus({ rootState, commit, dispatch }) {
+    console.log(rootState.command.current)
+    const round = {
+      title: rootState.command.current.title,
+      round: rootState.command.current.round?.round,
+      floor: rootState.command.current.round?.floor.id,
+    }
     const toWhisper = {
       status: true,
       current: {
-        round: rootState.command.current.title,
+        round,
         heat: rootState.command.currentHeat,
         dance: rootState.command.currentDance,
         // numCompetitors:
@@ -492,25 +504,33 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       judgeUserId: rootState.command.userDetails.id,
     }
     console.log('status update', toWhisper)
-    if (!window.echo) {
+    const state = window.echo?.connector.pusher.connection.state
+    const isConnected = state === 'connected'
+    if (!window.echo || !isConnected) {
       commit('setConnected', false)
       dispatch('connectEcho').then(() => {
         window.echo
           .join(`es-comp.${rootState.command.competition.id}.judges`)
           .whisper('judge', toWhisper)
-        commit('setConnected', true)
+        // .error((err) => {
+        //   console.log('we have an error on whisper', err)
+        // })
+        const state = window.echo?.connector.pusher.connection.state
+        commit('setConnected', state === 'connected')
       })
     } else {
       window.echo
         .join(`es-comp.${rootState.command.competition.id}.judges`)
         .whisper('judge', toWhisper)
-      commit('setConnected', true)
+      commit('setConnected', isConnected)
     }
   },
   judgesMarks({ rootState, commit, dispatch }, scrut) {
     // es-comp.{compId}.judges
     console.log('now we whisper', scrut, window.echo)
-    if (!window.echo) {
+    const state = window.echo?.connector.pusher.connection.state
+    const isConnected = state === 'connected'
+    if (!window.echo || !isConnected) {
       commit('setConnected', false)
       dispatch('connectEcho').then(() => {
         window.echo
@@ -524,7 +544,8 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
             // commit('setScrutineers', members)
           })
           .whisper('judge', scrut)
-        commit('setConnected', true)
+        const state = window.echo?.connector.pusher.connection.state
+        commit('setConnected', state === 'connected')
       })
     } else {
       window.echo
@@ -538,12 +559,13 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           commit('setScrutineers', members)
         })
         .whisper('judge', scrut)
-      commit('setConnected', true)
+      commit('setConnected', isConnected)
     }
   },
   completedRound({ rootState, commit, dispatch }, completed) {
-    // es-comp.{compId}.judges
-    if (!window.echo) {
+    const state = window.echo?.connector.pusher.connection.state
+    const isConnected = state === 'connected'
+    if (!window.echo || !isConnected) {
       commit('setConnected', false)
       dispatch('connectEcho').then(() => {
         window.echo
@@ -557,7 +579,8 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
             commit('setJudges', members)
           })
           .whisper('completedRoundZZZ', completed)
-        commit('setConnected', true)
+        const state = window.echo?.connector.pusher.connection.state
+        commit('setConnected', state === 'connected')
       })
     } else {
       window.echo
@@ -571,7 +594,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           commit('setJudges', members)
         })
         .whisper('completedRoundZZZ', completed)
-      commit('setConnected', true)
+      commit('setConnected', isConnected)
     }
   },
 }

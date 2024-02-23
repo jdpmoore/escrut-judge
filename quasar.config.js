@@ -56,10 +56,11 @@ module.exports = configure(function (ctx) {
       'store',
       'router',
       'flare',
+      'tippy',
     ],
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-css
-    css: ['app.scss', 'prism.css', 'prism-coy.css'],
+    css: ['app.scss', 'prism.css', 'prism-coy.css', 'tippy.css'],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [

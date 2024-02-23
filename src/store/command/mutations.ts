@@ -12,6 +12,9 @@ import _ from 'lodash'
 import { LocalStorage, Cookies, extend } from 'quasar'
 
 const mutation: MutationTree<CommandStateInterface> = {
+  setDemo(state, val: boolean) {
+    state.demo = val
+  },
   setCurrentHeat(state: CommandStateInterface, val: number) {
     state.currentHeat = val
   },
@@ -182,17 +185,55 @@ const mutation: MutationTree<CommandStateInterface> = {
   storeTimetable(state: CommandStateInterface, val: v2.TimetableItem[]) {
     state.timetable = val
     for (const floor of state.floors) {
-      const timetabledEventsByFloor = _.sortBy(
-        state.timetable.filter((timetableItem) => {
-          // if (state.floor) {
-          return timetableItem.floorId === state.floor.id
-          // } else {
-          //   return false
-          // }
-        }),
-        ['timetableOrder']
-      )
+      const timetabledEventsByFloor = _.sortBy(state.timetable, [
+        'timetableOrder',
+      ])
       state.timetableOrder.set(floor.id, timetabledEventsByFloor)
+    }
+  },
+  checkCurrent(state: CommandStateInterface) {
+    const active = state.timetable.find((t) => {
+      return t.status === 'active'
+    })
+    if (active) {
+      const currentId = state.current.id
+      const activeTimetableOrder = active.timetableOrder
+      const currentTimetableOrder = state.current.timetableOrder
+      const currentNoRound = !Boolean(state.current.round)
+      if (
+        active.id != currentId &&
+        currentNoRound &&
+        activeTimetableOrder > currentTimetableOrder
+      ) {
+        state.compere.completedTimetableEvents.add(currentId)
+        const floorEvents = _.sortBy(
+          state.timetable.filter((timetableEvent) => {
+            if (timetableEvent.status === 'skipped') {
+              return false
+            }
+            if (timetableEvent.status === 'completed') {
+              return false
+            }
+            return !state.compere.completedTimetableEvents.has(
+              timetableEvent.id
+            )
+          }),
+          ['timetableOrder']
+        )
+        if (floorEvents && floorEvents.length > 0) {
+          state.current = floorEvents[0]
+          state.floor = floorEvents[0].round?.floor ?? floorEvents[0].floor
+          if (floorEvents.length > 1) {
+            state.next = floorEvents[1]
+          } else {
+            state.next = blankRound
+          }
+        } else {
+          const allFloorEvents = _.sortBy(state.timetable, ['timetableOrder'])
+          state.current = allFloorEvents[allFloorEvents.length - 1]
+          state.next = blankRound
+        }
+      }
     }
   },
   overrideCurrent(state: CommandStateInterface, newCurrent: v2.TimetableItem) {
@@ -206,7 +247,6 @@ const mutation: MutationTree<CommandStateInterface> = {
     state.next = newNext
   },
   setCurrentNext(state: CommandStateInterface) {
-    console.log('set current and next', state.floor.id, state.timetable)
     const floorEvents = _.sortBy(
       state.timetable.filter((timetableEvent) => {
         // if (!timetableEvent.round) {
@@ -217,7 +257,6 @@ const mutation: MutationTree<CommandStateInterface> = {
         // const floorId =
         //   timetableEvent.round?.floor?.id ?? timetableEvent.floor?.id
         // if (!floorId) {
-        console.log(timetableEvent.status)
         if (timetableEvent.status === 'skipped') {
           return false
         }
@@ -239,12 +278,9 @@ const mutation: MutationTree<CommandStateInterface> = {
       }),
       ['timetableOrder']
     )
-    console.log('Set current and next', state.floor.id, floorEvents)
     if (floorEvents && floorEvents.length > 0) {
       state.current = floorEvents[0]
-      console.log('current set')
       state.floor = floorEvents[0].round?.floor ?? floorEvents[0].floor
-      console.log('floor is', state.floor)
       if (floorEvents.length > 1) {
         state.next = floorEvents[1]
       } else {

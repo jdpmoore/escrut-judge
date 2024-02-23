@@ -5,13 +5,40 @@
   >
     <q-toolbar-title class="col-10 q-mr-md">Timetable</q-toolbar-title>
     <div class="col-auto">
-      <q-btn icon="close" round dense flat @click="$emit('close')" />
+      <tippy
+        ref="timetable-close-btn"
+        content="Tap here to close"
+        trigger="manual"
+        :placement="'left-end'"
+        allow-h-t-m-l
+        interactive
+        :hide-on-click="false"
+        :popper-options="popperOptions"
+      >
+        <q-btn
+          icon="close"
+          color="accent"
+          round
+          dense
+          unelevated
+          @click="close"
+        />
+      </tippy>
     </div>
   </q-toolbar>
   <div style="height: 56px"></div>
   <q-list no-border link inset-delimiter>
-    <!--        :sublabel="event.name" color="red"-->
-    <q-item class="bg-primary text-white text-center text-h6">
+    <q-item
+      class="bg-primary text-white text-center text-h6 row justify-between"
+    >
+      <q-btn
+        dense
+        flat
+        color="white"
+        icon="checklist"
+        label="demo"
+        @click="$emit('demo')"
+      />
       <q-btn
         dense
         flat
@@ -36,26 +63,23 @@
       </q-item>
       <q-item
         v-else
-        multiline
         :class="activeCol(event)"
+        multiline
         style="cursor: pointer"
       >
         <q-item-section avatar>
-          <!-- event.timetableOrder -->
-          {{ formatTime(event.startTime) }}</q-item-section
-        >
+          {{ formatTime(event.startTime) }}
+        </q-item-section>
         <q-item-section>
           <q-item-label>
             {{ eventText(event) }}
-            <!-- {{ event.section.name }} - {{ event.title }} -->
           </q-item-label>
-          <!-- {{ event.dances }}{{ event.round?.isQualifier ? ' (Qualifier)' : '' }} -->
-          <!-- <q-item-label caption :class="activeCol(event)">{{
-            roundIdtoRound(event.roundId)
-          }}</q-item-label> -->
+          <q-item-label caption :class="captionCol(event)">{{
+            event.round.floor.name
+          }}</q-item-label>
         </q-item-section>
 
-        <q-item-section avatar
+        <q-item-section v-if="roundStatus(event)" avatar
           ><q-avatar
             v-if="roundStatus(event).icon != ''"
             left
@@ -64,8 +88,8 @@
             ><q-tooltip v-if="roundStatus(event).tooltip">{{
               roundStatus(event).tooltip
             }}</q-tooltip>
-          </q-avatar></q-item-section
-        >
+          </q-avatar>
+        </q-item-section>
       </q-item>
     </div>
   </q-list>
@@ -76,9 +100,11 @@ import { v1, v2 } from 'src/@types/command'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 import { scroll } from 'quasar'
+// import { timeStamp } from 'console'
 const { getScrollTarget, setVerticalScrollPosition } = scroll
 
 interface TimetableData {
+  popperOptions: Record<string, unknown>
   selectF: v1.Floor | null
   roundIdtoRound: (roundId: number) => string
 }
@@ -97,9 +123,20 @@ export default defineComponent({
   props: {
     modelValue: { type: Boolean, default: false },
   },
-  emits: ['menu', 'close'],
+  emits: ['menu', 'close', 'demo'],
   data(): TimetableData {
     return {
+      popperOptions: {
+        strategy: 'fixed',
+        modifiers: [
+          {
+            name: 'flip',
+            options: {
+              fallbackPlacements: [],
+            },
+          },
+        ],
+      },
       selectF: this.$store.state.command.floor,
       roundIdtoRound: this.$store.getters['command/roundIdtoRound'],
       // ? this.$store.state.command.floor
@@ -108,17 +145,27 @@ export default defineComponent({
   },
   computed: {
     ...mapState('command', ['floors', 'timetable', 'userDetails']),
+    isDemo() {
+      return this.$store.state.command.demo
+    },
+    timetableCloseButton() {
+      return this.$refs['timetable-close-btn']
+    },
     current() {
-      return this.filteredTimetable.find((t) => {
+      const toReturn = this.filteredTimetable.find((t) => {
         return t.status === 'active'
       })
+      if (!toReturn && !this.next.round) {
+        return this.next
+      }
+      return toReturn
     },
-    next() {
-      return this.filteredTimetable
-        .filter((t) => {
-          return t.status === 'new'
-        })
-        .reduce((prev, curr) => {
+    nextButOne() {
+      const newItems = this.filteredTimetable.filter((t) => {
+        return t.status === 'new' && t.id != this.next.id
+      })
+      if (newItems.length > 1) {
+        const toReturn = newItems.reduce((prev, curr) => {
           if (!prev) {
             return curr
           } else if (prev && curr.timetableOrder < prev.timetableOrder) {
@@ -127,6 +174,32 @@ export default defineComponent({
             return prev
           }
         })
+        return toReturn
+      } else if (newItems.length === 1) {
+        return newItems[0]
+      }
+      return null
+    },
+    next() {
+      const newItems = this.filteredTimetable.filter((t) => {
+        return t.status === 'new'
+      })
+      console.log(newItems)
+      if (newItems.length > 1) {
+        const toReturn = newItems.reduce((prev, curr) => {
+          if (!prev) {
+            return curr
+          } else if (prev && curr.timetableOrder < prev.timetableOrder) {
+            return curr
+          } else {
+            return prev
+          }
+        })
+        return toReturn
+      } else if (newItems.length === 1) {
+        return newItems[0]
+      }
+      return null
     },
     filteredTimetable(): v2.TimetableItem[] {
       return this.$store.state.command.timetable
@@ -179,10 +252,51 @@ export default defineComponent({
     modelValue(newVal) {
       if (newVal) {
         this.scrollToNow()
+        this.demoCheck()
+      } else {
+        if (this.isDemo && this.timetableCloseButton) {
+          this.timetableCloseButton.hide()
+        }
       }
     },
   },
+  mounted() {
+    this.demoCheck()
+  },
   methods: {
+    demoCheck() {
+      if (this.isDemo && this.modelValue && this.timetableCloseButton) {
+        this.$q
+          .dialog({
+            dark: true,
+            title: 'Timetable',
+            class: 'bg-primary text-white',
+            message:
+              'This is your timetable for the day, you can scroll up and down to see events, and tap on them to get more details. The current event will be highlighted in green, and the next event in yellow.',
+            html: true,
+            cancel: false, //{ label: 'Cancel', color: 'positive', flat: true },
+            ok: true, //{ label: 'Options', color: 'warning', flat: true },
+            focus: 'cancel',
+          })
+          .onDismiss(() => {
+            setTimeout(() => {
+              this.timetableCloseButton.show()
+            }, 2000)
+          })
+      }
+      if (!this.isDemo && this.modelValue) {
+        this.timetableCloseButton.hide()
+      }
+    },
+    close() {
+      if (this.isDemo && this.timetableCloseButton) {
+        this.timetableCloseButton.hide()
+      }
+      this.$emit('close')
+    },
+    startDemo() {
+      //
+    },
     theRoundText(evt) {
       const roundId = evt.round?.round
       const isResults = evt.result?.id
@@ -212,15 +326,17 @@ export default defineComponent({
       let toScroll = ''
       if (this.current) {
         toScroll = `timetable-${this.current.timetableOrder}`
-      } else {
+      } else if (this.next) {
         toScroll = `timetable-${this.next.timetableOrder}`
       }
-      const el = (this.$refs[toScroll] as HTMLElement[])?.[0]
-      if (el) {
-        const target = getScrollTarget(el)
-        const offset = el.offsetTop - 56
-        const duration = 1
-        setVerticalScrollPosition(target, offset, duration)
+      if (toScroll) {
+        const el = (this.$refs[toScroll] as HTMLElement[])?.[0]
+        if (el) {
+          const target = getScrollTarget(el)
+          const offset = el.offsetTop - 56
+          const duration = 1
+          setVerticalScrollPosition(target, offset, duration)
+        }
       }
     },
     roundStatus(event: v2.TimetableItem): RoundStatus {
@@ -243,6 +359,9 @@ export default defineComponent({
       ) {
         return { tooltip: 'Completed', icon: 'done', color: 'positive' }
       }
+      if (event.status === 'completed') {
+        return { tooltip: 'Completed', icon: 'done', color: 'positive' }
+      }
       // if (
       //   event.round &&
       //   this.$store.state.command.scrutineering.competitors[event.round.id]
@@ -250,7 +369,7 @@ export default defineComponent({
       // ) {
       //   return { tooltip: 'Competitors ready', icon: 'people', color: 'white' }
       // }
-      return { tooltip: '', icon: '', color: 'dark' }
+      return { tooltip: '', icon: '', color: 'white' }
     },
     activeCol(event: v2.TimetableItem): string {
       const current = this.current //this.$store.state.command.current
@@ -271,8 +390,61 @@ export default defineComponent({
         event.round.id === next?.round.id
       ) {
         return 'bg-warning text-black'
+      } else if (current?.id === next?.id && event.id === this.nextButOne?.id) {
+        return 'bg-warning text-black'
       }
       return 'bg-dark text-white'
+      // alert(inColindex)
+      // for (let j = 0; j < this.completedEvents.length; j++) {
+      //   if (this.completedEvents[j] === inColindex.roundId) {
+      //    return 'backgroundColor: lightgrey'
+      //  }
+      // }
+      // for (let i = 0; i < this.activeEvents.length; i++) {
+      //  if (inColindex.roundId === this.activeEvents[i]) {
+      //    return 'backgroundColor: lightgreen'
+      //  }
+      // }
+      // for (let i = 0; i < this.nextEvents.length; i++) {
+      //  if (inColindex.roundId === this.nextEvents[i]) {
+      //    this.$q.localStorage.set('upNext', inColindex)
+      //    return 'backgroundColor: lightblue'
+      //  }
+      // }
+      // return 'backgroundColor: white'
+      // if (inColindex === activeEvent) {
+      //  return 'backgroundColor: Green'
+      // } else if (inColindex === activeEvent + 1) {
+      //  return 'backgroundColor: Orange'
+      // } else if (inColindex < activeEvent) {
+      //  return 'backgroundColor: Grey'
+      // } else {
+      //  return 'backgroundColor: White'
+      // }
+    },
+    captionCol(event: v2.TimetableItem): string {
+      const current = this.current //this.$store.state.command.current
+      const next = this.next //this.$store.state.command.next
+      if (event.id === current?.id) {
+        return 'text-dark'
+      } else if (event.id === next?.id) {
+        return 'text-dark'
+      } else if (
+        event.round?.id &&
+        current?.round?.id &&
+        event.round.id === current?.round.id
+      ) {
+        return 'text-dark'
+      } else if (
+        event.round?.id &&
+        next?.round?.id &&
+        event.round.id === next?.round.id
+      ) {
+        return 'text-dark'
+      } else if (current?.id === next?.id && event.id === this.nextButOne?.id) {
+        return 'text-dark'
+      }
+      return 'text-info'
       // alert(inColindex)
       // for (let j = 0; j < this.completedEvents.length; j++) {
       //   if (this.completedEvents[j] === inColindex.roundId) {
@@ -520,11 +692,12 @@ export default defineComponent({
       const title = round.title
       let message = ''
       if (round.round) {
+        const approx = Math.round(round.round.recall / round.round.heats)
         message = `${round.round.floor.name} at ${this.formatTime(
           round.startTime
         )}<br>${round.round.heats} heat(s), recalling ${
           round.round.recall
-        }<br>Adjudicators: ${round.round.adjudicators
+        } (recall approx. ${approx} per heat)<br>Adjudicators: ${round.round.adjudicators
           .map((o) => {
             return o.letter
           })

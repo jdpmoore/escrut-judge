@@ -104,6 +104,7 @@ const mutation: MutationTree<EchoStateInterface> = {
   clearNumbers(state) {
     state.numbers = new Set()
   },
+
   openEcho(state, dataIn: { authToken: string; floorId: number }) {
     const { authToken, floorId } = dataIn
     console.log('now we open echo', authToken, floorId)

@@ -37,6 +37,7 @@ interface Scrutineering {
 // }
 
 export interface CommandStateInterface {
+  demo: boolean
   canSubmit: Set<number>
   handwriting: boolean
   currentHeat: number
@@ -146,6 +147,7 @@ export function initialState(): CommandStateInterface {
     domain = 'localhost'
   }
   const defaultState: CommandStateInterface = {
+    demo: true,
     canSubmit: new Set(),
     handwriting: false,
     currentHeat: 1,

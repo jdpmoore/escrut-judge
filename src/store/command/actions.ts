@@ -369,6 +369,7 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
               }
             })
             context.commit('storeTimetable', data)
+            context.commit('checkCurrent')
             context.commit('saveState')
             resolve()
           })

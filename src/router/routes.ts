@@ -16,6 +16,14 @@ const routes: RouteRecordRaw[] = [
           // title: 'Ju',
         },
       },
+      {
+        path: '/demo',
+        component: () => import('pages/DemoPage.vue'),
+        meta: {
+          requiresAuth: true,
+          // title: 'Ju',
+        },
+      },
       { path: '/whiteboard', component: () => import('pages/whiteboard.vue') },
     ],
   },
