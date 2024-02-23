@@ -195,7 +195,8 @@ export default defineComponent({
   },
   created() {
     // flare.test()
-    if (process.env.DEV && process.env.credentials) {
+    // process.env.DEV &&
+    if (process.env.credentials) {
       const cred = process.env.credentials as unknown as {
         email: string
         password: string
