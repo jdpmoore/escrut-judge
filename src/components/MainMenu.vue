@@ -95,6 +95,20 @@
       </q-item-section>
     </q-item>
     <q-item
+      v-ripple
+      label="data"
+      clickable
+      class="bg-dark text-white"
+      to="/backgrounds"
+    >
+      <q-item-section avatar>
+        <q-icon name="folder" class="text-warning" />
+      </q-item-section>
+      <q-item-section>
+        <q-item-label class="text-white">Backgrounds</q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-item
       v-if="isLoggedIn"
       v-ripple
       label="data"
@@ -110,15 +124,13 @@
       </q-item-section>
     </q-item>
     <q-item
-      v-if="!isLoggedIn"
       v-ripple
-      label="Test"
       clickable
       class="bg-dark text-white"
       @click="clearLocalStorage"
     >
       <q-item-section avatar>
-        <q-icon name="settings" class="text-warning" />
+        <q-icon name="settings" class="text-negative" />
       </q-item-section>
       <q-item-section>
         <q-item-label class="text-white">Clear local storage</q-item-label>

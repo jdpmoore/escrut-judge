@@ -24,6 +24,10 @@ const routes: RouteRecordRaw[] = [
           // title: 'Ju',
         },
       },
+      {
+        path: '/backgrounds',
+        component: () => import('pages/Backgrounds.vue'),
+      },
       { path: '/whiteboard', component: () => import('pages/whiteboard.vue') },
     ],
   },
