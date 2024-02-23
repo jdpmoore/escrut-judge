@@ -1,7 +1,7 @@
 import { MutationTree } from 'vuex'
 import {
   CommandStateInterface,
-  // initialState,
+  initialState,
   TempMark,
   TempMarks,
   TempMarksExport,
@@ -357,23 +357,41 @@ const mutation: MutationTree<CommandStateInterface> = {
     saveTempMarks(state.scrutineering.tempMarks)
     state.auth.authToken = authToken
   },
-  clearStore() {
-    // state: CommandStateInterface
-    // state.loggedIn = false
-    // // return
-    // LocalStorage.clear()
-    // if (Cookies.has('eScrut_command_JWT')) {
-    //   Cookies.remove('eScrut_command_JWT', {
-    //     path: '/',
-    //   })
-    // }
-    // const s = initialState()
-    // Object.keys(state).map((key) => {
-    //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //   // @ts-ignore
-    //   state[key as keyof CommandStateInterface] =
-    //     s[key as keyof CommandStateInterface]
-    // })
+  // clearStore() {
+  // state: CommandStateInterface
+  // state.loggedIn = false
+  // // return
+  // LocalStorage.clear()
+  // if (Cookies.has('eScrut_command_JWT')) {
+  //   Cookies.remove('eScrut_command_JWT', {
+  //     path: '/',
+  //   })
+  // }
+  // const s = initialState()
+  // Object.keys(state).map((key) => {
+  //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //   // @ts-ignore
+  //   state[key as keyof CommandStateInterface] =
+  //     s[key as keyof CommandStateInterface]
+  // })
+  // },
+  clearStore(state: CommandStateInterface) {
+    state.loggedIn = false
+    console.log('clearing store')
+    // return
+    LocalStorage.clear()
+    if (Cookies.has('eScrut_competitor_JWT')) {
+      Cookies.remove('eScrut_competitor_JWT', {
+        path: '/',
+      })
+    }
+    const s = initialState()
+    Object.keys(state).map((key) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      state[key as keyof CommandStateInterface] =
+        s[key as keyof CommandStateInterface]
+    })
   },
   updateNumberHeatsRoundId(
     state: CommandStateInterface,

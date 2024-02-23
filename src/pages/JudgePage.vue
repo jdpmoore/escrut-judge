@@ -380,10 +380,7 @@
               </div>
             </div>
           </div>
-          <q-card-section
-            horizontal
-            class="text-center q-pa-sm q-mb-none q-mt-xs"
-          >
+          <q-card-section horizontal class="text-center q-pa-sm q-mb-none">
             <div class="row full-width items-center no-wrap">
               <div class="col-auto">
                 <q-btn
@@ -754,7 +751,7 @@ export default {
       if (this.isFinal) {
         return 560
       }
-      return this.computedNumberColumns < 5 ? 540 : 642
+      return this.computedNumberColumns < 5 ? 530 : 642
     },
     computedNumberColumns() {
       if (this.isFinal) {
