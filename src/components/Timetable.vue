@@ -281,7 +281,7 @@ export default defineComponent({
           .onDismiss(() => {
             setTimeout(() => {
               this.timetableCloseButton.show()
-            }, 2000)
+            }, 1500)
           })
       }
       if (!this.isDemo && this.modelValue) {

@@ -147,7 +147,7 @@ export function initialState(): CommandStateInterface {
     domain = 'localhost'
   }
   const defaultState: CommandStateInterface = {
-    demo: true,
+    demo: false,
     canSubmit: new Set(),
     handwriting: false,
     currentHeat: 1,

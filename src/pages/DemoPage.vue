@@ -248,7 +248,6 @@
                       : 'Submit marks'
                   "
                   style="font-size: 150%"
-                  :disabled="!canSubmit"
                   @click="submitMarks"
                 />
                 <q-btn
@@ -446,10 +445,21 @@ export default {
       }
     },
     roundText() {
-      console.log('demo round', this.demoRound)
       switch (this.demoRound) {
         case 1:
+          return `Heat ${this.tempHeat}/2, Waltz: ${this.computedNumCouples} couples`
+        case 2:
           return `Heat 1/1, Waltz: ${this.computedNumCouples} couples`
+        case 3:
+          return 'Final'
+        default:
+          return ''
+      }
+    },
+    submitText() {
+      switch (this.demoRound) {
+        case 1:
+          return `Heat ${this.tempHeat}/2, Waltz: ${this.computedNumCouples} couples`
         case 2:
           return `Heat 1/1, Waltz: ${this.computedNumCouples} couples`
         case 3:
@@ -690,11 +700,7 @@ export default {
     },
     heat: {
       get() {
-        if (this.isCurrentEvent) {
-          return this.$store.state.command.compere.heat
-        } else {
-          return this.tempHeat
-        }
+        return this.tempHeat
       },
       set(val) {
         this.tempHeat = val
@@ -1441,6 +1447,13 @@ export default {
           },
         })
         .onOk((newNumber) => {
+          if (newNumber < 13) {
+            this.$common.popup({
+              title: 'Already added',
+              message:
+                'Number already in round - please add a number not in the event.',
+            })
+          }
           this.addedNumber = true
           // this.showPlacings = false
           console.log(newNumber)
@@ -1618,7 +1631,7 @@ export default {
       }
       let message = `Are you sure you wish to submit your ${
         this.isFinal ? 'placings' : 'marks'
-      } for ${this.roundText}`
+      } for ${this.titleText}`
       const spotOn =
         this.marked?.size == this.demoRecall || this.demoRecall == 0
       // ||
