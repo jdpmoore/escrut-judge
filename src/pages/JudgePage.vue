@@ -52,6 +52,44 @@
       </q-card-section>
     </q-card>
     <q-card
+      v-else-if="isOffbeat"
+      inline
+      flat
+      class="full-width full-height bg-dark q-pa-none"
+      style="user-select: none"
+    >
+      <q-card-section
+        horizontal
+        class="bg-primary text-white text-center q-pa-sm q-mb-none"
+      >
+        <div class="row full-width items-center no-wrap">
+          <div class="col">
+            <div class="text-h6 text-bold">{{ competitionTitle }}</div>
+          </div>
+        </div>
+      </q-card-section>
+      <q-separator inset />
+      <q-card-section class="bg-white q-pa-none">
+        <div class="col justify-center" style="width: 100%">
+          <div class="text-center q-pb-sm" style="font-size: 175%">
+            <div style="font-size: 125%" class="q-pt-lg">
+              {{ current.title }} is judged on paper
+            </div>
+
+            <div style="font-size: 100%" class="q-mt-lg">
+              Your next event is at {{ nextStartTime }} in the
+            </div>
+            <div style="font-size: 100%" class="q-my-lg text-bold text-accent">
+              {{ nextTimetableItem.floor.name }}
+            </div>
+            <div style="font-size: 100%" class="q-mb-md">
+              {{ nextTimetableItem.title }}
+            </div>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+    <q-card
       v-else
       v-touch-swipe.horizontal="handleSwipe"
       inline
@@ -1785,7 +1823,7 @@ export default {
       this.whisperMarks()
       this.$store.dispatch('echo/announceCompetitor', competitor)
     },
-    whisperMarks() {
+    whisperMarks(completed = false) {
       const roundId = this.currentRound.round.id
       const placedList = this.placings.map((placing) => {
         return this.placedObject[placing.value]
@@ -1800,6 +1838,7 @@ export default {
         numbers: tapMarked,
         isFinal: this.isFinal,
         handwriting: false,
+        completed,
       }
       if (!this.$store.state.command.scrutineering.tempMarks[roundId]) {
         this.$store.commit('command/saveTempMarks', {
@@ -2081,7 +2120,7 @@ export default {
               this.submitHandwritingMarks(jpgDownload)
               this.postPadMarks('file', jpgDownload)
             } else {
-              this.whisperMarks()
+              this.whisperMarks(true)
               if (this.isFinal) {
                 this.postPadMarks('array', {
                   placed: this.placedObject,
@@ -2139,7 +2178,7 @@ export default {
           this.submitHandwritingMarks(jpgDownload)
           this.postPadMarks('file', jpgDownload)
         } else {
-          this.whisperMarks()
+          this.whisperMarks(true)
           if (this.isFinal) {
             this.postPadMarks('array', {
               placed: this.placedObject,

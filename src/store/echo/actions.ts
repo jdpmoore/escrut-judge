@@ -147,16 +147,47 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           commit('command/updateNumberRecallsRoundId', payload, { root: true })
         }
       )
-      judges.listenForWhisper('forceCurrent', (payload: v2.TimetableItem) => {
+      judges.listenForWhisper('forceDanceIndex', (payload) => {
+        const judgeUserIds = payload.judgeUserIds
+        const judgeUserId = rootState.command.userDetails.id
+        const isMe = judgeUserIds.includes(judgeUserId)
+        if (isMe) {
+          commit('command/setDanceLetterIndex', payload.danceLetterIndex, {
+            root: true,
+          })
+        }
+      })
+      judges.listenForWhisper('forceCurrent', (payload) => {
+        // : v2.TimetableItem
         // id is the timetable id
-        commit('command/overrideCurrent', payload, { root: true })
-        commit('command/forceCurrentTimetableOrder', payload.id, { root: true })
-        commit('command/setDanceLetterIndex', 0, { root: true })
-        dispatch('command/getCompetitorsByRoundId', payload.round.id, {
-          root: true,
-        })
-        dispatch('command/getNextCompetitors', {}, { root: true })
-        // commit('command/setCurrentNext', {}, { root: true })
+
+        const judgeUserIds = payload.judgeUserIds
+        const judgeUserId = rootState.command.userDetails.id
+        const isMe = judgeUserIds.includes(judgeUserId)
+        // console.log(
+        //   'we received',
+        //   payload,
+        //   'is it for me?',
+        //   judgeUserIds,
+        //   judgeUserId,
+        //   isMe
+        // )
+        if (isMe) {
+          commit('command/forceCurrentTimetableOrder', payload.id, {
+            root: true,
+          })
+          commit('command/overrideCurrent', payload, { root: true })
+          commit('command/setDanceLetterIndex', 0, { root: true })
+          dispatch('command/getCompetitorsByRoundId', payload.round.id, {
+            root: true,
+          })
+          dispatch('command/getNextCompetitors', {}, { root: true })
+          if (payload.force) {
+            dispatch('command/setAllPreviousComplete', payload, {
+              root: true,
+            })
+          }
+        }
       })
       judges.listenForWhisper(
         'markCompletedSetCurrent',
@@ -486,20 +517,39 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       }
     }
   },
-  shareStatus({ rootState, commit, dispatch }) {
-    console.log(rootState.command.current)
+  shareStatus({ rootState, commit, dispatch, rootGetters }) {
+    const roundId = rootState.command.current.round?.id
+    // const nextRoundId = rootState.command.current.round?.id
     const round = {
       title: rootState.command.current.title,
       round: rootState.command.current.round?.round,
       floor: rootState.command.current.round?.floor.id,
     }
+    const nextRound = {
+      title: rootState.command.next?.title,
+      round: rootState.command.next?.round?.round,
+      floor: rootState.command.next?.round?.floor.id,
+    }
+    const dance = rootGetters['command/dance']
+    const competitors = rootGetters['command/competitorsByRoundId'](roundId)
     const toWhisper = {
       status: true,
       current: {
         round,
         heat: rootState.command.currentHeat,
-        dance: rootState.command.currentDance,
-        // numCompetitors:
+        dance,
+        danceLetterIndex: rootState.command.compere.danceLetterIndex,
+        // competitors: competitors?.map((heat) => {
+        //   return heat.map((h) => {
+        //     return h.number
+        //   })
+        // }),
+        numCompetitors: competitors?.map((heat) => {
+          return heat.length
+        }),
+      },
+      next: {
+        round: nextRound,
       },
       judgeUserId: rootState.command.userDetails.id,
     }
