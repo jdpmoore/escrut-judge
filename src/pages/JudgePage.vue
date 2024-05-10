@@ -408,7 +408,7 @@
                 
                                   -->
                 <div
-                  v-if="isFirstRound"
+                  v-if="isFirstRound && !isOxbridgeVarsity"
                   class="text-center bg-info text-info-inv"
                   :class="isFinal ? 'competitor-add-final' : 'competitor-add'"
                   @click="addNumber"
@@ -425,7 +425,12 @@
                   round
                   color="primary"
                   icon="keyboard_arrow_left"
-                  :disable="heat === 1 || isNonCompereEvent || endOfDays"
+                  :disable="
+                    heat === 1 ||
+                    isNonCompereEvent ||
+                    endOfDays ||
+                    isOxbridgeVarsity
+                  "
                   @click="pageChange(-1)"
                   ><q-tooltip> Previous heat </q-tooltip></q-btn
                 >
@@ -443,7 +448,8 @@
                   v-if="
                     isCurrentEvent &&
                     !isNonCompereEvent &&
-                    heat == competitors.length
+                    heat == competitors.length &&
+                    !isOxbridgeVarsity
                   "
                   class="full-width"
                   :disable="
@@ -451,15 +457,7 @@
                     finalPlacings?.size != computedCompetitors.length &&
                     computedCompetitors.length > 1
                   "
-                  :class="
-                    (marked?.size == currentRound.round.recall &&
-                      currentRound.round.recall > 0) ||
-                    (isFinal &&
-                      finalPlacings?.size == computedCompetitors.length) ||
-                    (computedCompetitorsSuper.length == 1 && !isFinal)
-                      ? 'bg-positive text-positive-inv'
-                      : 'bg-negative text-negative-inv'
-                  "
+                  :class="computedSubmitClass"
                   icon="done"
                   :label="
                     computedCompetitorsSuper.length == 1 && !isFinal
@@ -474,13 +472,14 @@
                   v-if="
                     isCurrentEvent &&
                     !isNonCompereEvent &&
-                    heat < competitors.length
+                    (heat < competitors.length || isOxbridgeVarsity)
                   "
-                  class="full-width bg-warning"
-                  icon="keyboard_arrow_right"
-                  label="Next heat"
+                  :disable="isOxbridgeVarsity && finalPlacings?.size < 6"
+                  :class="computedHeatClass"
+                  :icon="isOxbridgeVarsity ? 'done' : 'keyboard_arrow_right'"
+                  :label="isOxbridgeVarsity ? 'Submit marks' : 'Next heat'"
                   style="font-size: 150%"
-                  @click="heat++"
+                  @click="gotoNextHeat"
                 />
                 <!-- :disable="booleanVarSub" -->
                 <q-btn
@@ -705,6 +704,32 @@ export default {
     }
   },
   computed: {
+    computedHeatClass() {
+      if (this.isOxbridgeVarsity) {
+        return this.finalPlacings?.size == 6
+          ? 'full-width bg-positive'
+          : 'full-width bg-warning'
+      }
+      return 'full-width bg-warning'
+    },
+    computedSubmitClass() {
+      const test1 =
+        this.marked?.size == this.currentRound.round.recall &&
+        this.currentRound.round.recall > 0
+      const test2 =
+        this.isFinal &&
+        this.finalPlacings?.size == this.computedCompetitors.length
+      const test3 = this.computedCompetitorsSuper.length == 1 && !this.isFinal
+      const test4 = this.isOxbridgeVarsity && this.finalPlacings?.size == 6
+      console.log(
+        this.isOxbridgeVarsity,
+        this.finalPlacings,
+        this.computedCompetitors
+      )
+      return test1 || test2 || test3 || test4
+        ? 'bg-positive text-positive-inv'
+        : 'bg-negative text-negative-inv'
+    },
     competitionTitle() {
       return this.$store.state.command.competition.title
     },
@@ -786,6 +811,9 @@ export default {
       })
     },
     computedFlexBoxHeight() {
+      if (this.isOxbridgeVarsity) {
+        return 440
+      }
       if (this.isFinal) {
         return 560
       }
@@ -1313,6 +1341,93 @@ export default {
     // void this.$store.dispatch('command/getTimetable')
   },
   methods: {
+    gotoNextHeat() {
+      if (this.isOxbridgeVarsity) {
+        this.$store.dispatch('command/getEvents')
+        this.$store.dispatch('command/updateTimetable')
+        let message = `Are you sure you wish to submit your placings for ${this.roundText} - ${this.varsityPairs}`
+        this.$q
+          .dialog({
+            title: `${this.currentEvent.title} - ${this.varsityPairs}`,
+            message,
+            focus: 'cancel',
+            dark: true,
+            class: 'bg-dark text-dark-inv',
+            cancel: { label: 'Cancel', color: 'positive', flat: true },
+            ok: { label: 'Yes', color: 'warning', flat: true },
+            focus: 'cancel',
+          })
+          .onOk(() => {
+            this.toClear = !this.toClear
+            const loadingDialog = this.$q.dialog({
+              message: 'Processing marks...',
+              dark: true,
+              progress: true, // we enable default settings
+              persistent: true, // we want the user to not be able to close it
+              ok: false, // we want the user to not be able to close it
+            })
+            this.whisperMarks(true)
+            if (this.isFinal) {
+              this.postPadMarks('array', {
+                placed: this.placedObject,
+              })
+            } else {
+              this.postPadMarks('array', {
+                marked: [...this.marked],
+                considered: [...this.considering],
+              })
+            }
+            if (this.heat == this.competitors.length) {
+              console.log(this.lastDance, 'is last dance', this.currentRound)
+              if (this.lastDance) {
+                this.danceLetterIndex = 0
+                if (this.currentRound.round) {
+                  this.$store.commit(
+                    'command/completedRound',
+                    this.currentRound.round.id
+                  )
+                }
+                // console.log('completed timetable event', this.timetableId)
+                this.$store.commit(
+                  'command/completedTimetableEvent',
+                  this.timetableId
+                )
+                this.$store.commit('command/setCurrentNext')
+                this.$store.dispatch('command/getNextCompetitors')
+                const currentTimetableIndex = this.timetableOrders.indexOf(
+                  this.timetableOrder
+                )
+                this.timetableOrder =
+                  this.timetableOrders[currentTimetableIndex + 1]
+                if (!this.timetableOrder) {
+                  this.checkForNewTimetable(currentTimetableIndex + 1)
+                }
+                this.announced = new Set()
+                this.getCompetitors()
+              } else {
+                this.danceLetterIndex++
+              }
+              this.heat = 1
+            } else {
+              this.heat++
+            }
+
+            this.$store.commit('command/setCurrentHeat', this.heat)
+            this.activeHeat = this.heat
+            this.marked = new Set()
+            this.considering = new Set()
+            this.finalPlacings = new Map()
+            this.additionalNumbers = {}
+
+            // console.log(loadingDialog)
+            setTimeout(() => {
+              loadingDialog.hide()
+            }, 350)
+          })
+      } else {
+        this.heat++
+      }
+    },
     checkNoCurrentEvent() {
       if (this.noCurrentEvent) {
         if (this.timetableCurrent) {
@@ -1415,6 +1530,8 @@ export default {
             title = 'semi-final'
           } else if (timetableItem.round.round === 'F') {
             title = 'final'
+          } else if (timetableItem.round.round === 'PO') {
+            title = 'play-off'
           }
           if (timetableItem.round.isQualifier) {
             title = 'qualifier'
@@ -1839,6 +1956,8 @@ export default {
         isFinal: this.isFinal,
         handwriting: false,
         completed,
+        isOxbridgeVarsity: this.isOxbridgeVarsity,
+        heat: this.heat,
       }
       if (!this.$store.state.command.scrutineering.tempMarks[roundId]) {
         this.$store.commit('command/saveTempMarks', {
@@ -1848,7 +1967,10 @@ export default {
       }
       const savedMarks =
         this.$store.state.command.scrutineering.tempMarks[roundId]
-      const judgeHeat = `${toPost.judge.letter}-${toPost.dance}`
+      let judgeHeat = `${toPost.judge.letter}-${toPost.dance}`
+      if (this.isOxbridgeVarsity) {
+        judgeHeat = `${toPost.judge.letter}-${toPost.dance}-${this.heat}`
+      }
       if (!savedMarks.has(judgeHeat)) {
         this.$store.commit('command/newJudgeHeatTempMarks', {
           roundId,
@@ -1948,7 +2070,7 @@ export default {
         })
     },
     handleSwipe(info) {
-      if (this.isHandwriting) {
+      if (this.isHandwriting || this.isOxbridgeVarsity) {
         return
       }
       console.log('swipg', info)
@@ -2252,6 +2374,9 @@ export default {
         toPost.fileData = data
       } else {
         toPost.marks = data
+      }
+      if (this.isOxbridgeVarsity) {
+        toPost.varsityHeat = this.heat - 1
       }
       this.$axios.post('padmarks/add', toPost).catch(this.$common.axiosError)
     },
