@@ -71,7 +71,7 @@
       <q-separator inset />
       <q-card-section class="bg-white q-pa-none">
         <div class="col justify-center" style="width: 100%">
-          <div class="text-center q-pb-sm" style="font-size: 175%">
+          <div class="text-center q-pb-sm" style="font-size: 165%">
             <div style="font-size: 125%" class="q-pt-lg">
               {{ current.title }} is judged on paper
             </div>
@@ -236,7 +236,7 @@
                 </q-list>
               </q-menu>
             </q-btn> -->
-            <div v-if="isResults" class="text-center" style="font-size: 175%">
+            <div v-if="isResults" class="text-center" style="font-size: 165%">
               <!-- <div class="row flex-center">
                 Now we announce the results of
               </div> -->
@@ -249,7 +249,7 @@
             <div
               v-else-if="isNonCompereEvent"
               class="text-center"
-              style="font-size: 175%"
+              style="font-size: 165%"
             >
               <div v-if="!endOfDays" class="row flex-center">
                 {{ isCurrentEvent ? 'The current' : 'This' }} event is
@@ -258,7 +258,7 @@
                 {{ roundText }}
               </div>
             </div>
-            <div v-else class="text-center" style="font-size: 175%">
+            <div v-else class="text-center" style="font-size: 165%">
               <!-- <div v-if="!isFinal" style="font-size: 125%">
                 {{ competitors.flat().length }} competitors,
                 recall {{ currentRound?.round?.recall }} from
@@ -405,7 +405,7 @@
                   </div>
                 </div>
                 <!-- && !isFinal
-                
+
                                   -->
                 <div
                   v-if="isFirstRound && !isOxbridgeVarsity"
@@ -418,7 +418,10 @@
               </div>
             </div>
           </div>
-          <q-card-section horizontal class="text-center q-pa-sm q-mb-none">
+          <q-card-section
+            horizontal
+            class="text-center q-pb-sm q-mb-none q-pt-none"
+          >
             <div class="row full-width items-center no-wrap">
               <div class="col-auto">
                 <q-btn
@@ -1487,7 +1490,7 @@ export default {
                     : '1 heat'
                 }<br>
                 <span class="text-body1">(recall approx. ${approx} per heat)</span>
-                               
+
                 <br><br>
                 Heat ${this.heat}, ${this.dance?.name}: ${
         this.computedNumCouples
