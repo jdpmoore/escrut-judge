@@ -1,6 +1,6 @@
 <template>
   <q-page
-    class="row justify-center items-center"
+    class="row justify-center items-top"
     :class="isHandwriting ? 'bg-primary' : 'bg-dark'"
   >
     <!-- {{ timetableOrder }} {{ current }} -->
