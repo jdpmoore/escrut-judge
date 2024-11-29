@@ -57,7 +57,7 @@
             aria-label="Login"
             @click="setCompetition"
           /> -->
-          <q-btn
+          <!-- <q-btn
             class="q-mb-sm full-width"
             flat
             color="white"
@@ -76,7 +76,7 @@
             icon="vpn_key"
             aria-label="Change password"
             to="/password/change"
-          />
+          /> -->
         </div>
       </q-item-section>
     </q-item>
@@ -92,6 +92,21 @@
           color="positive"
           keep-color
         ></q-toggle> -->
+      </q-item-section>
+    </q-item>
+    <q-item
+      v-ripple
+      label="Judge"
+      clickable
+      class="bg-dark text-white"
+      to="/judge"
+      @click="$emit('close')"
+    >
+      <q-item-section avatar>
+        <q-icon name="done" class="text-positive" />
+      </q-item-section>
+      <q-item-section>
+        <q-item-label class="text-white">Judge competition</q-item-label>
       </q-item-section>
     </q-item>
     <q-item
@@ -423,16 +438,19 @@ export default defineComponent({
           title: 'Clear storage',
           class: 'bg-primary text-white',
           html: true,
-          message: 'Are you sure you wish to clear local storage?',
+          message: 'Please enter password to clear local storage?',
+          prompt: {
+            model: '',
+          },
           cancel: {
-            label: 'No',
+            label: 'Cancel',
             // outline: true,
             // flat: true,
             unelevated: true,
             color: 'negative',
           },
           ok: {
-            label: 'Yes',
+            label: 'Ok',
             unelevated: true,
             // outline: true,
             // flat: true,
@@ -440,11 +458,13 @@ export default defineComponent({
           },
           color: 'primary',
         })
-        .onOk(() => {
-          // this.logout().then(() => {
-          this.$q.localStorage.clear()
-          this.forceUpdate()
-          // })
+        .onOk((model) => {
+          if (model === '1234') {
+            this.logout().then(() => {
+              this.$q.localStorage.clear()
+              this.forceUpdate()
+            })
+          }
         })
     },
     uploadAvatar() {

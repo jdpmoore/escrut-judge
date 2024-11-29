@@ -131,7 +131,14 @@
       </div> -->
       <!--       @click="showMenu = !showMenu" -->
       <!-- :width="$q.screen.lt.sm ? headerSize.width : 350" -->
-      <MainMenu @close="showMenu = false" />
+      <MainMenu
+        @close="
+          (val) => {
+            showMenu = false
+            closeTimetable()
+          }
+        "
+      />
     </q-drawer>
 
     <q-page-container>
@@ -141,7 +148,7 @@
       <q-card-section class="bg-dark text-white shadow-2 text-center q-pa-sm">
         <div class="row items-center no-wrap">
           <div class="col">
-          
+
           <q-icon name="person" />
           </div>
         </div>
@@ -163,7 +170,7 @@
               <j-menu :menu-items="displayMenu" @selected="handleDisplayMenu">
               </j-menu>
             </q-btn>
-    
+
           </div>
         </div>
       </q-card-section>

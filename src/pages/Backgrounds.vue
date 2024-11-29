@@ -1,5 +1,12 @@
 <template>
   <JTabs v-model="tab" :tabs="tabs"></JTabs>
+  <q-btn
+    class="full-width guide bg-warning text-warning-inv q-ma-lg"
+    icon="done"
+    label="Resume judging"
+    style="font-size: 150%"
+    to="/judge"
+  />
   <img :src="src" width="414" />
 </template>
 
