@@ -818,13 +818,19 @@ export default {
         return 440
       }
       if (this.isFinal) {
+        // Add in "but what about 9 couple finals"
         return 560
       }
       return this.computedNumberColumns < 5 ? 530 : 642
     },
     computedNumberColumns() {
       if (this.isFinal) {
-        return Math.max(Math.ceil((this.computedCompetitors.length + 1) / 6), 2)
+        const toReturn = Math.max(
+          Math.ceil((this.computedCompetitors.length + 1) / 6),
+          2
+        )
+        console.log('number of columns', toReturn)
+        return toReturn
       }
       return Math.ceil((this.computedCompetitors.length + 1) / 6)
     },
@@ -1643,7 +1649,9 @@ export default {
         toReturn = 'bg-positive text-positive-inv'
       }
       toReturn = `${toReturn} ${
-        this.isFinal ? 'competitor-number-final' : 'competitor-number'
+        this.isFinal
+          ? `competitor-number-final competitor-number-final-${this.placings.length}`
+          : 'competitor-number'
       }`
       return toReturn
     },
@@ -1655,7 +1663,9 @@ export default {
         toReturn = 'bg-positive text-positive-inv'
       }
       toReturn = `${toReturn} ${
-        this.isFinal ? 'competitor-number-final' : 'competitor-number'
+        this.isFinal
+          ? `competitor-number-final competitor-number-final-${this.placings.length}`
+          : 'competitor-number'
       }`
       return toReturn
     },
@@ -1699,7 +1709,9 @@ export default {
       //   toReturn = `${toReturn} competitor-names`
       // } else {
       toReturn = `${toReturn} ${
-        this.isFinal ? 'competitor-number-final' : 'competitor-number'
+        this.isFinal
+          ? `competitor-number-final competitor-number-final-${this.placings.length}`
+          : 'competitor-number'
       }`
       // }
       return toReturn
