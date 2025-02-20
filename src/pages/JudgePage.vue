@@ -782,7 +782,9 @@ export default {
     placings() {
       const fir = this.triggerPlacingUpdate ? 1 : 0
       let size = fir
-      size = size + this.competitors[this.heat - 1].length
+      if (this.competitors && this.heat) {
+        size = size + this.competitors[this.heat - 1]?.length
+      }
       size = size - fir
       const toReturn = new Array(size).fill(1).map((o, i) => {
         const value = i + 1
@@ -893,7 +895,10 @@ export default {
       return this.$store.state.command.current.id
     },
     noCurrentEvent() {
-      return Object.keys(this.currentEvent).length === 0
+      if (this.currentEvent) {
+        return Object.keys(this.currentEvent).length === 0
+      }
+      return true
     },
     noCurrentOrIsNewOrSkippedEvent() {
       return (
@@ -1953,7 +1958,6 @@ export default {
         this.marked.add(number)
       }
       this.whisperMarks()
-      this.$store.dispatch('echo/announceCompetitor', competitor)
     },
     whisperMarks(completed = false) {
       const roundId = this.currentRound.round.id

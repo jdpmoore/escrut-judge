@@ -155,7 +155,7 @@ export default defineComponent({
       const toReturn = this.filteredTimetable.find((t) => {
         return t.status === 'active'
       })
-      if (!toReturn && !this.next.round) {
+      if (!toReturn && !this.next?.round) {
         return this.next
       }
       return toReturn
@@ -184,7 +184,6 @@ export default defineComponent({
       const newItems = this.filteredTimetable.filter((t) => {
         return t.status === 'new'
       })
-      console.log(newItems)
       if (newItems.length > 1) {
         const toReturn = newItems.reduce((prev, curr) => {
           if (!prev) {
@@ -553,7 +552,7 @@ export default defineComponent({
         // }
         items.push({ label: 'View competitors', value: '4', color: 'positive' })
       }
-      if (round.id > current.id) {
+      if (round.id > current?.id) {
         items.push({
           label: 'Mark all previous rounds completed and set current',
           value: '3',
