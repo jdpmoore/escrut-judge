@@ -162,6 +162,23 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           root: true,
         })
       })
+      judges.listenForWhisper('refreshCompetitors', () => {
+        dispatch(
+          'command/getCompetitors',
+          {},
+          {
+            root: true,
+          }
+        ).then(() => {
+          dispatch(
+            'command/getFirstRoundCompetitors',
+            {},
+            {
+              root: true,
+            }
+          )
+        })
+      })
       judges.listenForWhisper('forceCurrent', (payload) => {
         // : v2.TimetableItem
         // id is the timetable id
