@@ -782,7 +782,12 @@ export default {
     placings() {
       const fir = this.triggerPlacingUpdate ? 1 : 0
       let size = fir
-      if (this.competitors && this.heat) {
+      if (
+        this.competitors &&
+        this.heat &&
+        this.competitors[this.heat - 1] &&
+        this.competitors[this.heat - 1].length > 0
+      ) {
         size = size + this.competitors[this.heat - 1]?.length
       }
       size = size - fir

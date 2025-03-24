@@ -74,9 +74,17 @@
           <q-item-label>
             {{ eventText(event) }}
           </q-item-label>
-          <q-item-label caption :class="captionCol(event)">{{
-            event.round.floor.name
-          }}</q-item-label>
+          <q-item-label
+            v-if="
+              event &&
+              event.round &&
+              event.round.floor &&
+              event.round.floor.name
+            "
+            caption
+            :class="captionCol(event)"
+            >{{ event.round.floor.name }}</q-item-label
+          >
         </q-item-section>
 
         <q-item-section v-if="roundStatus(event)" avatar
