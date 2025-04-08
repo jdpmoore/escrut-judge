@@ -15,6 +15,7 @@ require('dotenv').config()
 const fs = require('fs')
 const packageJson = fs.readFileSync('./package.json')
 const version = JSON.parse(packageJson).version || '0'
+const execSync = require('child_process').execSync
 
 // function getDistDir(process, ctx) {
 //   let distDir = `dist/${ctx.modeName}`
@@ -93,21 +94,42 @@ module.exports = configure(function (ctx) {
         ? 'dist/' + ctx.modeName + '/prod'
         : 'dist/' + ctx.modeName + '/dev',
       vueRouterMode: 'hash', // available values: 'hash', 'history'
+      devtool: 'hidden-source-map',
+      webpackDevtool: 'hidden-source-map',
       uglifyOptions: {
-        compress: { drop_console: isLive ? true : false },
+        compress: { drop_console: true },
         // compress: false,
         // keep_fnames: true,
         // // keep_fargs: true,
         // mangle: false
         // { drop_console: true },
       },
+      sourcemap: 'hidden',
       extendWebpack(cfg) {
         const FlareWebpackPluginSourcemap = require('@flareapp/flare-webpack-plugin-sourcemap')
         const flarePlugin = new FlareWebpackPluginSourcemap({
           key: process.env.FLARE,
+          removeSourcemaps: true,
         })
         cfg.plugins.push(flarePlugin)
         cfg.devtool = 'hidden-source-map'
+        if (!cfg.output) {
+          cfg.output = {}
+        }
+        cfg.output.filename = 'js/[name].js' //'js/[name].[contenthash:8].js'
+        cfg.output.chunkFilename = 'js/[name].js' //'js/[name].[chunkhash:8].js'
+        cfg.output.cssFilename = 'css/[name].js' //'js/[name].[chunkhash:8].js'
+        cfg.output.cssChunkFilename = 'css/[name].js' //'js/[name].[chunkhash:8].js'
+        cfg.plugins.forEach((plugin) => {
+          // console.log(plugin)
+          if (
+            plugin.options?.filename?.includes('css') &&
+            plugin.options?.chunkFilename?.includes('css')
+          ) {
+            plugin.options.filename = 'css/[name].css'
+            plugin.options.chunkFilename = 'css/[name].css'
+          }
+        })
         // linting is slow in TS projects, we execute it only for production builds
         // if (ctx.prod) {
         //   cfg.module.rules.push({
@@ -117,6 +139,16 @@ module.exports = configure(function (ctx) {
         //     exclude: /node_modules/,
         //   })
         // }
+      },
+      afterBuild(params) {
+        // let output = ''
+        execSync(`rm ${params.quasarConf.build.distDir}/*.js.map`, {
+          encoding: 'utf-8',
+        })
+        // output = execSync(`ls ${params.quasarConf.build.distDir}`, {
+        //   encoding: 'utf-8',
+        // })
+        // console.log(output)
       },
       // transpile: false,
       // publicPath: '/',
@@ -207,6 +239,7 @@ module.exports = configure(function (ctx) {
         maximumFileSizeToCacheInBytes: 25000000,
         skipWaiting: true,
         clientsClaim: true,
+        inlineWorkboxRuntime: true,
       }, // only for GenerateSW
 
       // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
