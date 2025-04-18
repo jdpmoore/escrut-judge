@@ -224,7 +224,7 @@ const getters: GetterTree<CommandStateInterface, StateInterface> = {
       }
       return innerReturn
     })
-    console.log('we send back', toReturn)
+    // console.log('we send back', toReturn)
     return toReturn
     // .split('')
   },
@@ -234,11 +234,11 @@ const getters: GetterTree<CommandStateInterface, StateInterface> = {
     //   state.compere.danceLetterIndex,
     //   getters.currentDanceLetters
     // )
-    console.log(
-      'is the problem here',
-      getters.currentDanceLetters,
-      state.compere.danceLetterIndex
-    )
+    // console.log(
+    //   'is the problem here',
+    //   getters.currentDanceLetters,
+    //   state.compere.danceLetterIndex
+    // )
     return getters.currentDanceLetters?.[state.compere.danceLetterIndex] ?? '0'
   },
   danceById: (state) => (danceId: number) => {
@@ -276,6 +276,93 @@ const getters: GetterTree<CommandStateInterface, StateInterface> = {
       return judge.user.id === userId
     })
     return adj
+  },
+  // judgeMarksByRound: (state) => (roundId, judgeHeat) => {
+  //   const markObj = {
+  //     ...state.scrutineering.tempMarks,
+  //   }
+  //   const rounds = _.fromPairs(
+  //     Object.keys(markObj).map((key) => {
+  //       const innerMap = _.fromPairs(
+  //         [...markObj[key]].map((k) => {
+  //           return [k[0], [...k[1]]]
+  //         })
+  //       )
+  //       return [key, innerMap] //[...innerMap[1]] //[key, [innerMap[0], [...innerMap[1]]]]
+  //     })
+  //   )
+  //   return rounds
+  // },
+  judgeMarks(state) {
+    const markObj = {
+      ...state.scrutineering.tempMarks,
+    }
+    const rounds = _.fromPairs(
+      Object.keys(markObj).map((key) => {
+        const obj = [...markObj[key]]
+        const innerMap = obj
+          .map((k) => {
+            return k[0]
+          })
+          .filter(Boolean)
+
+        // const innerMap = _.fromPairs(
+        //   [...markObj[key]].map((k) => {
+        //     return [k[0], [...k[1]]]
+        //   })
+        // )
+        return [key, innerMap] //[...innerMap[1]] //[key, [innerMap[0], [...innerMap[1]]]]
+      })
+    )
+    return rounds //{ marked: rounds, judgeUserId: state.userDetails.id }
+  },
+  status(state, getters) {
+    const roundId = state.current.round?.id
+    const judgeUserId = state.userDetails.id
+    // const myAdj = state.current.round?.adjudicators.find(({ user }) => {
+    //   return user.id === judgeUserId
+    // })
+    console.log(state.current)
+    // const nextRoundId = rootState.command.current.round?.id
+    const round = {
+      id: state.current.round?.id,
+      title: state.current.title,
+      round: state.current.round?.round,
+      floor: state.current.round?.floor.id,
+    }
+    const nextRound = {
+      title: state.next?.title,
+      round: state.next?.round?.round,
+      floor: state.next?.round?.floor.id,
+    }
+    const dance = getters.dance
+    const competitors = getters.competitorsByRoundId(roundId)
+    const theStatus = {
+      status: true,
+      current: {
+        id: state.current.id,
+        order: state.current.timetableOrder,
+        round,
+        heat: state.currentHeat,
+        dance,
+        danceLetterIndex: state.compere.danceLetterIndex,
+        // competitors: competitors?.map((heat) => {
+        //   return heat.map((h) => {
+        //     return h.number
+        //   })
+        // }),
+        numCompetitors: competitors?.map((heat) => {
+          return heat.length
+        }),
+      },
+      next: {
+        round: nextRound,
+      },
+      s: getters.judgeMarks,
+      judgeUserId,
+      // letter: myAdj.letter,
+    }
+    return theStatus
   },
 }
 

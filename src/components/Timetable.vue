@@ -1,6 +1,6 @@
 <template>
   <q-toolbar
-    class="bg-primary text-white shadow-2 q-pr-xs"
+    class="bg-primary text-primary-inv shadow-2 q-pr-xs"
     style="position: fixed; top: 0px; z-index: 666; height: 56px"
   >
     <q-toolbar-title class="col-10 q-mr-md">Timetable</q-toolbar-title>
@@ -27,28 +27,28 @@
     </div>
   </q-toolbar>
   <div style="height: 56px"></div>
-  <q-list no-border link inset-delimiter>
-    <q-item
-      class="bg-primary text-white text-center text-h6 row justify-between"
-    >
-      <q-btn
-        dense
-        flat
-        color="white"
-        icon="checklist"
-        label="demo"
-        @click="$emit('demo')"
-      />
-      <q-btn
-        dense
-        flat
-        color="white"
-        icon="menu"
-        label="menu"
-        @click="$emit('menu')"
-      />
-    </q-item>
 
+  <q-item
+    class="bg-primary text-primary-inv text-center text-h6 row justify-between"
+  >
+    <q-btn
+      dense
+      flat
+      color="primary-inv"
+      icon="checklist"
+      label="demo"
+      @click="$emit('demo')"
+    />
+    <q-btn
+      dense
+      flat
+      color="primary-inv"
+      icon="menu"
+      label="menu"
+      @click="$emit('menu')"
+    />
+  </q-item>
+  <q-list v-if="loggedIn" no-border link inset-delimiter>
     <div
       v-for="event in filteredTimetableWithHeaders"
       :key="event.timetableOrder"
@@ -57,7 +57,7 @@
     >
       <q-item
         v-if="'header' in event"
-        class="bg-accent text-white text-center text-h6"
+        class="bg-accent text-accent-inv text-center text-h6"
       >
         {{ event.section.name }}
       </q-item>
@@ -153,6 +153,9 @@ export default defineComponent({
   },
   computed: {
     ...mapState('command', ['floors', 'timetable', 'userDetails']),
+    loggedIn() {
+      return this.$store.state.command.loggedIn
+    },
     isDemo() {
       return this.$store.state.command.demo
     },
@@ -277,13 +280,12 @@ export default defineComponent({
           .dialog({
             dark: true,
             title: 'Timetable',
-            class: 'bg-primary text-white',
+            class: 'bg-primary text-primary-inv',
             message:
               'This is your timetable for the day, you can scroll up and down to see events, and tap on them to get more details. The current event will be highlighted in green, and the next event in yellow.',
             html: true,
             cancel: false, //{ label: 'Cancel', color: 'positive', flat: true },
-            ok: true, //{ label: 'Options', color: 'warning', flat: true },
-            focus: 'cancel',
+            ok: { label: 'Ok', color: 'positive', textColor: 'positive-inv' },
           })
           .onDismiss(() => {
             setTimeout(() => {
@@ -382,25 +384,25 @@ export default defineComponent({
       const current = this.current //this.$store.state.command.current
       const next = this.next //this.$store.state.command.next
       if (event.id === current?.id) {
-        return 'bg-positive text-black'
+        return 'bg-positive text-positive-inv'
       } else if (event.id === next?.id) {
-        return 'bg-warning text-black'
+        return 'bg-warning text-warning-inv'
       } else if (
         event.round?.id &&
         current?.round?.id &&
         event.round.id === current?.round.id
       ) {
-        return 'bg-positive text-black'
+        return 'bg-positive text-positive-inv'
       } else if (
         event.round?.id &&
         next?.round?.id &&
         event.round.id === next?.round.id
       ) {
-        return 'bg-warning text-black'
+        return 'bg-warning text-warning-inv'
       } else if (current?.id === next?.id && event.id === this.nextButOne?.id) {
-        return 'bg-warning text-black'
+        return 'bg-warning text-warning-inv'
       }
-      return 'bg-dark text-white'
+      return 'bg-dark text-dark-inv'
       // alert(inColindex)
       // for (let j = 0; j < this.completedEvents.length; j++) {
       //   if (this.completedEvents[j] === inColindex.roundId) {
@@ -433,9 +435,9 @@ export default defineComponent({
       const current = this.current //this.$store.state.command.current
       const next = this.next //this.$store.state.command.next
       if (event.id === current?.id) {
-        return 'text-dark'
+        return 'text-grey-9'
       } else if (event.id === next?.id) {
-        return 'text-dark'
+        return 'text-grey-9'
       } else if (
         event.round?.id &&
         current?.round?.id &&
@@ -509,11 +511,15 @@ export default defineComponent({
         .dialog({
           dark: true,
           title,
-          class: 'bg-primary text-white',
+          class: 'bg-primary text-primary-inv',
           message,
           html: true,
-          cancel: { label: 'Cancel', color: 'positive', flat: true },
-          ok: { label: 'Ok', color: 'warning', flat: true },
+          cancel: {
+            label: 'Cancel',
+            color: 'positive',
+            textColor: 'positive-inv',
+          },
+          ok: { label: 'Ok', color: 'warning', textColor: 'warning-inv' },
           focus: 'cancel',
           options: {
             type: 'radio',
@@ -571,11 +577,15 @@ export default defineComponent({
         .dialog({
           dark: true,
           title,
-          class: 'bg-primary text-white',
+          class: 'bg-primary text-primary-inv',
           message,
           html: true,
-          cancel: { label: 'Cancel', color: 'positive', flat: true },
-          ok: { label: 'Ok', color: 'warning', flat: true },
+          cancel: {
+            label: 'Cancel',
+            color: 'positive',
+            textColor: 'positive-inv',
+          },
+          ok: { label: 'Ok', color: 'warning', textColor: 'warning-inv' },
           focus: 'cancel',
           options: {
             type: 'radio',
@@ -718,11 +728,11 @@ export default defineComponent({
       this.$q.dialog({
         dark: true,
         title,
-        class: 'bg-primary text-white',
+        class: 'bg-primary text-primary-inv',
         message,
         html: true,
         cancel: false, //{ label: 'Cancel', color: 'positive', flat: true },
-        ok: true, //{ label: 'Options', color: 'warning', flat: true },
+        ok: { label: 'Ok', color: 'positive', textColor: 'positive-inv' },
         focus: 'cancel',
       })
       // .onOk(() => {

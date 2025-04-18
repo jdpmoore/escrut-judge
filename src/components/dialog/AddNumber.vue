@@ -9,14 +9,21 @@
     <q-layout view="lHh lpr lFf" container class="shadow-2 rounded-borders">
       <q-header elevated>
         <q-card-section
-          class="bg-dark text-white text-center q-pa-sm q-mb-none"
+          class="bg-dark text-dark-inv text-center q-pa-sm q-mb-none"
         >
           <div class="row items-center no-wrap">
             <div class="col">
               <div class="text-h6">{{ title }}</div>
             </div>
             <div class="col-auto">
-              <q-btn icon="close" round dense flat @click="onCancelClick" />
+              <q-btn
+                v-if="!pin"
+                icon="close"
+                round
+                dense
+                flat
+                @click="onCancelClick"
+              />
             </div>
           </div>
         </q-card-section>
@@ -77,11 +84,13 @@
             <!-- :disable="selected.length === 0" -->
             <div class="col-6 q-px-md">
               <q-btn
+                v-if="!pin"
                 icon="done"
-                label="Add"
+                :label="pin ? 'Ok' : 'Add'"
                 color="positive"
                 class="text-black full-width"
                 size="lg"
+                :disabled="pin ? newNumber < 1000 || newNumber > 9999 : false"
                 @click="onOKClick"
               />
             </div>
@@ -90,7 +99,7 @@
       </q-footer>
     </q-layout>
     <!-- addButton
-                  
+
                                   @add="addInvoiceFooterItem"
             @filterFn="updateInvoiceFooterItemsTable"
             @btnClick="editInvoiceFooterItem"
@@ -137,6 +146,10 @@ export default defineComponent({
       default() {
         return {}
       },
+    },
+    pin: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: ['hide', 'ok'],
@@ -186,6 +199,9 @@ export default defineComponent({
         }
       } else {
         this.newNumber = `${this.newNumber}${num}`
+      }
+      if (this.pin && this.newNumber > 999 && this.newNumber < 10000) {
+        this.onOKClick()
       }
     },
     addFn() {
@@ -256,6 +272,11 @@ export default defineComponent({
     },
 
     onOKClick() {
+      if (this.pin) {
+        this.$emit('ok', this.newNumber)
+        this.hide()
+        return
+      }
       // on OK, it is REQUIRED to
       // emit "ok" event (with optional payload)
       // before hiding the QDialog

@@ -5,6 +5,7 @@ import { v1, v2 } from 'src/@types/command'
 import { axiosInstance, axiosError } from 'boot/axios'
 import _ from 'lodash'
 import { Notify, Dialog } from 'quasar'
+import { themeHelper } from 'src/components/script/themeHelper'
 
 // function orderedDances(dances: v2.Dance[], danceOrder: number[]) {
 //   if (danceOrder) {
@@ -40,7 +41,7 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
       const loadingDialog = Dialog.create({
         message: 'Preparing competition',
         dark: true,
-        class: 'bg-primary',
+        class: 'bg-primary text-primary-inv',
         progress: {
           // spinner: QSpinnerGears,
           color: 'amber',
@@ -55,6 +56,7 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
         dispatch('getTimetable', loadingDialog)
           .then(() => {
             void dispatch('getFirstRoundCompetitors')
+            commit('resetCurrentTimetableOrder')
             commit('saveState')
             resolve()
           })
@@ -64,7 +66,7 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
               title: 'No timetable / round order',
               message:
                 'Please construct a timetable or order of rounds before attempting to scrutineer or compere a competition',
-              class: 'bg-primary',
+              class: 'bg-primary text-primary-inv',
               persistent: true,
               // cancel: { label: 'Close', outline: true, flat: true, color: 'amber' },
               ok: { label: 'Ok', outline: true, flat: true, color: 'positive' },
@@ -101,7 +103,7 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
       const loadingDialog = Dialog.create({
         message: 'Downloading first round competitors, please wait',
         dark: true,
-        class: 'bg-primary',
+        class: 'bg-primary text-primary-inv',
         progress: {
           // spinner: QSpinnerGears,
           color: 'amber',
@@ -126,7 +128,7 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
     const loadingDialog = Dialog.create({
       message: 'Downloading competitors, please wait',
       dark: true,
-      class: 'bg-primary',
+      class: 'bg-primary text-primary-inv',
       progress: {
         // spinner: QSpinnerGears,
         color: 'amber',
@@ -148,6 +150,26 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
       })
     ).then(() => {
       loadingDialog.hide()
+    })
+  },
+  getCompetition(context, compId: number) {
+    return new Promise<void>((resolve, reject) => {
+      axiosInstance
+        .get(`/competition/${compId}`)
+        .then(({ data: comp }) => {
+          context.commit('setCompetition', comp)
+          if (comp.circuit) {
+            themeHelper().setTheme(comp.circuit)
+          }
+          context.commit('saveState')
+          context.dispatch('prepScrutineering').then(() => {
+            resolve()
+          })
+        })
+        .catch((err) => {
+          axiosError(err)
+          reject()
+        })
     })
   },
   getCompetitions(context) {
@@ -199,8 +221,11 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
           persistent: true,
           // cancel: { label: 'Close', outline: true, flat: true, color: 'amber' },
           ok: { label: 'Ok', outline: true, flat: true, color: 'positive' },
-        }).onOk((comp: v1.Competition) => {
+        }).onOk((comp: v2.Competition) => {
           context.commit('setCompetition', comp)
+          if (comp.circuit) {
+            themeHelper().setTheme(comp.circuit)
+          }
           context.dispatch('prepScrutineering').then(() => {
             resolve()
           })
@@ -211,7 +236,7 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
           title: 'No live competitions',
           message:
             'There are currently no live competitions on the system, please set the competition live first before logging into the compere and scrutineering app.',
-          class: 'bg-primary',
+          class: 'bg-primary text-primary-inv',
           persistent: true,
           // cancel: { label: 'Close', outline: true, flat: true, color: 'amber' },
           ok: { label: 'Ok', outline: true, flat: true, color: 'positive' },

@@ -2,19 +2,23 @@
   font-size: 250%;
   text-align: center;
   background-color: var(--q-secondary);
+  background: var(--q-secondary);
   color: black;
   border: 2px solid var(--q-accent);
 }
 .tippy-box[data-theme~='ivda'][data-placement^='top'] > .tippy-arrow::before {
-  border-top-color: var(--q-secondary);
+  border-top-color: var(--q-accent);
 }
 .tippy-box[data-theme~='ivda'][data-placement^='bottom']
   > .tippy-arrow::before {
-  border-bottom-color: var(--q-secondary);
+  border-bottom-color: var(--q-accent);
 }
 .tippy-box[data-theme~='ivda'][data-placement^='left'] > .tippy-arrow::before {
-  border-left-color: var(--q-secondary);
+  border-left-color: var(--q-accent);
 }
 .tippy-box[data-theme~='ivda'][data-placement^='right'] > .tippy-arrow::before {
-  border-right-color: var(--q-secondary);
+  border-right-color: var(--q-accent);
+}
+.tippy-box[data-theme~='ivda'] > .tippy-arrow::before {
+  transform: scale(2);
 }

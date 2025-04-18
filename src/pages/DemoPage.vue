@@ -1,7 +1,7 @@
 <template>
   <q-page
     class="row justify-center items-center"
-    :class="isHandwriting ? 'bg-primary' : 'bg-dark'"
+    :class="isHandwriting ? 'bg-primary text-primary-inv' : 'bg-dark'"
   >
     <q-card
       v-if="showStartPage"
@@ -12,7 +12,7 @@
     >
       <q-card-section
         horizontal
-        class="bg-primary text-white text-center q-pa-sm q-mb-none"
+        class="bg-primary text-primary-inv text-center q-pa-sm q-mb-none"
       >
         <div class="row full-width items-center no-wrap">
           <div class="col">
@@ -79,7 +79,7 @@
     >
       <q-card-section
         horizontal
-        class="bg-primary text-white text-center q-pa-sm q-mb-none"
+        class="bg-primary text-primary-inv text-center q-pa-sm q-mb-none"
         style="max-height: 56px"
       >
         <div class="row full-width items-center no-wrap">
@@ -1022,14 +1022,14 @@ export default {
     finishDemo() {
       this.$q
         .dialog({
-          dark: true,
+          dark: false,
           title: 'Demo concluded',
-          class: 'bg-primary text-white',
+          class: 'bg-primary text-primary-inv',
           message:
             'That concludes the demo of eScrut. Would you like to repeat the demo?',
           html: true,
-          cancel: { label: 'No', color: 'warning', flat: true },
-          ok: { label: 'Yes', color: 'warning', flat: true },
+          cancel: { label: 'No', color: 'positive', textColor: 'positive-inv' },
+          ok: { label: 'Yes', color: 'warning', textColor: 'warning-inv' },
           focus: 'cancel',
         })
         .onOk(() => {
@@ -1065,13 +1065,13 @@ export default {
       }
       this.$q
         .dialog({
-          dark: true,
+          dark: false,
           title: this.titleText,
-          class: 'bg-primary text-white',
+          class: 'bg-primary text-primary-inv',
           message,
           html: true,
           cancel: false, //{ label: 'Cancel', color: 'positive', flat: true },
-          ok: true, //{ label: 'Options', color: 'warning', flat: true },
+          ok: { label: 'Ok', color: 'positive', textColor: 'positive-inv' },
           focus: 'cancel',
         })
         .onDismiss(() => {
@@ -1121,10 +1121,14 @@ export default {
           title: this.roundText,
           message: `Are you sure you wish to clear the page for ${this.roundText} and start again?`,
           focus: 'cancel',
-          dark: true,
+          dark: false,
           class: 'bg-dark text-dark-inv',
-          cancel: { label: 'Cancel', color: 'positive', flat: true },
-          ok: { label: 'Yes', color: 'warning', flat: true },
+          cancel: {
+            label: 'Cancel',
+            color: 'negative',
+            textColor: 'negative-inv',
+          },
+          ok: { label: 'Yes', color: 'positive', textColor: 'positive-inv' },
           focus: 'cancel',
         })
         .onOk(() => {
@@ -1153,7 +1157,7 @@ export default {
         html: true,
         class: 'bg-dark text-dark-inv text-subtitle1',
         cancel: false,
-        ok: { label: 'OK', color: 'positive', flat: true },
+        ok: { label: 'OK', color: 'positive', textColor: 'positive-inv' },
         focus: 'ok',
       })
       // .onDismiss(() => {
@@ -1374,7 +1378,7 @@ export default {
               : 'Restart heat',
             message,
             cancel: true,
-            dark: true,
+            dark: false,
             class: 'bg-primary text-primary-inv',
           })
           .onOk(() => {
@@ -1609,7 +1613,7 @@ export default {
             dark: true,
             class: 'bg-negative text-negative-inv',
             cancel: false,
-            ok: { label: 'Ok', color: 'warning', flat: true },
+            ok: { label: 'Ok', color: 'warning', textColor: 'warning-inv' },
           })
           .onDismiss(() => {
             console.log(this.addBtnRef)
@@ -1625,7 +1629,7 @@ export default {
           dark: true,
           class: 'bg-negative text-negative-inv',
           cancel: false,
-          ok: { label: 'Ok', color: 'warning', flat: true },
+          ok: { label: 'Ok', color: 'warning', textColor: 'warning-inv' },
         })
         return
       }
@@ -1660,15 +1664,19 @@ export default {
             class: spotOn
               ? 'bg-dark text-dark-inv'
               : 'bg-negative text-negative-inv',
-            cancel: { label: 'Cancel', color: 'positive', flat: true },
-            ok: { label: 'Yes', color: 'warning', flat: true },
+            cancel: {
+              label: 'Cancel',
+              color: 'warning',
+              textColor: 'warning-inv',
+            },
+            ok: { label: 'Yes', color: 'positive', textColor: 'positive-inv' },
             focus: 'cancel',
           })
           .onOk(() => {
             this.toClear = !this.toClear
             const loadingDialog = this.$q.dialog({
               message: 'Processing marks...',
-              dark: true,
+              dark: false,
               progress: true, // we enable default settings
               persistent: true, // we want the user to not be able to close it
               ok: false, // we want the user to not be able to close it
@@ -1806,7 +1814,7 @@ export default {
         },
         cancel: true,
         persistent: true,
-        dark: true,
+        dark: false,
         class: 'bg-primary text-primary-inv',
       })
     },
@@ -1820,10 +1828,14 @@ export default {
           title: this.currentEvent.title,
           message: `Are you sure you wish to restart ${this.roundText} from:`,
           focus: 'cancel',
-          dark: true,
+          dark: false,
           class: 'bg-dark text-dark-inv',
-          cancel: { label: 'Cancel', color: 'positive', flat: true },
-          ok: { label: 'Yes', color: 'warning', flat: true },
+          cancel: {
+            label: 'Cancel',
+            color: 'positive',
+            textColor: 'positive-inv',
+          },
+          ok: { label: 'Yes', color: 'warning', textColor: 'positive-inv' },
           focus: 'cancel',
           options: {
             type: 'radio',

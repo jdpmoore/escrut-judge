@@ -1,6 +1,7 @@
 import { boot } from 'quasar/wrappers'
 import VueTippy from 'vue-tippy'
 import 'tippy.js/dist/tippy.css' // optional for styling
+import 'tippy.js/dist/border.css'
 
 export default boot(({ app }) => {
   app.use(

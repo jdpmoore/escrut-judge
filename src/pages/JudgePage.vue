@@ -3,7 +3,6 @@
     class="row justify-center items-top"
     :class="isHandwriting ? 'bg-primary' : 'bg-dark'"
   >
-    <!-- {{ timetableOrder }} {{ current }} -->
     <q-card
       v-if="noCurrentOrIsNewOrSkippedEvent"
       inline
@@ -13,7 +12,7 @@
     >
       <q-card-section
         horizontal
-        class="bg-primary text-white text-center q-pa-sm q-mb-none"
+        class="bg-primary text-primary-inv text-center q-pa-sm q-mb-none"
       >
         <div class="row full-width items-center no-wrap">
           <div class="col">
@@ -48,6 +47,18 @@
               Please stand by...
             </div>
           </div>
+          <q-card-section
+            class="row items-center text-center justify-center q-pt-none"
+          >
+            <q-btn
+              class="q-ma-sm"
+              color="accent"
+              text-color="white"
+              label="Switch judge"
+              style="width: 315px"
+              @click="switchJudge"
+            />
+          </q-card-section>
         </div>
       </q-card-section>
     </q-card>
@@ -60,7 +71,7 @@
     >
       <q-card-section
         horizontal
-        class="bg-primary text-white text-center q-pa-sm q-mb-none"
+        class="bg-primary text-primary-inv text-center q-pa-sm q-mb-none"
       >
         <div class="row full-width items-center no-wrap">
           <div class="col">
@@ -99,7 +110,7 @@
     >
       <q-card-section
         horizontal
-        class="bg-primary text-white text-center q-pa-sm q-mb-none"
+        class="bg-primary text-primary-inv text-center q-pa-sm q-mb-none"
         style="max-height: 56px"
       >
         <div class="row full-width items-center no-wrap">
@@ -425,6 +436,7 @@
             <div class="row full-width items-center no-wrap">
               <div class="col-auto">
                 <q-btn
+                  v-if="!isFinal"
                   round
                   color="primary"
                   icon="keyboard_arrow_left"
@@ -541,7 +553,7 @@
       <q-card-section
         v-if="isHandwriting"
         horizontal
-        class="bg-primary text-white text-center q-pa-sm q-mb-none"
+        class="bg-primary text-primary-inv text-center q-pa-sm q-mb-none"
       >
         <div class="row full-width items-center no-wrap">
           <!-- <div class="col-auto">
@@ -738,11 +750,12 @@ export default {
     },
     canSubmit() {
       if (this.current) {
-        const isCompleted = this.current.status === 'completed'
-        const inCanSubmit = this.$store.state.command.canSubmit?.has(
-          this.current.id
-        )
-        return isCompleted || inCanSubmit
+        return true
+        // const isCompleted = this.current.status === 'completed'
+        // const inCanSubmit = this.$store.state.command.canSubmit?.has(
+        //   this.current.id
+        // )
+        // return isCompleted || inCanSubmit
       }
       return false
     },
@@ -906,6 +919,7 @@ export default {
       return true
     },
     noCurrentOrIsNewOrSkippedEvent() {
+      console.log(this.current, this.noCurrentEvent, this.current.status)
       return (
         this.noCurrentEvent || ['new', 'skipped'].includes(this.current?.status)
       )
@@ -1310,6 +1324,7 @@ export default {
       )
     },
     currentRound(oldValue, newValue) {
+      console.log('are we wathcing current round', oldValue.id != newValue.id)
       if (oldValue.id != newValue.id) {
         this.marked = new Set()
         this.considering = new Set()
@@ -1360,6 +1375,79 @@ export default {
     // void this.$store.dispatch('command/getTimetable')
   },
   methods: {
+    switchJudge() {
+      this.$q
+        .dialog({
+          title: 'Change adjudicator',
+          message: 'Are you sure you wish to change adjudicator?',
+          focus: 'cancel',
+          dark: true,
+          class: 'bg-dark text-dark-inv',
+          cancel: { label: 'No', color: 'negative', textColor: 'negative-inv' },
+          ok: { label: 'Yes', color: 'positive', textColor: 'positive-inv' },
+          focus: 'cancel',
+        })
+        .onOk(() => {
+          this.$q
+            .dialog({
+              component: AddNumber,
+              componentProps: {
+                title: 'Enter Passcode',
+                pin: true,
+              },
+            })
+            .onOk((pin) => {
+              if (pin == this.$store.state.command.pin) {
+                return
+              } else {
+                const loadingDialog = this.$q.dialog({
+                  message: 'Changing adjudicator, please stand by...',
+                  dark: false,
+                  class: 'bg-dark text-dark-inv',
+                  progress: true, // we enable default settings
+                  persistent: true, // we want the user to not be able to close it
+                  ok: false, // we want the user to not be able to close it
+                })
+                this.$axios
+                  .post('/auth/judgelogin', { pin })
+                  .then((response) => {
+                    this.$store.commit('command/storePin', pin)
+                    console.log(response)
+                    this.$axios.defaults.headers.common.Authorization = `Bearer ${response.headers.authorization}`
+                    this.$store.commit(
+                      'command/storeAuth',
+                      response.headers.authorization
+                    )
+                    this.$store.dispatch('command/getUserDetails').then(() => {
+                      this.$store.dispatch('command/getEvents')
+                      this.$store
+                        .dispatch('command/updateTimetable')
+                        .then(() => {
+                          this.$store.commit('command/setCurrentNext')
+                          this.$store.commit(
+                            'command/resetCurrentTimetableOrder'
+                          )
+                          this.getCompetitors()
+                          loadingDialog.hide()
+                        })
+
+                      this.$store.dispatch('echo/connectEcho')
+                    })
+                  })
+                  .catch(() => {
+                    this.loggingIn = false
+                    loadingDialog.hide()
+                    this.$q.notify({
+                      color: 'negative',
+                      position: 'bottom',
+                      message: 'Incorrect PIN',
+                      icon: 'report_problem',
+                    })
+                  })
+              }
+            })
+        })
+    },
     gotoNextHeat() {
       if (this.isOxbridgeVarsity) {
         this.$store.dispatch('command/getEvents')
@@ -1380,7 +1468,8 @@ export default {
             this.toClear = !this.toClear
             const loadingDialog = this.$q.dialog({
               message: 'Processing marks...',
-              dark: true,
+              class: 'bg-dark text-dark-inv',
+              dark: false,
               progress: true, // we enable default settings
               persistent: true, // we want the user to not be able to close it
               ok: false, // we want the user to not be able to close it
@@ -1494,6 +1583,11 @@ export default {
         })
     },
     getDetails() {
+      // console.log(this.$store.getters['command/judgeMarks'])
+      // this.$store.dispatch('echo/shareStoredMarks', {
+      //   roundId: 2920,
+      //   judgeHeat: 'D1-1',
+      // })
       const approx = Math.round(
         this.currentRound?.round?.recall / this.currentRound?.round?.heats
       )
@@ -1520,7 +1614,12 @@ export default {
         html: true,
         class: 'bg-dark text-dark-inv text-subtitle1',
         cancel: false,
-        ok: { label: 'OK', color: 'positive', flat: true },
+        ok: {
+          label: 'OK',
+          color: 'positive',
+          class: 'text-positive-inv',
+          unelevated: true,
+        },
         focus: 'ok',
       })
       // .onCancel(() => {
@@ -1974,6 +2073,7 @@ export default {
         this.currentRound.round.danceOrder ?? this.currentRound.round.dances
       const toPost = {
         roundId,
+        id: this.currentRound.id,
         dance: danceIds[this.danceLetterIndex],
         judge: this.myAdjudicator,
         numbers: tapMarked,
@@ -2249,15 +2349,20 @@ export default {
             class: spotOn
               ? 'bg-dark text-dark-inv'
               : 'bg-negative text-negative-inv',
-            cancel: { label: 'Cancel', color: 'positive', flat: true },
-            ok: { label: 'Yes', color: 'warning', flat: true },
+            cancel: {
+              label: 'Cancel',
+              color: 'warning',
+              textColor: 'warning-inv',
+            },
+            ok: { label: 'Yes', color: 'positive', textColor: 'positive-inv' },
             focus: 'cancel',
           })
           .onOk(() => {
             this.toClear = !this.toClear
             const loadingDialog = this.$q.dialog({
               message: 'Processing marks...',
-              dark: true,
+              dark: false,
+              class: 'bg-dark text-dark-inv',
               progress: true, // we enable default settings
               persistent: true, // we want the user to not be able to close it
               ok: false, // we want the user to not be able to close it

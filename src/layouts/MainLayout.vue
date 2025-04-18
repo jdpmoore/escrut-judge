@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh lpr fFf">
     <q-header elevated>
-      <q-toolbar class="bg-dark ivdalines q-px-xs">
+      <q-toolbar class="bg-dark text-dark-inv ivdalines q-px-xs">
         <tippy
           ref="timetable-btn"
           content="Tap here for your timetable"
@@ -18,11 +18,12 @@
             :disable="$store.state.command.timetable.length === 0"
             round
             icon="schedule"
+            class="text-dark-inv"
             aria-label="Timetable"
             @click="showTheTimetable"
           />
         </tippy>
-        <q-toolbar-title class="row justify-between items-center">
+        <q-toolbar-title class="row justify-between items-center text-dark-inv">
           <div>
             {{ toolbarTitle }}
             <q-badge v-if="isChair" rounded color="positive"></q-badge>
@@ -75,7 +76,7 @@
       behavior="mobile"
       elevated
       :width="$q.screen.lt.sm ? $q.screen.width : 350"
-      class="bg-dark text-white"
+      class="bg-dark text-dark-inv"
     >
       <!-- <div
         v-if="showTimetable"
@@ -110,7 +111,7 @@
       elevated
       side="right"
       :width="$q.screen.lt.sm ? $q.screen.width : 350"
-      class="bg-dark text-white"
+      class="bg-dark text-dark-inv"
     >
       <!-- <div
         v-if="showMenu"
@@ -207,8 +208,8 @@
 
       <q-card-section class="row items-center no-wrap">
         <div>
-          <div class="text-weight-bold text-white">Login timeout</div>
-          <div class="text-white">
+          <div class="text-weight-bold text-primary-inv">Login timeout</div>
+          <div class="text-primary-inv">
             You will be logged out in {{ timeRemainingMin }}
           </div>
         </div>
@@ -245,6 +246,7 @@ import { crono } from 'vue-crono'
 
 import { defineComponent } from 'vue'
 import { axiosError } from 'boot/axios'
+// import { flare } from '@flareapp/flare-client'
 // import { useTippy } from 'vue-tippy'
 
 export default defineComponent({
@@ -442,6 +444,7 @@ export default defineComponent({
     },
   },
   created() {
+    // flare.test()
     // console.log(this.$q.platform)
     // window.io = require('socket.io-client')
     // this.$axios.interceptors.response.use(null, (error) => {
@@ -508,9 +511,23 @@ export default defineComponent({
           .dialog({
             title: 'Start demo',
             message: 'Are you ready to start the demo?',
-            cancel: true,
             dark: true,
             class: 'bg-primary text-primary-inv',
+            cancel: {
+              label: 'No',
+              // outline: true,
+              // flat: true,
+              unelevated: true,
+              color: 'negative',
+            },
+            ok: {
+              label: 'Yes',
+              unelevated: true,
+              // outline: true,
+              // flat: true,
+              color: 'positive',
+              textColor: 'positive-inv',
+            },
           })
           .onOk(() => {
             this.timetableButton.show()

@@ -1,6 +1,6 @@
 <template>
   <q-toolbar
-    class="bg-primary text-white shadow-2 q-pr-xs"
+    class="bg-primary text-primary-inv shadow-2 q-pr-xs"
     style="position: fixed; top: 0px; z-index: 666; height: 56px"
   >
     <!--  -->
@@ -15,7 +15,7 @@
   </q-toolbar>
   <div style="height: 56px"></div>
   <q-list>
-    <q-item v-if="isLoggedIn" class="q-pr-none">
+    <q-item class="q-pr-none">
       <q-item-section avatar class="q-pa-none q-pr-sm">
         <q-avatar size="140px">
           <!-- <q-badge
@@ -40,23 +40,23 @@
           />
         </q-avatar>
       </q-item-section>
-      <q-item-section class="text-white">
+      <q-item-section class="text-dark-inv">
         <div class="col justify-center items-center text-center">
           <q-item-label style="font-weight: bold" class="text-h6 q-pb-md">{{
             userName
           }}</q-item-label>
           <!--              <q-item-label caption class="text-white inline" v-for="role in user.roles" v-bind:key="role">{{ role }}</q-item-label>-->
           <!--                <q-btn flat dense icon="warning" color="blue"><q-badge color="red" floating>4</q-badge></q-btn>-->
-          <!-- <q-btn
+          <q-btn
             class="q-mb-sm full-width"
             flat
-            color="white"
+            color="dark-inv"
             dense
             label="logout"
             icon="logout"
             aria-label="Login"
-            @click="setCompetition"
-          /> -->
+            @click="checkLogin"
+          />
           <!-- <q-btn
             class="q-mb-sm full-width"
             flat
@@ -80,7 +80,7 @@
         </div>
       </q-item-section>
     </q-item>
-    <q-item v-ripple clickable class="bg-dark text-white">
+    <q-item v-ripple clickable class="bg-dark text-dark-inv">
       <!-- <q-item-section avatar>
         <q-icon name="settings" class="text-positive" />
       </q-item-section> -->
@@ -95,10 +95,11 @@
       </q-item-section>
     </q-item>
     <q-item
+      v-if="isLoggedIn"
       v-ripple
       label="Judge"
       clickable
-      class="bg-dark text-white"
+      class="bg-dark text-dark-inv"
       to="/judge"
       @click="$emit('close')"
     >
@@ -106,63 +107,63 @@
         <q-icon name="done" class="text-positive" />
       </q-item-section>
       <q-item-section>
-        <q-item-label class="text-white">Judge competition</q-item-label>
+        <q-item-label class="text-dark-inv">Judge competition</q-item-label>
       </q-item-section>
     </q-item>
-    <q-item
+    <!-- <q-item
       v-ripple
       label="data"
       clickable
-      class="bg-dark text-white"
+      class="bg-dark text-dark-inv"
       to="/backgrounds"
     >
       <q-item-section avatar>
         <q-icon name="folder" class="text-warning" />
       </q-item-section>
       <q-item-section>
-        <q-item-label class="text-white">Backgrounds</q-item-label>
+        <q-item-label class="text-dark-inv">Backgrounds</q-item-label>
       </q-item-section>
-    </q-item>
+    </q-item> -->
     <q-item
       v-if="isLoggedIn"
       v-ripple
       label="data"
       clickable
-      class="bg-dark text-white"
-      @click="dataDump"
+      class="bg-dark text-dark-inv"
+      @click="checkPass"
     >
       <q-item-section avatar>
-        <q-icon name="settings" class="text-warning" />
+        <q-icon name="list" class="text-warning" />
       </q-item-section>
       <q-item-section>
-        <q-item-label class="text-white">Data dump</q-item-label>
+        <q-item-label class="text-dark-inv">Marked rounds</q-item-label>
       </q-item-section>
     </q-item>
     <q-item
       v-ripple
       clickable
-      class="bg-dark text-white"
+      class="bg-dark text-dark-inv"
       @click="clearLocalStorage"
     >
       <q-item-section avatar>
         <q-icon name="settings" class="text-negative" />
       </q-item-section>
       <q-item-section>
-        <q-item-label class="text-white">Clear local storage</q-item-label>
+        <q-item-label class="text-dark-inv">Clear local storage</q-item-label>
       </q-item-section>
     </q-item>
     <q-item
       v-ripple
       label="About"
       clickable
-      class="bg-dark text-white"
+      class="bg-dark text-dark-inv"
       @click="aboutBox"
     >
       <q-item-section avatar>
-        <q-icon name="info" class="text-white" />
+        <q-icon name="info" class="text-dark-inv" />
       </q-item-section>
       <q-item-section>
-        <q-item-label class="text-white">About</q-item-label>
+        <q-item-label class="text-dark-inv">About</q-item-label>
       </q-item-section>
     </q-item>
     <q-item
@@ -170,14 +171,14 @@
       v-ripple
       label="Login"
       clickable
-      class="bg-dark text-white"
+      class="bg-dark text-dark-inv"
       to="/login"
     >
       <q-item-section avatar>
         <q-icon name="login" class="text-positive" />
       </q-item-section>
       <q-item-section>
-        <q-item-label class="text-white">Login</q-item-label>
+        <q-item-label class="text-dark-inv">Login</q-item-label>
       </q-item-section>
     </q-item>
     <!-- <q-item
@@ -201,8 +202,8 @@
         expand-separator
         :label="menu.title"
         :icon="menu.icon"
-        header-class="bg-primary text-white"
-        expand-icon-class="text-white"
+        header-class="bg-primary text-primary-inv"
+        expand-icon-class="text-primary-inv"
       >
         <q-item
           v-for="(child, childIndex) in menu.children"
@@ -210,19 +211,19 @@
           v-ripple
           clickable
           :header-inset-level="1"
-          class="text-white"
+          class="text-dark-inv"
           :to="child.location"
         >
           <q-item-section avatar>
             <q-icon
               :name="child.icon"
               :class="
-                child.iconColor ? `text-${child.iconColor}` : 'text-white'
+                child.iconColor ? `text-${child.iconColor}` : 'text-dark-inv'
               "
             />
           </q-item-section>
           <q-item-section>
-            <q-item-label class="text-white">{{ child.title }}</q-item-label>
+            <q-item-label class="text-dark-inv">{{ child.title }}</q-item-label>
           </q-item-section>
         </q-item>
       </q-expansion-item>
@@ -230,17 +231,17 @@
         v-else-if="menu.title"
         v-ripple
         clickable
-        class="bg-primary text-white"
+        class="bg-primary text-primary-inv"
         :to="menu.location"
       >
         <q-item-section avatar>
           <q-icon
             :name="menu.icon"
-            :class="menu.iconColor ? `text-${menu.iconColor}` : 'text-white'"
+            :class="menu.iconColor ? `text-${menu.iconColor}` : 'text-dark-inv'"
           />
         </q-item-section>
         <q-item-section>
-          <q-item-label class="text-white">{{ menu.title }}</q-item-label>
+          <q-item-label class="text-dark-inv">{{ menu.title }}</q-item-label>
         </q-item-section>
       </q-item>
     </div>
@@ -366,6 +367,113 @@ export default defineComponent({
     },
   },
   methods: {
+    checkPass() {
+      this.$q
+        .dialog({
+          dark: true,
+          title: 'View storage',
+          class: 'bg-primary text-primary-inv',
+          html: true,
+          message: 'Please enter password to view local storage',
+          prompt: {
+            model: '',
+          },
+          cancel: {
+            label: 'Cancel',
+            // outline: true,
+            // flat: true,
+            unelevated: true,
+            color: 'negative',
+          },
+          ok: {
+            label: 'Ok',
+            unelevated: true,
+            // outline: true,
+            // flat: true,
+            color: 'positive',
+          },
+          color: 'primary',
+        })
+        .onOk((model) => {
+          if (model === '1234') {
+            this.restoreOptions()
+          }
+        })
+    },
+    restoreOptions() {
+      const stored = this.$store.getters['command/judgeMarks']
+      const roundIds = Object.keys(stored)
+      // const rounds = roundIds.map((id) => {
+      //   return this.$store.state.command.scrutineering.roundById.get(Number(id))
+      // })
+      const items = roundIds.map((r) => {
+        return { label: r, value: r, color: 'positive' }
+      })
+      items.unshift({ label: 'All', value: 'all', color: 'positive' })
+      console.log(items)
+      this.$q
+        .dialog({
+          dark: true,
+          title: 'Saved marks on this pad',
+          class: 'bg-primary text-primary-inv',
+          message:
+            'The following rounds have marks saved on this pad, which do you wish to re-transmit?',
+          html: true,
+          cancel: {
+            label: 'Cancel',
+            color: 'positive',
+            textColor: 'positive-inv',
+          },
+          ok: { label: 'Ok', color: 'warning', textColor: 'warning-inv' },
+          focus: 'cancel',
+          options: {
+            type: 'radio',
+            model: null,
+            // inline: true
+            items,
+          },
+        })
+        .onOk((data) => {
+          if (data === 'all') {
+            this.dataDump()
+          } else {
+            this.selectJudgeHeat(data, stored[data])
+          }
+        })
+    },
+
+    selectJudgeHeat(roundId, roundJudgeHeats) {
+      const items = roundJudgeHeats.map((r) => {
+        return { label: r, value: r, color: 'positive' }
+      })
+      this.$q
+        .dialog({
+          dark: true,
+          title: 'Saved marks on this pad',
+          class: 'bg-primary text-primary-inv',
+          message: `Round ${roundId} has the following sets of marks saved on this pad, which do you wish to re-transmit?`,
+          html: true,
+          cancel: {
+            label: 'Cancel',
+            color: 'positive',
+            textColor: 'positive-inv',
+          },
+          ok: { label: 'Ok', color: 'warning', textColor: 'warning-inv' },
+          focus: 'cancel',
+          options: {
+            type: 'radio',
+            model: null,
+            // inline: true
+            items,
+          },
+        })
+        .onOk((data) => {
+          this.$store.dispatch('echo/shareStoredMarks', {
+            roundId: Number(roundId),
+            judgeHeat: data,
+          })
+        })
+    },
     dataDump() {
       console.log('now we dump')
       const { tempMarks, tempImages, roundById } =
@@ -436,7 +544,7 @@ export default defineComponent({
         .dialog({
           dark: true,
           title: 'Clear storage',
-          class: 'bg-primary text-white',
+          class: 'bg-primary text-primary-inv',
           html: true,
           message: 'Please enter password to clear local storage?',
           prompt: {
@@ -459,10 +567,11 @@ export default defineComponent({
           color: 'primary',
         })
         .onOk((model) => {
-          if (model === '1234') {
+          if (model === '12349876') {
             this.logout().then(() => {
               this.$q.localStorage.clear()
               this.forceUpdate()
+              this.$router.push('/login')
             })
           }
         })
@@ -484,7 +593,7 @@ export default defineComponent({
             .dialog({
               dark: true,
               title: 'About eScrut',
-              class: 'bg-primary text-white',
+              class: 'bg-primary text-primary-inv',
               persistent: true,
               html: true,
               message: `You are currently running ${localVersion} of the eScrut judges module, and the latest version is ${cloudVersion}. You may trigger an immediate update, however this will also log you out.`,
@@ -537,9 +646,10 @@ export default defineComponent({
       return this.$axios
         .post('/auth/logout', 'logout')
         .then(() => {
+          void this.$router.push('/login')
           this.$axios.defaults.headers.common.Authorization = ''
           this.$store.commit('command/storeAuth', '')
-          this.$store.commit('command/clearStore')
+          this.$store.commit('command/clearUser')
           // this.$q.localStorage.remove('login-details', this.credentials)
           // this.noCompetitionBool = true
           // window.Echo.connector.socket.close()
@@ -557,10 +667,22 @@ export default defineComponent({
           .dialog({
             dark: true,
             title: 'Logout?',
-            class: 'bg-primary text-white',
+            class: 'bg-primary text-primary-inv',
             message: 'Are you sure you wish to logout?',
-            cancel: { label: 'No', outline: true, flat: true, color: 'amber' },
-            ok: { label: 'Yes', outline: true, flat: true, color: 'amber' },
+            cancel: {
+              label: 'No',
+              // outline: true,
+              // flat: true,
+              unelevated: true,
+              color: 'negative',
+            },
+            ok: {
+              label: 'Yes',
+              unelevated: true,
+              // outline: true,
+              // flat: true,
+              color: 'positive',
+            },
             color: 'primary',
           })
           .onOk(() => {

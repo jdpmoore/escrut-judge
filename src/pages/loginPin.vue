@@ -31,46 +31,6 @@
             class="column items-center justify-center text-center"
           >
             <!-- <q-input standout="bg-teal text-white" v-model="text" label="Custom standout" :dense="dense" /> -->
-            <q-input
-              v-model="credentials.email"
-              color="white"
-              outlined
-              dark
-              standout="bg-primary text-white"
-              class="q-pa-sm text-black"
-              label="Email"
-              style="width: 300px"
-              autocomplete="username"
-            >
-              <template v-if="credentials.email" #append>
-                <q-icon
-                  name="cancel"
-                  class="cursor-pointer"
-                  @click.stop="credentials.email = ''"
-                />
-              </template>
-            </q-input>
-            <q-input
-              v-model="credentials.password"
-              outlined
-              standout="bg-primary text-white"
-              class="q-pa-sm"
-              :type="isPwd ? 'password' : 'text'"
-              label="Password"
-              autocomplete="current-password"
-              label-color="white"
-              dark
-              style="width: 300px"
-              @keyup.enter="login"
-            >
-              <template #append>
-                <q-icon
-                  :name="isPwd ? 'visibility_off' : 'visibility'"
-                  class="cursor-pointer"
-                  @click="isPwd = !isPwd"
-                />
-              </template>
-            </q-input>
             <!-- <q-input
             v-model="credentials.email"
             outlined
@@ -117,35 +77,11 @@
               text-color="white"
               label="Login"
               style="width: 315px"
-              :disabled="
-                credentials.email.length === 0 ||
-                credentials.password.length === 0
-              "
-              @click="login"
+              :disabled="loggingIn"
+              @click="loginPin"
             />
           </q-card-section>
         </form>
-        <q-card-section
-          class="row items-center text-center justify-center q-pt-none"
-        >
-          <q-btn
-            class="q-ma-sm"
-            color="primary"
-            dark
-            text-color="white"
-            label="reset password"
-            style="width: 155px"
-            :disabled="credentials.email.length === 0"
-            @click="forgotPopup"
-          />
-          <!-- <q-btn
-            class="q-ma-sm text-white row full-width"
-            label="Register"
-            color="primary"
-            style="max-width: 155px"
-            @click="register"
-          /> -->
-        </q-card-section>
       </q-card>
     </div>
   </q-page>
@@ -155,6 +91,7 @@
 import { defineComponent } from 'vue'
 import { Common, userDetails, Versions } from '../@types/common'
 import Echo from 'laravel-echo'
+import AddNumber from 'components/dialog/AddNumber.vue'
 // import { flare } from '@flareapp/flare-client'
 // import client from 'socket.io-client'
 declare global {
@@ -354,6 +291,64 @@ export default defineComponent({
             .catch(this.$common.axiosError)
         }
       }
+    },
+    loginPin() {
+      this.$q
+        .dialog({
+          component: AddNumber,
+          componentProps: {
+            title: 'Enter Passcode',
+            pin: true,
+          },
+        })
+        .onOk((pin: number) => {
+          this.loggingIn = true
+          this.$axios
+            .post('/auth/judgelogin', { pin })
+            .then((response) => {
+              this.$store.commit('command/storePin', pin)
+              console.log(response)
+              this.$axios.defaults.headers.common.Authorization = `Bearer ${response.headers.authorization}`
+              this.$store.commit(
+                'command/storeAuth',
+                response.headers.authorization
+              )
+              this.$store
+                .dispatch('command/getUserDetails')
+                .then((userDetails: userDetails) => {
+                  this.versionCheck(userDetails.versions)
+                  // this.$store.dispatch('GOstore/joinEchoNotifications')
+                  this.$store.dispatch('command/getDances')
+                  this.$store
+                    .dispatch('command/getCompetition', response.data.compId)
+                    .then(() => {
+                      this.$store.dispatch('echo/connectEcho')
+                      this.loggingIn = false
+                      // if (userDetails.firstTime) {
+                      //   this.firstLoginPopup()
+                      // } else {
+                      // if ('redirect' in this.$route.query) {
+                      //   this.$router.push(`${this.$route.query.redirect}`)
+                      // } else {
+                      this.$router.push('/judge')
+                      // }
+                      // }
+                    })
+                    .catch(() => {
+                      this.loggingIn = false
+                    })
+                })
+            })
+            .catch(() => {
+              this.loggingIn = false
+              this.$q.notify({
+                color: 'negative',
+                position: 'bottom',
+                message: 'Incorrect PIN',
+                icon: 'report_problem',
+              })
+            })
+        })
     },
     login() {
       this.loggingIn = true

@@ -8,23 +8,21 @@
 // Your own variables (that are declared here) and Quasar's own
 // ones will be available out of the box in your .vue/.scss/.sass files
 
-
-$primary   : #0D68B1;
-$accent    : #B4191D;
-$secondary : lightyellow;
+$primary: #0d68b1;
+$accent: #b4191d;
+$secondary: lightyellow;
 // #26A69A;
 // $accent    : #B4191D;
-$dark      : #333333;
+$dark: #333333;
 
-$accent-highlight : #9C120033;
-$highlight : #f2c0376e;
+$accent-highlight: #9c120033;
+$highlight: #f2c0376e;
 $highlighted: yellow;
 
-$positive  : #21BA45;
-$negative  : #C10015;
-$info      : #31CCEC;
-$warning   : #F2C037;
-
+$positive: #21ba45;
+$negative: #c10015;
+$info: #31ccec;
+$warning: #f2c037;
 
 $primary-inv: #fff;
 $secondary-inv: #000;
@@ -34,18 +32,20 @@ $positive-inv: #000;
 $negative-inv: #fff;
 $info-inv: #000;
 $warning-inv: #000;
+$highlighted-inv: #000;
 
 :root {
-  --q-color-highlighted: yellow;
-  --q-color-primary-inv:#fff;
-  --q-color-secondary-inv: #000;
-  --q-color-accent-inv:#fff;
-  --q-color-dark-inv: #fff;
-  --q-color-dark: #333;
-  --q-color-positive-inv:#000;
-  --q-color-negative-inv: #fff;
-  --q-color-info-inv:#000;
-  --q-color-warning-inv: #000;
+  --q-highlighted: yellow;
+  --q-primary-inv: #fff;
+  --q-secondary-inv: #000;
+  --q-accent-inv: #fff;
+  --q-dark-inv: #fff;
+  // --q-dark: #333;
+  --q-positive-inv: #000;
+  --q-negative-inv: #fff;
+  --q-info-inv: #000;
+  --q-warning-inv: #000;
+  --q-highlighted-inv: #000;
 }
 
 // .text-white {
@@ -59,72 +59,72 @@ $warning-inv: #000;
 
 .bg-accent-highlighted {
   background-color: $highlighted;
-  background-color: var(--q-color-highlighted) !important;
+  background-color: var(--q-highlighted) !important;
 }
 .text-accent-highlighted {
   color: $highlighted;
-  color: var(--q-color-highlighted) !important;
+  color: var(--q-highlighted) !important;
 }
 
 .bg-highlighted {
   background-color: $highlighted;
-  background-color: var(--q-color-highlighted) !important;
+  background-color: var(--q-highlighted) !important;
 }
 .text-highlighted {
   color: $highlighted;
-  color: var(--q-color-highlighted) !important;
+  color: var(--q-highlighted) !important;
 }
 
 .bg-primary-inv {
-  background-color: var(--q-color-primary-inv) !important;
+  background-color: var(--q-primary-inv) !important;
 }
 .text-primary-inv {
-  color: var(--q-color-primary-inv) !important;
+  color: var(--q-primary-inv);
 }
 .bg-secondary-inv {
-  background-color: var(--q-color-secondary-inv) !important;
+  background-color: var(--q-secondary-inv) !important;
 }
 .text-secondary-inv {
-  color: var(--q-color-secondary-inv) !important;
+  color: var(--q-secondary-inv) !important;
 }
 .bg-accent-inv {
-  background-color: var(--q-color-accent-inv) !important;
+  background-color: var(--q-accent-inv) !important;
 }
 .text-accent-inv {
-  color: var(--q-color-accent-inv) !important;
+  color: var(--q-accent-inv) !important;
 }
 .bg-dark-inv {
-  background-color: var(--q-color-dark-inv) !important;
+  background-color: var(--q-dark-inv) !important;
 }
 .text-dark-inv {
-  color: var(--q-color-dark-inv) !important;
+  color: var(--q-dark-inv) !important;
 }
 .text-dark {
-  color: var(--q-color-dark) !important;
+  color: var(--q-dark) !important;
 }
 .bg-positive-inv {
-  background-color: var(--q-color-positive-inv) !important;
+  background-color: var(--q-positive-inv) !important;
 }
 .text-positive-inv {
-  color: var(--q-color-positive-inv) !important;
+  color: var(--q-positive-inv) !important;
 }
 .bg-negative-inv {
-  background-color: var(--q-color-negative-inv) !important;
+  background-color: var(--q-negative-inv) !important;
 }
 .text-negative-inv {
-  color: var(--q-color-negative-inv) !important;
+  color: var(--q-negative-inv) !important;
 }
 .bg-info-inv {
-  background-color: var(--q-color-info-inv) !important;
+  background-color: var(--q-info-inv) !important;
 }
 .text-info-inv {
-  color: var(--q-color-info-inv) !important;
+  color: var(--q-info-inv) !important;
 }
 .bg-warning-inv {
-  background-color: var(--q-color-warning-inv) !important;
+  background-color: var(--q-warning-inv) !important;
 }
 .text-warning-inv {
-  color: var(--q-color-warning-inv) !important;
+  color: var(--q-warning-inv) !important;
 }
 
 .bg-oxford-blue {
@@ -134,10 +134,10 @@ $warning-inv: #000;
   color: #002147 !important;
 }
 .bg-oxford-blue-inv {
-  background-color: #FFF !important;
+  background-color: #fff !important;
 }
 .text-oxford-blue-inv {
-  color: #FFF !important;
+  color: #fff !important;
 }
 
 .bg-cambridge-blue {
@@ -154,10 +154,9 @@ $warning-inv: #000;
   background-color: #000 !important;
 }
 
-
-
 :export {
   primary: $primary;
+  primary-inv: $primary-inv;
   secondary: $secondary;
   accent: $accent;
   dark: $dark;
@@ -166,4 +165,3 @@ $warning-inv: #000;
   info: $info;
   warning: $warning;
 }
-

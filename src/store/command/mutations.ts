@@ -12,6 +12,15 @@ import _ from 'lodash'
 import { LocalStorage, Cookies, extend } from 'quasar'
 
 const mutation: MutationTree<CommandStateInterface> = {
+  storePin(state: CommandStateInterface, val: number) {
+    state.pin = val
+  },
+  setLogo(state: CommandStateInterface, val: string) {
+    state.logo = val ?? '/assets/ivda/ivda_website_logo_2.svg'
+  },
+  setIcon(state: CommandStateInterface, val: string) {
+    state.icon = val ?? '/assets/ivda/ivda_logo_only.svg'
+  },
   setDemo(state, val: boolean) {
     state.demo = val
   },
@@ -31,6 +40,10 @@ const mutation: MutationTree<CommandStateInterface> = {
     state.auth.authToken = val
     state.auth.timeStamp = Date.now()
     state.loggedIn = val.length > 0
+  },
+  clearUser(state: CommandStateInterface, val: string) {
+    state.userDetails = { avatar: '', roles: [''], firstName: '', lastName: '' }
+    state.loggedIn = false
   },
   storeUser(
     state: CommandStateInterface,
@@ -240,6 +253,9 @@ const mutation: MutationTree<CommandStateInterface> = {
     state.current = newCurrent
     state.compere.timetableOrder = newCurrent.timetableOrder
   },
+  resetCurrentTimetableOrder(state: CommandStateInterface) {
+    state.compere.timetableOrder = state.current.timetableOrder
+  },
   setCurrent(state: CommandStateInterface, newCurrent: v2.TimetableItem) {
     state.current = newCurrent
   },
@@ -303,8 +319,14 @@ const mutation: MutationTree<CommandStateInterface> = {
       state.next = blankRound
     }
   },
-  setCompetition(state: CommandStateInterface, val: v1.Competition) {
+  setCompetition(state: CommandStateInterface, val: v2.Competition) {
     state.competition = val
+    if (val.circuit.logo) {
+      state.logo = val.circuit.logo
+    }
+    if (val.circuit.icon) {
+      state.icon = val.circuit.icon
+    }
   },
   setFloor(state: CommandStateInterface, val: v1.Floor) {
     state.floor = val
@@ -385,6 +407,8 @@ const mutation: MutationTree<CommandStateInterface> = {
         path: '/',
       })
     }
+    const icon = state.icon
+    const logo = state.logo
     const s = initialState()
     Object.keys(state).map((key) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -392,6 +416,8 @@ const mutation: MutationTree<CommandStateInterface> = {
       state[key as keyof CommandStateInterface] =
         s[key as keyof CommandStateInterface]
     })
+    state.icon = icon
+    state.logo = logo
   },
   updateNumberHeatsRoundId(
     state: CommandStateInterface,
@@ -456,7 +482,7 @@ const mutation: MutationTree<CommandStateInterface> = {
     })
   },
   setTimetableIdActive(state: CommandStateInterface, id: number) {
-    console.log('we set it active now...')
+    console.log('we set it active now...', id)
     state.timetable.forEach((ti) => {
       if (ti.id == id) {
         ti.status = 'active'

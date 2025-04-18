@@ -37,6 +37,9 @@ interface Scrutineering {
 // }
 
 export interface CommandStateInterface {
+  pin: number
+  logo: string
+  icon: string
   demo: boolean
   canSubmit: Set<number>
   handwriting: boolean
@@ -147,6 +150,9 @@ export function initialState(): CommandStateInterface {
     domain = 'localhost'
   }
   const defaultState: CommandStateInterface = {
+    pin: 0,
+    logo: '/assets/ivda/ivda_website_logo_2.svg',
+    icon: '/assets/ivda/ivda_logo_only.svg',
     demo: false,
     canSubmit: new Set(),
     handwriting: false,

@@ -29,6 +29,7 @@ const execSync = require('child_process').execSync
 
 module.exports = configure(function (ctx) {
   const isLive = JSON.parse(process.env.LIVE)
+  const isLocal = JSON.parse(process.env.LOCAL ?? 'false')
   return {
     // https://v2.quasar.dev/quasar-cli-webpack/supporting-ts
     supportTS: {
@@ -83,7 +84,7 @@ module.exports = configure(function (ctx) {
         API: process.env.API,
         PUSHER_APP_KEY: process.env.PUSHER_APP_KEY,
         LIVE: isLive,
-        LOCAL: JSON.parse(process.env.LOCAL),
+        LOCAL: isLocal,
         FLARE: process.env.FLARE,
         credentials: JSON.parse(process.env.CREDENTIALS),
         version: version,
@@ -94,8 +95,8 @@ module.exports = configure(function (ctx) {
         ? 'dist/' + ctx.modeName + '/prod'
         : 'dist/' + ctx.modeName + '/dev',
       vueRouterMode: 'hash', // available values: 'hash', 'history'
-      devtool: 'hidden-source-map',
-      webpackDevtool: 'hidden-source-map',
+      devtool: isLocal ? 'source-map' : 'hidden-source-map',
+      webpackDevtool: isLocal ? 'source-map' : 'hidden-source-map',
       uglifyOptions: {
         compress: { drop_console: true },
         // compress: false,
@@ -104,7 +105,7 @@ module.exports = configure(function (ctx) {
         // mangle: false
         // { drop_console: true },
       },
-      sourcemap: 'hidden',
+      sourcemap: isLocal ? true : 'hidden',
       extendWebpack(cfg) {
         const FlareWebpackPluginSourcemap = require('@flareapp/flare-webpack-plugin-sourcemap')
         const flarePlugin = new FlareWebpackPluginSourcemap({
@@ -112,7 +113,7 @@ module.exports = configure(function (ctx) {
           removeSourcemaps: true,
         })
         cfg.plugins.push(flarePlugin)
-        cfg.devtool = 'hidden-source-map'
+        cfg.devtool = isLocal ? 'source-map' : 'hidden-source-map'
         if (!cfg.output) {
           cfg.output = {}
         }

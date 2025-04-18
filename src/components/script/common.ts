@@ -8,6 +8,7 @@ import { routerInstance } from 'boot/router'
 import { storeInstance } from 'boot/store'
 import Moment from 'moment-timezone'
 import _ from 'lodash'
+import { isThemeDark } from './themeHelper'
 // import { boot } from 'quasar/wrappers'
 // import { store } from 'src/store'
 import { Common, Competitor } from '../../@types/common'
@@ -232,7 +233,7 @@ export function axiosError(err: Common.ErrorObject, optionalMsg = ''): void {
 
 function reportError(err: Common.ErrorObject, optionalMsg: string) {
   Dialog.create({
-    dark: true,
+    dark: isThemeDark(),
     title: 'Bug report',
     message:
       'Please add as much detail as to what you were doing when this error occurred, including any steps which can repeat it',
@@ -413,7 +414,7 @@ export function roundSort(a: string, b: string) {
 export function popup(details: Common.PopupDetails) {
   // console.log(details)
   return Dialog.create({
-    dark: true,
+    dark: isThemeDark(),
     title: details.title,
     message: details.message,
     class: 'bg-primary',
@@ -614,7 +615,7 @@ export const sanitizeRules = {
 export function makePDF(idTag: string, title: string, test: boolean) {
   const makingDialog = Dialog.create({
     message: 'Creating PDF',
-    dark: true,
+    dark: isThemeDark(),
     class: 'bg-charcoal',
     progress: {
       // spinner: QSpinnerGears,
@@ -915,7 +916,7 @@ export function shareLocation(title: string) {
     title: title,
     message: `The link below has been copied to your clipboard<br/><a href="${window.location}" target="_blank" class="text-info">${window.location}</a>`,
     html: true,
-    dark: true,
+    dark: isThemeDark(),
     class: 'bg-dark text-dark-inv',
   })
 }

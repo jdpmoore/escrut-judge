@@ -54,6 +54,7 @@ export namespace v1 {
     id: number
     letter: string
     name: string
+    user: UseDetails
   }
 
   export interface Event {
@@ -140,6 +141,7 @@ export namespace v1 {
 
   export interface TimetableItem {
     adjudicatorLetters: string
+    timetableOrder?: number
     adjudicators: ShortJudge[]
     dances: string
     event: string
@@ -155,7 +157,36 @@ export namespace v1 {
 }
 
 export namespace v2 {
+  export interface Circuit {
+    id: number
+    title: string
+    description: string
+    domain: string
+    website: string
+    logo: string
+    icon: string
+    theme: {
+      primary: string
+      primary_inv: string
+      secondary: string
+      secondary_inv: string
+      accent: string
+      accent_inv: string
+      dark: string
+      dark_inv: string
+      positive: string
+      negative: string
+      info: string
+      warning: string
+      normal: string
+      highlighted: string
+      logo: string
+      icon: string
+    }
+  }
+
   export interface Competition {
+    circuit: Circuit
     address: string
     date: string
     id: number
@@ -209,6 +240,7 @@ export namespace v2 {
     id: number
     letter: string
     name: string
+    user: UseDetails
   }
 
   export interface Event {

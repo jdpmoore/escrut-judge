@@ -212,6 +212,17 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
         }
       })
       judges.listenForWhisper(
+        'skipRound',
+        (payload: { id: number; roundId: number }) => {
+          console.log('we should skip', payload.id)
+          commit('command/completedRound', payload.roundId, { root: true })
+          commit('command/completedTimetableEvent', payload.id, { root: true })
+          commit('command/setCurrentNext', {}, { root: true })
+          commit('command/resetCurrentTimetableOrder', {}, { root: true })
+          dispatch('command/getNextCompetitors', {}, { root: true })
+        }
+      )
+      judges.listenForWhisper(
         'markCompletedSetCurrent',
         (payload: { id: number; round: v2.TimetableItem }) => {
           // const { round } = payload
@@ -236,6 +247,12 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
         'heats',
         (payload: { roundId: number; newHeats: number }) => {
           commit('command/updateNumberHeatsRoundId', payload, { root: true })
+        }
+      )
+      judges.listenForWhisper(
+        'requestJudgeData',
+        (payload: { roundId: number; judgeHeat: string }) => {
+          dispatch('shareStoredMarks', payload)
         }
       )
       judges.listenForWhisper(
@@ -540,42 +557,44 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
     }
   },
   shareStatus({ rootState, commit, dispatch, rootGetters }) {
-    const roundId = rootState.command.current.round?.id
-    // const nextRoundId = rootState.command.current.round?.id
-    const round = {
-      title: rootState.command.current.title,
-      round: rootState.command.current.round?.round,
-      floor: rootState.command.current.round?.floor.id,
-    }
-    const nextRound = {
-      title: rootState.command.next?.title,
-      round: rootState.command.next?.round?.round,
-      floor: rootState.command.next?.round?.floor.id,
-    }
-    const dance = rootGetters['command/dance']
-    const competitors = rootGetters['command/competitorsByRoundId'](roundId)
-    const toWhisper = {
-      status: true,
-      current: {
-        round,
-        heat: rootState.command.currentHeat,
-        dance,
-        danceLetterIndex: rootState.command.compere.danceLetterIndex,
-        // competitors: competitors?.map((heat) => {
-        //   return heat.map((h) => {
-        //     return h.number
-        //   })
-        // }),
-        numCompetitors: competitors?.map((heat) => {
-          return heat.length
-        }),
-      },
-      next: {
-        round: nextRound,
-      },
-      judgeUserId: rootState.command.userDetails.id,
-    }
+    const toWhisper = rootGetters['command/status']
     console.log('status update', toWhisper)
+    const state = window.echo?.connector.pusher.connection.state
+    const isConnected = state === 'connected'
+    if (!window.echo || !isConnected) {
+      commit('setConnected', false)
+      dispatch('connectEcho').then(() => {
+        window.echo
+          .join(`es-comp.${rootState.command.competition.id}.judges`)
+          .whisper('judge', toWhisper)
+        // .error((err) => {
+        //   console.log('we have an error on whisper', err)
+        // })
+        const state = window.echo?.connector.pusher.connection.state
+        commit('setConnected', state === 'connected')
+      })
+    } else {
+      window.echo
+        .join(`es-comp.${rootState.command.competition.id}.judges`)
+        .whisper('judge', toWhisper)
+      commit('setConnected', isConnected)
+    }
+  },
+  shareStoredMarks({ rootState, commit, dispatch }, { judgeHeat, roundId }) {
+    const theRound = rootState.command.scrutineering.tempMarks[roundId]
+    if (!theRound) {
+      return
+    }
+    const theMarks = theRound.get(judgeHeat)
+    if (!theMarks) {
+      return
+    }
+    const toWhisper = {
+      restore: true,
+      judgeHeat,
+      roundId,
+      numbers: [...theRound.get(judgeHeat)],
+    }
     const state = window.echo?.connector.pusher.connection.state
     const isConnected = state === 'connected'
     if (!window.echo || !isConnected) {
