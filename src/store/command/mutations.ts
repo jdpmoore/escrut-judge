@@ -356,28 +356,28 @@ const mutation: MutationTree<CommandStateInterface> = {
       // console.log('saving cookie')
       Cookies.set('eScrut_command_JWT', authToken, state.cookieDetails)
     }
-    state.auth.authToken = ''
-    const toSave = extend<CommandStateInterface>(true, {}, state)
-    toSave.scrutineering.competitors = {}
-    LocalStorage.set('savedState-eScrut-command-v2', toSave)
-    saveMapSet(
-      'completedScrutineeringRounds',
-      state.scrutineering.completedRounds
-    )
-    saveMapSet('completedRounds', state.compere.completedRounds)
-    saveMapSet(
-      'completedTimetableEvents',
-      state.compere.completedTimetableEvents
-    )
-    saveMapSet('roundIdToEventId', state.scrutineering.roundIdToEventId)
-    saveMapSet('roundById', state.scrutineering.roundById)
-    saveMapSet('startTimes', state.startTimes)
-    saveMapSet('finalTimes', state.finalTimes)
-    saveMapSet('startTimesByRoundId', state.startTimesByRoundId)
-    saveMapSet('timetableOrder', state.timetableOrder)
-    saveMapSet('canSubmit', state.canSubmit)
-    saveTempMarks(state.scrutineering.tempMarks)
-    state.auth.authToken = authToken
+    // state.auth.authToken = ''
+    // const toSave = extend<CommandStateInterface>(true, {}, state)
+    // toSave.scrutineering.competitors = {}
+    // LocalStorage.set('savedState-eScrut-command-v2', toSave)
+    // saveMapSet(
+    //   'completedScrutineeringRounds',
+    //   state.scrutineering.completedRounds
+    // )
+    // saveMapSet('completedRounds', state.compere.completedRounds)
+    // saveMapSet(
+    //   'completedTimetableEvents',
+    //   state.compere.completedTimetableEvents
+    // )
+    // saveMapSet('roundIdToEventId', state.scrutineering.roundIdToEventId)
+    // saveMapSet('roundById', state.scrutineering.roundById)
+    // saveMapSet('startTimes', state.startTimes)
+    // saveMapSet('finalTimes', state.finalTimes)
+    // saveMapSet('startTimesByRoundId', state.startTimesByRoundId)
+    // saveMapSet('timetableOrder', state.timetableOrder)
+    // saveMapSet('canSubmit', state.canSubmit)
+    // saveTempMarks(state.scrutineering.tempMarks)
+    // state.auth.authToken = authToken
   },
   // clearStore() {
   // state: CommandStateInterface
