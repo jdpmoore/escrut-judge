@@ -303,9 +303,8 @@
               </div>
               <div v-else style="font-size: 100%">
                 Heat {{ heat }}/{{ currentRound?.round?.heats }},
-                {{ dance?.name }}:
-                {{ computedNumCouples }}
-                {{ isTeam ? 'teams' : 'couples' }}
+                {{ dance?.name }}: recall {{ currentRound?.round?.recall }}
+                <!-- {{ isTeam ? 'teams' : 'couples' }} -->
                 <!-- <q-btn
                   color="accent"
                   flat
@@ -1600,13 +1599,13 @@ export default {
                 <span class="text-body1">(recall approx. ${approx} per heat)</span>
 
                 <br><br>
-                Heat ${this.heat}, ${this.dance?.name}: ${
-        this.computedNumCouples
-      }
-                ${this.isTeam ? 'teams' : 'couples'} <br>out of ${
-        this.competitors.flat().length
-      } competitors<br>
-                                <div class="text-info">${this.floor.name}</div>`
+                Heat ${this.heat}, ${this.dance?.name}`
+      // <br><br>
+      // No. on floor: ${this.computedNumCouples}<br>
+      //<div class="text-info">${this.floor.name}</div>
+      //           ${this.isTeam ? 'teams' : 'couples'} <br>out of ${
+      //   this.competitors.flat().length
+      // } competitors
       this.$q.dialog({
         title: this.roundText,
         message,

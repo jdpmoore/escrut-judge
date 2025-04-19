@@ -447,9 +447,9 @@ export default {
     roundText() {
       switch (this.demoRound) {
         case 1:
-          return `Heat ${this.tempHeat}/2, Waltz: ${this.computedNumCouples} couples`
+          return `Heat ${this.tempHeat}/2, Waltz: recall ${this.demoRecall}`
         case 2:
-          return `Heat 1/1, Waltz: ${this.computedNumCouples} couples`
+          return `Heat 1/1, Waltz: recall ${this.demoRecall}`
         case 3:
           return 'Final'
         default:
@@ -1144,10 +1144,19 @@ export default {
                     ? `${this.competitors.length} heats`
                     : '1 heat'
                 }, ${this.competitors.flat().length} competitors<br>
-                <span class="text-body1">(recall approx. ${approx} per heat)</span>
-                <br><br>
-                Heat ${this.heat}, Waltz: ${this.computedNumCouples}
-                couples`
+                <span class="text-body1">(recall approx. ${approx} per heat)</span>`
+      // const message = `Recall ${this.currentRound?.round?.recall} from
+      //           ${
+      //             this.currentRound?.round?.heats > 1
+      //               ? `${this.currentRound?.round?.heats} heats`
+      //               : '1 heat'
+      //           }<br>
+      //           <span class="text-body1">(recall approx. ${approx} per heat)</span>
+
+      //           <br><br>
+      //           Heat ${this.heat}, ${this.dance?.name}<br><br>
+      //           No. on floor: ${this.computedNumCouples}<br>
+      //                           <div class="text-info">${this.floor.name}</div>`
       this.$q.dialog({
         title: this.roundText,
         message,
