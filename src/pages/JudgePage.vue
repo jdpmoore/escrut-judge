@@ -1591,9 +1591,7 @@ export default {
       const approx = Math.round(
         this.currentRound?.round?.recall / this.currentRound?.round?.heats
       )
-      const message = `${this.competitors.flat().length} competitors, recall ${
-        this.currentRound?.round?.recall
-      } from
+      const message = `Recall ${this.currentRound?.round?.recall} from
                 ${
                   this.currentRound?.round?.heats > 1
                     ? `${this.currentRound?.round?.heats} heats`
@@ -1605,7 +1603,9 @@ export default {
                 Heat ${this.heat}, ${this.dance?.name}: ${
         this.computedNumCouples
       }
-                ${this.isTeam ? 'teams' : 'couples'} <br><br>
+                ${this.isTeam ? 'teams' : 'couples'} <br>out of ${
+        this.competitors.flat().length
+      } competitors<br>
                                 <div class="text-info">${this.floor.name}</div>`
       this.$q.dialog({
         title: this.roundText,
