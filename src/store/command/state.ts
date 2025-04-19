@@ -47,8 +47,8 @@ export interface CommandStateInterface {
   currentDance: string
   version: string
   offline: boolean
-  competition: v1.Competition
-  competitions: v1.Competition[]
+  competition: v2.Competition
+  competitions: v2.Competition[]
   scrutineering: Scrutineering
   floors: v2.Floor[]
   floor: v1.Floor
@@ -98,13 +98,14 @@ const blankFloor: v1.Floor = {
   name: '',
 }
 
-const blankCompetition: v1.Competition = {
+const blankCompetition: v2.Competition = {
   address: '',
   date: '',
   id: 0,
   status: '',
   title: '',
   venue: '',
+  circuit: null,
 }
 
 export const blankRound: v2.TimetableItem = {
@@ -160,7 +161,13 @@ export function initialState(): CommandStateInterface {
     currentDance: '',
     version: process.env.version ? process.env.version : '1.0.0',
     offline: false,
-    userDetails: { avatar: '', roles: [''], firstName: '', lastName: '' },
+    userDetails: {
+      avatar: '',
+      roles: [''],
+      firstName: '',
+      lastName: '',
+      theme: null,
+    },
     competition: blankCompetition,
     floors: [],
     floor: blankFloor,

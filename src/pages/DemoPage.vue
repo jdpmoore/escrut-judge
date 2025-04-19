@@ -1138,14 +1138,12 @@ export default {
     getDetails() {
       this.helpButton.hide()
       const approx = Math.round(this.demoRecall / this.competitors.length)
-      const message = `${this.competitors.flat().length} competitors, recall ${
-        this.demoRecall
-      } from
+      const message = `Recall ${this.demoRecall} from
                 ${
                   this.competitors.length > 1
                     ? `${this.competitors.length} heats`
                     : '1 heat'
-                }<br>
+                }, ${this.competitors.flat().length} competitors<br>
                 <span class="text-body1">(recall approx. ${approx} per heat)</span>
                 <br><br>
                 Heat ${this.heat}, Waltz: ${this.computedNumCouples}

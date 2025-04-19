@@ -25,7 +25,17 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
         axiosInstance
           .get('/user')
           .then(({ data }) => {
+            if (
+              state.userDetails.theme &&
+              !data.theme &&
+              state.competition.circuit
+            ) {
+              themeHelper().setTheme(state.competition.circuit)
+            } else if (data.theme) {
+              themeHelper().setTheme(data)
+            }
             commit('storeUser', data)
+
             commit('saveState')
             resolve(data)
           })
@@ -158,7 +168,7 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
         .get(`/competition/${compId}`)
         .then(({ data: comp }) => {
           context.commit('setCompetition', comp)
-          if (comp.circuit) {
+          if (comp.circuit && !context.state.userDetails.theme) {
             themeHelper().setTheme(comp.circuit)
           }
           context.commit('saveState')

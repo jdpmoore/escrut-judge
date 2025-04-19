@@ -66,7 +66,7 @@ const mutation: MutationTree<CommandStateInterface> = {
       found.background = 'pink'
     }
   },
-  storeCompetitions(state: CommandStateInterface, val: v1.Competition[]) {
+  storeCompetitions(state: CommandStateInterface, val: v2.Competition[]) {
     state.competitions = val
   },
   storeDances(state: CommandStateInterface, val: v1.Dance[]) {
