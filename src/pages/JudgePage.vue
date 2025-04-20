@@ -2200,7 +2200,7 @@ export default {
         return
       }
       console.log('swipg', info)
-      if (info.duration < 25) {
+      if (info.duration < 50) {
         return
       }
       const numHeats = this.currentRound?.round?.heats
