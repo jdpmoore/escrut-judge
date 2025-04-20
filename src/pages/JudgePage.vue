@@ -1066,7 +1066,10 @@ export default {
       if (!roundId) {
         return []
       }
-      return this.$store.getters['command/competitorsByRoundId'](roundId) ?? []
+      const toReturn =
+        this.$store.getters['command/competitorsByRoundId'](roundId) ?? []
+      console.log(toReturn)
+      return toReturn
     },
     competitorsCurrent() {
       const roundId = this.current.round?.id

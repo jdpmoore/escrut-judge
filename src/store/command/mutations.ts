@@ -571,6 +571,18 @@ const mutation: MutationTree<CommandStateInterface> = {
     state.scrutineering.tempImages[roundId].set(judgeHeat, image)
     // console.log('new set', state.scrutineering.tempMarks[roundId])
   },
+  // newJudgeHeatTempMarks(
+  //   state: CommandStateInterface,
+  //   { roundId, judgeHeat }: { roundId: number; judgeHeat: string }
+  // ) {
+  //   if (!state.scrutineering.tempMarks[roundId]) {
+  //     state.scrutineering.tempMarks[roundId] = new Map()
+  //   }
+  //   if (!state.scrutineering.tempMarks[roundId].has(judgeHeat)) {
+  //     state.scrutineering.tempMarks[roundId].set(judgeHeat, new Set())
+  //   }
+  //   // console.log('new set', state.scrutineering.tempMarks[roundId])
+  // },
   newJudgeHeatTempMarks(
     state: CommandStateInterface,
     { roundId, judgeHeat }: { roundId: number; judgeHeat: string }
@@ -578,7 +590,9 @@ const mutation: MutationTree<CommandStateInterface> = {
     if (!state.scrutineering.tempMarks[roundId]) {
       state.scrutineering.tempMarks[roundId] = new Map()
     }
-    state.scrutineering.tempMarks[roundId].set(judgeHeat, new Set())
+    if (!state.scrutineering.tempMarks[roundId].has(judgeHeat)) {
+      state.scrutineering.tempMarks[roundId].set(judgeHeat, new Set())
+    }
     // console.log('new set', state.scrutineering.tempMarks[roundId])
   },
   judgeHeatTempMark(

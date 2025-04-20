@@ -5,7 +5,7 @@ import { EchoStateInterface } from './state'
 import Pusher from 'pusher-js'
 import Echo from 'laravel-echo'
 import { axiosInstance } from 'boot/axios'
-import { uid } from 'quasar'
+import { uid, Dialog } from 'quasar'
 // import _ from 'lodash'
 import { v2 } from 'src/@types/command'
 
@@ -595,6 +595,15 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       roundId,
       numbers: [...theRound.get(judgeHeat)],
     }
+    Dialog.create({
+      dark: true,
+      title: `Stored marks for ${judgeHeat} in ${roundId}`,
+      message: toWhisper.numbers.join(', '),
+      class: 'bg-primary text-primary-inv',
+      persistent: true,
+      // cancel: { label: 'Close', outline: true, flat: true, color: 'amber' },
+      ok: { label: 'Ok', outline: true, flat: true, color: 'positive' },
+    })
     const state = window.echo?.connector.pusher.connection.state
     const isConnected = state === 'connected'
     if (!window.echo || !isConnected) {
