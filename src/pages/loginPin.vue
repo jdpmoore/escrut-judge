@@ -330,7 +330,7 @@ export default defineComponent({
                       // if ('redirect' in this.$route.query) {
                       //   this.$router.push(`${this.$route.query.redirect}`)
                       // } else {
-                      this.$router.push('/judge')
+                      this.$router.replace('/judge')
                       // }
                       // }
                     })

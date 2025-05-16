@@ -184,6 +184,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
         // id is the timetable id
 
         const judgeUserIds = payload.judgeUserIds
+        const danceIndex = payload.danceIndex ?? 0
         const judgeUserId = rootState.command.userDetails.id
         const isMe = judgeUserIds.includes(judgeUserId)
         // console.log(
@@ -199,7 +200,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
             root: true,
           })
           commit('command/overrideCurrent', payload, { root: true })
-          commit('command/setDanceLetterIndex', 0, { root: true })
+          commit('command/setDanceLetterIndex', danceIndex, { root: true })
           dispatch('command/getCompetitorsByRoundId', payload.round.id, {
             root: true,
           })

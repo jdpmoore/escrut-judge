@@ -12,6 +12,24 @@
         >
           <!-- v-tippy="'Timetable'" -->
           <!-- v-tippy="{ trigger: 'custom', content: 'Timetable' }" -->
+          <!-- <q-btn
+            color="secondary"
+            unelevated
+            dense
+            icon="arrow_back"
+            class="q-mr-xs"
+            size="sm"
+            @click="$router.go(-1)"
+          />
+          <q-btn
+            color="secondary"
+            unelevated
+            dense
+            icon="arrow_forward"
+            class="q-ml-none"
+            size="sm"
+            @click="$router.go(1)"
+          /> -->
           <q-btn
             flat
             dense

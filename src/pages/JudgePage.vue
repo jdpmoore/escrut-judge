@@ -2196,21 +2196,22 @@ export default {
         })
     },
     handleSwipe(info) {
+      console.log(info)
       if (this.isHandwriting || this.isOxbridgeVarsity) {
         return
       }
-      console.log('swipg', info)
-      if (info.duration < 50) {
-        return
-      }
-      const numHeats = this.currentRound?.round?.heats
-      if (info.direction === 'right' && this.heat > 1) {
-        this.heat = this.heat - 1
-      }
-      if (info.direction === 'left' && this.heat < numHeats) {
-        this.heat = this.heat + 1
-      }
-      this.$store.commit('command/setCurrentHeat', this.heat)
+      // console.log('swipg', info)
+      // if (info.duration < 50) {
+      //   return
+      // }
+      // const numHeats = this.currentRound?.round?.heats
+      // if (info.direction === 'right' && this.heat > 1) {
+      //   this.heat = this.heat - 1
+      // }
+      // if (info.direction === 'left' && this.heat < numHeats) {
+      //   this.heat = this.heat + 1
+      // }
+      // this.$store.commit('command/setCurrentHeat', this.heat)
       // native Javascript event
       // console.log(evt)
     },
