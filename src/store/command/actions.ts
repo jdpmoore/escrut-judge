@@ -392,11 +392,17 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
         axiosInstance
           .get(`/competition/${id}/mytimetable`)
           .then(({ data }: { data: v2.TimetableItem[] }) => {
+            const noActive = !data.some((d) => {
+              return d.status === 'active'
+            })
             data.forEach((timetableItem) => {
               if (timetableItem.danceOrder) {
                 timetableItem.dances = timetableItem.danceOrder
               }
               if (timetableItem.id == context.state.current.id) {
+                if (noActive && context.state.current.status === 'active') {
+                  timetableItem.status = 'active'
+                }
                 context.commit('setCurrent', timetableItem)
               }
               if (timetableItem.id == context.state.next.id) {

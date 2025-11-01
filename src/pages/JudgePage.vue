@@ -340,7 +340,7 @@
                   v-for="(placing, index) in placings"
                   :key="index"
                   :class="placingClass(placing)"
-                  @click="selectedFinalPlacing = placing"
+                  @click="selectPlacing(placing)"
                 >
                   <div class="text-center" style="font-size: 225%">
                     {{ placing.label }}
@@ -419,6 +419,7 @@
 
                                   -->
                 <div
+                  v-if="(isFinal && isFirstRound) || !isFinal"
                   class="text-center bg-info text-info-inv"
                   :class="isFinal ? 'competitor-add-final' : 'competitor-add'"
                   @click="addNumber"
@@ -655,6 +656,7 @@ export default {
       additionalNumbers: {},
       tempHeat: 1,
       selectedFinalPlacing: null,
+      selectedFinalNumber: null,
       // liveJudges: [],
       // competitorsTeam: [],
       // lastDisplay: 200,
@@ -1301,14 +1303,15 @@ export default {
     },
   },
   watch: {
-    competitorsInRound(val) {
-      const newLength = val.flat().length
-      if (newLength === 0) {
-        setTimeout(() => {
-          this.getCompetitors()
-        }, 5000)
-      }
-    },
+    // competitorsInRound(val) {
+    //   const newLength = val.flat().length
+    //   const roundId = this.current.round?.id
+    //   if (newLength === 0 && roundId) {
+    //     setTimeout(() => {
+    //       this.getCompetitors()
+    //     }, 5000)
+    //   }
+    // },
     placings() {
       //
     },
@@ -1792,6 +1795,9 @@ export default {
         if (this.placedCompetitorNumbers.includes(no)) {
           toReturn = 'bg-positive text-positive-inv'
         }
+        if (this.selectedFinalNumber === no) {
+          toReturn = 'bg-info text-info-inv'
+        }
       }
       // if (
       //   !this.marked.has(no) &&
@@ -2028,9 +2034,29 @@ export default {
       this.$store.dispatch('echo/announceEvent', toAnnounce)
       this.active = true
     },
+    selectPlacing(placing) {
+      if (!this.selectedFinalNumber) {
+        this.selectedFinalPlacing = placing
+        return
+      }
+      const { value } = placing
+      console.log('we selected a value', value, this.selectedFinalNumber)
+      const storedNumbers = [...this.finalPlacings.values()]
+      if (storedNumbers.includes(this.selectedFinalNumber)) {
+        const keys = [...this.finalPlacings.keys()]
+        keys.forEach((key) => {
+          if (this.finalPlacings.get(key) == this.selectedFinalNumber) {
+            this.finalPlacings.delete(key)
+          }
+        })
+      }
+      this.finalPlacings.set(value, this.selectedFinalNumber)
+      this.selectedFinalNumber = null
+    },
     markCompetitorFinal(number) {
       // console.log('now we place', this.selectedFinalPlacing, number)
       if (!this.selectedFinalPlacing) {
+        this.selectedFinalNumber = number
         return
       }
       const { value } = this.selectedFinalPlacing

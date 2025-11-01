@@ -781,7 +781,7 @@ export default defineComponent({
       method: 'checkAuthTimeout',
     },
     {
-      time: 30000,
+      time: 20000,
       method: 'updateTimetable',
     },
     {
