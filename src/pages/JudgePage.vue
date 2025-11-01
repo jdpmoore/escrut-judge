@@ -415,10 +415,10 @@
                   </div>
                 </div>
                 <!-- && !isFinal
+                  v-if="isFirstRound && !isOxbridgeVarsity"
 
                                   -->
                 <div
-                  v-if="isFirstRound && !isOxbridgeVarsity"
                   class="text-center bg-info text-info-inv"
                   :class="isFinal ? 'competitor-add-final' : 'competitor-add'"
                   @click="addNumber"
