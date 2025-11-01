@@ -1302,7 +1302,7 @@ export default {
   },
   watch: {
     competitorsInRound(val) {
-      const newLength = val.flat().lenght
+      const newLength = val.flat().length
       if (newLength === 0) {
         setTimeout(() => {
           this.getCompetitors()
