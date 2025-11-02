@@ -426,6 +426,14 @@
                 >
                   Add
                 </div>
+                <div
+                  v-if="computedCompetitorsSuper.length == 0"
+                  class="text-center bg-info text-info-inv"
+                  :class="isFinal ? 'competitor-add-final' : 'competitor-add'"
+                  @click="getCompetitors"
+                >
+                  Refresh
+                </div>
               </div>
             </div>
           </div>
@@ -1303,6 +1311,12 @@ export default {
     },
   },
   watch: {
+    noCurrentOrIsNewOrSkippedEvent() {
+      const roundId = this.current.round?.id
+      if (roundId) {
+        this.getCompetitors()
+      }
+    },
     // competitorsInRound(val) {
     //   const newLength = val.flat().length
     //   const roundId = this.current.round?.id
