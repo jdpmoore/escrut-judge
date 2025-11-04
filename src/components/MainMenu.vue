@@ -292,6 +292,7 @@ import { blankAvatar } from 'components/script/common'
 import { v1 } from 'src/@types/command'
 import { axiosError } from 'boot/axios'
 import mainMenu from 'src/layouts/Menu'
+import AddNumber from 'components/dialog/AddNumber.vue'
 interface MenuTypes {
   // userDetails: {
   //   firstName: string
@@ -370,32 +371,14 @@ export default defineComponent({
     checkPass() {
       this.$q
         .dialog({
-          dark: true,
-          title: 'View storage',
-          class: 'bg-primary text-primary-inv',
-          html: true,
-          message: 'Please enter password to view local storage',
-          prompt: {
-            model: '',
+          component: AddNumber,
+          componentProps: {
+            title: 'View storage',
+            pin: true,
           },
-          cancel: {
-            label: 'Cancel',
-            // outline: true,
-            // flat: true,
-            unelevated: true,
-            color: 'negative',
-          },
-          ok: {
-            label: 'Ok',
-            unelevated: true,
-            // outline: true,
-            // flat: true,
-            color: 'positive',
-          },
-          color: 'primary',
         })
-        .onOk((model) => {
-          if (model === '1234') {
+        .onOk((pin: number) => {
+          if (pin === 1234) {
             this.restoreOptions()
           }
         })
@@ -542,37 +525,25 @@ export default defineComponent({
     clearLocalStorage() {
       this.$q
         .dialog({
-          dark: true,
-          title: 'Clear storage',
-          class: 'bg-primary text-primary-inv',
-          html: true,
-          message: 'Please enter password to clear local storage?',
-          prompt: {
-            model: '',
+          component: AddNumber,
+          componentProps: {
+            title: 'Clear storage',
+            pin: true,
           },
-          cancel: {
-            label: 'Cancel',
-            // outline: true,
-            // flat: true,
-            unelevated: true,
-            color: 'negative',
-          },
-          ok: {
-            label: 'Ok',
-            unelevated: true,
-            // outline: true,
-            // flat: true,
-            color: 'positive',
-          },
-          color: 'primary',
         })
-        .onOk((model) => {
-          if (model === '12349876') {
-            this.logout().then(() => {
+        .onOk((pin: number) => {
+          if (pin === 1812) {
+            if (this.isLoggedIn) {
+              this.logout().then(() => {
+                this.$q.localStorage.clear()
+                this.forceUpdate()
+                this.$router.push('/login')
+              })
+            } else {
               this.$q.localStorage.clear()
               this.forceUpdate()
               this.$router.push('/login')
-            })
+            }
           }
         })
     },
@@ -646,7 +617,7 @@ export default defineComponent({
       return this.$axios
         .post('/auth/logout', 'logout')
         .then(() => {
-          void this.$router.push('/login')
+          // void this.$router.push('/login')
           this.$axios.defaults.headers.common.Authorization = ''
           this.$store.commit('command/storeAuth', '')
           this.$store.commit('command/clearUser')
@@ -658,6 +629,9 @@ export default defineComponent({
         })
         .catch((err) => {
           axiosError(err)
+          this.$axios.defaults.headers.common.Authorization = ''
+          this.$store.commit('command/storeAuth', '')
+          this.$store.commit('command/clearUser')
           void this.$router.push('/login')
         })
     },

@@ -596,15 +596,15 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       roundId,
       numbers: [...theRound.get(judgeHeat)],
     }
-    Dialog.create({
-      dark: true,
-      title: `Stored marks for ${judgeHeat} in ${roundId}`,
-      message: toWhisper.numbers.join(', '),
-      class: 'bg-primary text-primary-inv',
-      persistent: true,
-      // cancel: { label: 'Close', outline: true, flat: true, color: 'amber' },
-      ok: { label: 'Ok', outline: true, flat: true, color: 'positive' },
-    })
+    // Dialog.create({
+    //   dark: true,
+    //   title: `Stored marks for ${judgeHeat} in ${roundId}`,
+    //   message: toWhisper.numbers.join(', '),
+    //   class: 'bg-primary text-primary-inv',
+    //   persistent: true,
+    //   // cancel: { label: 'Close', outline: true, flat: true, color: 'amber' },
+    //   ok: { label: 'Ok', outline: true, flat: true, color: 'positive' },
+    // })
     const state = window.echo?.connector.pusher.connection.state
     const isConnected = state === 'connected'
     if (!window.echo || !isConnected) {
