@@ -273,7 +273,7 @@ export default defineComponent({
 
     onOKClick() {
       if (this.pin) {
-        this.$emit('ok', this.newNumber)
+        this.$emit('ok', Number(this.newNumber))
         this.hide()
         return
       }

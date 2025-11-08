@@ -581,7 +581,10 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       commit('setConnected', isConnected)
     }
   },
-  shareStoredMarks({ rootState, commit, dispatch }, { judgeHeat, roundId }) {
+  shareStoredMarks(
+    { rootState, commit, dispatch },
+    { judgeHeat, roundId, popup }
+  ) {
     const theRound = rootState.command.scrutineering.tempMarks[roundId]
     if (!theRound) {
       return
@@ -596,15 +599,17 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       roundId,
       numbers: [...theRound.get(judgeHeat)],
     }
-    // Dialog.create({
-    //   dark: true,
-    //   title: `Stored marks for ${judgeHeat} in ${roundId}`,
-    //   message: toWhisper.numbers.join(', '),
-    //   class: 'bg-primary text-primary-inv',
-    //   persistent: true,
-    //   // cancel: { label: 'Close', outline: true, flat: true, color: 'amber' },
-    //   ok: { label: 'Ok', outline: true, flat: true, color: 'positive' },
-    // })
+    if (popup) {
+      Dialog.create({
+        dark: true,
+        title: `Stored marks for ${judgeHeat} in ${roundId}`,
+        message: toWhisper.numbers.join(', '),
+        class: 'bg-primary text-primary-inv',
+        persistent: true,
+        // cancel: { label: 'Close', outline: true, flat: true, color: 'amber' },
+        ok: { label: 'Ok', outline: true, flat: true, color: 'positive' },
+      })
+    }
     const state = window.echo?.connector.pusher.connection.state
     const isConnected = state === 'connected'
     if (!window.echo || !isConnected) {

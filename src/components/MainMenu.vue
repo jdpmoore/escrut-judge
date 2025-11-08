@@ -378,6 +378,7 @@ export default defineComponent({
           },
         })
         .onOk((pin: number) => {
+          console.log('do we restore?', pin, pin === 1234)
           if (pin === 1234) {
             this.restoreOptions()
           }
@@ -454,6 +455,7 @@ export default defineComponent({
           this.$store.dispatch('echo/shareStoredMarks', {
             roundId: Number(roundId),
             judgeHeat: data,
+            popup: true,
           })
         })
     },
@@ -532,6 +534,7 @@ export default defineComponent({
           },
         })
         .onOk((pin: number) => {
+          console.log('what was pin', pin)
           if (pin === 1812) {
             if (this.isLoggedIn) {
               this.logout().then(() => {

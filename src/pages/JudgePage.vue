@@ -1351,6 +1351,7 @@ export default {
         this.heat = 1
         this.$store.commit('command/setCurrentHeat', this.heat)
         this.activeHeat = 1
+        this.$store.dispatch('echo/shareStatus')
       }
     },
   },
@@ -2066,6 +2067,8 @@ export default {
       }
       this.finalPlacings.set(value, this.selectedFinalNumber)
       this.selectedFinalNumber = null
+      console.log('what do we have as finals placings', this.finalPlacings)
+      console.log('and as a placed list', placedList)
     },
     markCompetitorFinal(number) {
       // console.log('now we place', this.selectedFinalPlacing, number)
@@ -2085,6 +2088,12 @@ export default {
       }
       this.finalPlacings.set(value, number)
       this.selectedFinalPlacing = null
+      console.log('what do we have as finals placings', this.finalPlacings)
+      const placedList = this.placings.map((placing) => {
+        return this.placedObject[placing.value] ?? -1
+      })
+      console.log('and as a placed list', placedList)
+      this.whisperMarks()
     },
     markCompetitor({ number }) {
       // console.log(number, this.marked, this.considering)
@@ -2107,8 +2116,10 @@ export default {
     },
     whisperMarks(completed = false) {
       const roundId = this.currentRound.round.id
+      let unmarked = -10000
       const placedList = this.placings.map((placing) => {
-        return this.placedObject[placing.value]
+        unmarked--
+        return this.placedObject[placing.value] ?? unmarked
       })
       const tapMarked = this.isFinal ? placedList : [...this.marked]
       const danceIds =

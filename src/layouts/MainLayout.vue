@@ -51,6 +51,15 @@
         <!-- <q-avatar size="24px" :color="currentFloorColor" text-color="black">{{
           currentFloorLetter
         }}</q-avatar> -->
+        <!-- <q-btn
+          flat
+          dense
+          round
+          icon="schedule"
+          class="text-dark-inv"
+          aria-label="Login"
+          to="/login"
+        /> -->
         <q-avatar size="40px" class="q-ma-none">
           <!-- <img src="assets/ivda/ivda_logo_only.svg" /> -->
 
@@ -445,6 +454,7 @@ export default defineComponent({
       if (user.firstName) {
         toReturn = `${user.firstName} ${user.lastName}`
       }
+      console.log('what is myadj', this.myAdj)
       if (this.$store.state.command.competition.id > 0 && this.myAdj) {
         // if (this.isChair) {
         //   toReturn = `${this.myAdj.letter}*: ${toReturn}`

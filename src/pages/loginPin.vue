@@ -127,6 +127,9 @@ export default defineComponent({
         return false
       }
     },
+    isLoggedIn(): boolean {
+      return this.$store.state.command.loggedIn
+    },
   },
   created() {
     // flare.test()
@@ -137,6 +140,9 @@ export default defineComponent({
         password: string
       }[]
       this.credentials = cred[0]
+    }
+    if (this.isLoggedIn) {
+      this.$router.forward()
     }
   },
   methods: {
@@ -324,6 +330,7 @@ export default defineComponent({
                     .then(() => {
                       this.$store.dispatch('echo/connectEcho')
                       this.loggingIn = false
+                      console.log('did we finish logging in?')
                       // if (userDetails.firstTime) {
                       //   this.firstLoginPopup()
                       // } else {

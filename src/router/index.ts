@@ -47,14 +47,31 @@ export default route<StateInterface>(function ({ store }) {
       //     replace: true,
       //   })
       // }
+      console.log('ar we logged in', isLoggedIn)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const user = (<any>store).state.command.userDetails
       // const userRoles = user?.roles
+      console.log(
+        'what is the record',
+        record,
+        record.path,
+        record.path == '',
+        record.path == '/',
+        record.path.includes('login')
+      )
       const loginPage =
         record.path == '' || record.path == '/' || record.path.includes('login')
       if (loginPage && isLoggedIn) {
         allowedToEnter = false
+      } else {
+        allowedToEnter = true
       }
+      console.log(
+        'are we allowed to enter',
+        allowedToEnter,
+        loginPage,
+        isLoggedIn
+      )
       if ('meta' in record) {
         // ------------------------------------------------------------
         // check if user needs to be logged in to access this page
@@ -77,7 +94,7 @@ export default route<StateInterface>(function ({ store }) {
         }
       }
     })
-
+    console.log('and next', allowedToEnter)
     if (allowedToEnter) {
       // go to the requested page
       next()
