@@ -427,7 +427,7 @@ v-if="(isFinal && isFirstRound) || !isFinal"
                   Add
                 </div>
                 <div
-                  v-if="computedCompetitorsSuper.length == 0"
+                  v-if="showRefresh"
                   class="text-center bg-info text-info-inv"
                   :class="isFinal ? 'competitor-add-final' : 'competitor-add'"
                   @click="getCompetitors"
@@ -728,6 +728,15 @@ export default {
     }
   },
   computed: {
+    showRefresh() {
+      if (this.isFinal) {
+        return (
+          this.computedCompetitorsSuper.length == 0 &&
+          this.finalPlacings?.size == 0
+        )
+      }
+      return computedCompetitorsSuper.length == 0
+    },
     computedHeatClass() {
       if (this.isOxbridgeVarsity) {
         return this.finalPlacings?.size == 6
@@ -2121,6 +2130,7 @@ export default {
         unmarked--
         return this.placedObject[placing.value] ?? unmarked
       })
+      console.log('now we start the whisper stuff', placedList)
       const tapMarked = this.isFinal ? placedList : [...this.marked]
       const danceIds =
         this.currentRound.round.danceOrder ?? this.currentRound.round.dances
@@ -2136,30 +2146,36 @@ export default {
         isOxbridgeVarsity: this.isOxbridgeVarsity,
         heat: this.heat,
       }
-      if (!this.$store.state.command.scrutineering.tempMarks[roundId]) {
-        this.$store.commit('command/saveTempMarks', {
-          roundId,
-          marks: new Map(),
-        })
-      }
-      const savedMarks =
-        this.$store.state.command.scrutineering.tempMarks[roundId]
       let judgeHeat = `${toPost.judge.letter}-${toPost.dance}`
       if (this.isOxbridgeVarsity) {
         judgeHeat = `${toPost.judge.letter}-${toPost.dance}-${this.heat}`
       }
-      if (!savedMarks.has(judgeHeat)) {
-        this.$store.commit('command/newJudgeHeatTempMarks', {
-          roundId,
-          judgeHeat,
-        })
-      }
+      console.log('now we start the whisper stuff 2', toPost)
+      this.$store.commit('command/newJudgeHeatTempMarks', {
+        roundId,
+        judgeHeat,
+        force: this.isFinal,
+      })
+      console.log('do we finish whisper', this.isFinal)
+      // if (!this.$store.state.command.scrutineering.tempMarks[roundId]) {
+      //   this.$store.commit('command/saveTempMarks', {
+      //     roundId,
+      //     marks: new Map(),
+      //   })
+      // }
+      const savedMarks =
+        this.$store.state.command.scrutineering.tempMarks[roundId]
+
+      console.log(savedMarks, judgeHeat)
+      // if (!savedMarks.has(judgeHeat)) {
+
+      // }
       const toAdd = _.difference(toPost.numbers, [...savedMarks.get(judgeHeat)])
       const toRemove = _.difference(
         [...savedMarks.get(judgeHeat)],
         toPost.numbers
       )
-      // console.log(tapMarked, toAdd, toRemove)
+      console.log(tapMarked, toAdd, toRemove)
       for (const no of toAdd) {
         this.$store.commit('command/judgeHeatTempMark', {
           roundId,

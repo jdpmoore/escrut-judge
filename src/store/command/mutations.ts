@@ -585,12 +585,22 @@ const mutation: MutationTree<CommandStateInterface> = {
   // },
   newJudgeHeatTempMarks(
     state: CommandStateInterface,
-    { roundId, judgeHeat }: { roundId: number; judgeHeat: string }
+    {
+      roundId,
+      judgeHeat,
+      force = false,
+    }: { roundId: number; judgeHeat: string; force: boolean }
   ) {
+    console.log(
+      'are we in the new judge heat temp marks?',
+      roundId,
+      judgeHeat,
+      force
+    )
     if (!state.scrutineering.tempMarks[roundId]) {
       state.scrutineering.tempMarks[roundId] = new Map()
     }
-    if (!state.scrutineering.tempMarks[roundId].has(judgeHeat)) {
+    if (!state.scrutineering.tempMarks[roundId].has(judgeHeat) || force) {
       state.scrutineering.tempMarks[roundId].set(judgeHeat, new Set())
     }
     // console.log('new set', state.scrutineering.tempMarks[roundId])

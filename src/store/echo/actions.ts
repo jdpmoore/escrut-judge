@@ -201,6 +201,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           })
           commit('command/overrideCurrent', payload, { root: true })
           commit('command/setDanceLetterIndex', danceIndex, { root: true })
+          dispatch('shareStatus')
           dispatch('command/getCompetitorsByRoundId', payload.round.id, {
             root: true,
           })
@@ -597,6 +598,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       restore: true,
       judgeHeat,
       roundId,
+      // isFinal: ,
       numbers: [...theRound.get(judgeHeat)],
     }
     if (popup) {

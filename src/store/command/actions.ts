@@ -62,10 +62,10 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
       void dispatch('getJudges')
       void dispatch('getCompetitors')
       void dispatch('getEvents')
+      void dispatch('getFirstRoundCompetitors')
       dispatch('getFloors').then(() => {
         dispatch('getTimetable', loadingDialog)
           .then(() => {
-            void dispatch('getFirstRoundCompetitors')
             commit('resetCurrentTimetableOrder')
             commit('saveState')
             resolve()
@@ -75,7 +75,7 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
               dark: true,
               title: 'No timetable / round order',
               message:
-                'Please construct a timetable or order of rounds before attempting to scrutineer or compere a competition',
+                'Please construct a timetable or order of rounds before attempting to judge a competition',
               class: 'bg-primary text-primary-inv',
               persistent: true,
               // cancel: { label: 'Close', outline: true, flat: true, color: 'amber' },
@@ -100,39 +100,61 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
   //   commit('saveState')
   // },
   getFirstRoundCompetitors(context) {
-    const firstRounds: number[] = []
-    context.state.timetable.map((timetableItem) => {
-      const round = timetableItem?.round
-      if (!round) return
-      // const eventId = context.state.scrutineering.roundIdToEventId.get(roundId)
-      if (round.round == 1) {
-        firstRounds.push(round.id)
-      }
+    const loadingDialog = Dialog.create({
+      message: 'Downloading first round competitors, please wait',
+      dark: true,
+      class: 'bg-primary',
+      progress: {
+        // spinner: QSpinnerGears,
+        color: 'amber',
+      },
+      persistent: true, // we want the user to not be able to close it
+      ok: false, // we want the user to not be able to close it
     })
-    if (firstRounds.length > 0) {
-      const loadingDialog = Dialog.create({
-        message: 'Downloading first round competitors, please wait',
-        dark: true,
-        class: 'bg-primary text-primary-inv',
-        progress: {
-          // spinner: QSpinnerGears,
-          color: 'amber',
-        },
-        persistent: true, // we want the user to not be able to close it
-        ok: false, // we want the user to not be able to close it
+    axiosInstance
+      .get(`/competition/${context.state.competition.id}/roundcompetitors`)
+      .then(({ data }) => {
+        data.forEach((roundCompetitors) => {
+          context.commit('storeCompetitorsByRoundId', roundCompetitors)
+        })
+        loadingDialog.hide()
       })
-      Promise.all(
-        firstRounds.map((roundId) => {
-          return context.dispatch('getCompetitorsByRoundId', roundId)
-        })
-      )
-        .then(() => {
-          loadingDialog.hide()
-        })
-        .catch(() => {
-          loadingDialog.hide()
-        })
-    }
+      .catch(() => {
+        loadingDialog.hide()
+      })
+    // const firstRounds: number[] = []
+    // context.state.timetable.map((timetableItem) => {
+    //   const round = timetableItem?.round
+    //   if (!round) return
+    //   // const eventId = context.state.scrutineering.roundIdToEventId.get(roundId)
+    //   if (round.round == 1) {
+    //     firstRounds.push(round.id)
+    //   }
+    // })
+    // if (firstRounds.length > 0) {
+    //   const loadingDialog = Dialog.create({
+    //     message: 'Downloading first round competitors, please wait',
+    //     dark: true,
+    //     class: 'bg-primary text-primary-inv',
+    //     progress: {
+    //       // spinner: QSpinnerGears,
+    //       color: 'amber',
+    //     },
+    //     persistent: true, // we want the user to not be able to close it
+    //     ok: false, // we want the user to not be able to close it
+    //   })
+    //   Promise.all(
+    //     firstRounds.map((roundId) => {
+    //       return context.dispatch('getCompetitorsByRoundId', roundId)
+    //     })
+    //   )
+    //     .then(() => {
+    //       loadingDialog.hide()
+    //     })
+    //     .catch(() => {
+    //       loadingDialog.hide()
+    //     })
+    // }
   },
   getAllCompetitorsByFloorId(context, floorIdFilter: number) {
     const loadingDialog = Dialog.create({
