@@ -200,6 +200,15 @@ const getters: GetterTree<CommandStateInterface, StateInterface> = {
       }
       return ''
     },
+  isFinal:
+    (state) =>
+    (roundId: number): boolean => {
+      const round = state.scrutineering.roundById.get(roundId)
+      if (round) {
+        return ['F', 'PO'].includes(`${round.round}`)
+      }
+      return false
+    },
   currentDanceLetters(state) {
     const getDanceLetter = (id) => {
       return state.dances.find((dance) => {

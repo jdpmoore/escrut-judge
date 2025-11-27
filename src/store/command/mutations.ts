@@ -254,6 +254,7 @@ const mutation: MutationTree<CommandStateInterface> = {
     state.compere.timetableOrder = newCurrent.timetableOrder
   },
   resetCurrentTimetableOrder(state: CommandStateInterface) {
+    console.log('what is current', state.current)
     state.compere.timetableOrder = state.current.timetableOrder
   },
   setCurrent(state: CommandStateInterface, newCurrent: v2.TimetableItem) {
@@ -294,6 +295,7 @@ const mutation: MutationTree<CommandStateInterface> = {
       }),
       ['timetableOrder']
     )
+    console.log('we have floor events', floorEvents)
     if (floorEvents && floorEvents.length > 0) {
       state.current = floorEvents[0]
       state.floor = floorEvents[0].round?.floor ?? floorEvents[0].floor
@@ -585,12 +587,10 @@ const mutation: MutationTree<CommandStateInterface> = {
   // },
   newJudgeHeatTempMarks(
     state: CommandStateInterface,
-    {
-      roundId,
-      judgeHeat,
-      force = false,
-    }: { roundId: number; judgeHeat: string; force: boolean }
+    payload: { roundId: number; judgeHeat: string; force: boolean }
   ) {
+    const { roundId, judgeHeat } = payload
+    const force = payload.force ?? false
     console.log(
       'are we in the new judge heat temp marks?',
       roundId,

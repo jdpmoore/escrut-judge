@@ -201,6 +201,8 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           })
           commit('command/overrideCurrent', payload, { root: true })
           commit('command/setDanceLetterIndex', danceIndex, { root: true })
+          commit('command/setCurrentHeat', 1, { root: true })
+          commit('command/setHeat', 1, { root: true })
           dispatch('shareStatus')
           dispatch('command/getCompetitorsByRoundId', payload.round.id, {
             root: true,
@@ -583,24 +585,32 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
     }
   },
   shareStoredMarks(
-    { rootState, commit, dispatch },
+    { rootState, commit, dispatch, rootGetters },
     { judgeHeat, roundId, popup }
   ) {
     const theRound = rootState.command.scrutineering.tempMarks[roundId]
-    if (!theRound) {
-      return
-    }
-    const theMarks = theRound.get(judgeHeat)
-    if (!theMarks) {
-      return
-    }
+    const isFinal = rootGetters['command/isFinal'](roundId)
     const toWhisper = {
       restore: true,
       judgeHeat,
       roundId,
-      // isFinal: ,
-      numbers: [...theRound.get(judgeHeat)],
+      isFinal,
+      numbers: [],
+      noMarks: true,
+      noRound: true,
     }
+    if (theRound) {
+      toWhisper.noRound = false
+      const theMarks = theRound.get(judgeHeat)
+      if (theMarks) {
+        toWhisper.noMarks = false
+        toWhisper.restore = true
+        toWhisper.numbers = [...theRound.get(judgeHeat)]
+      }
+    }
+    //  else {
+    //   return
+    // }
     if (popup) {
       Dialog.create({
         dark: true,

@@ -164,97 +164,12 @@
       </q-card-section>
       <q-separator inset />
       <q-card-section v-if="!isHandwriting" class="bg-white q-pa-none">
-        <!-- <q-page-sticky position="top-left" :offset="[18, 18]">
-      <q-fab
-        v-model="fab2"
-        label="Actions"
-        vertical-actions-align="left"
-        color="purple"
-        icon="keyboard_arrow_down"
-        direction="down"
-      >
-        <q-fab-action color="primary" @click="onClick" icon="mail" label="Email" />
-        <q-fab-action color="secondary" @click="onClick" icon="alarm" label="Alarm" />
-        <q-fab-action color="orange" @click="onClick" icon="airplay" label="Airplay" />
-        <q-fab-action color="accent" @click="onClick" icon="room" label="Map" />
-      </q-fab>
-      </q-page-sticky> -->
         <div>
           <div class="col justify-center" style="width: 100%">
-            <!-- <q-btn
-              color="accent"
-              square
-              no-caps
-              :label="$q.screen.lt.md ? '' : 'Menu'"
-              icon="settings"
-              class="topLeft"
-            >
-              <q-menu>
-                <q-list
-                  square
-                  style="min-width: 100px"
-                  class="bg-dark text-primary-inv"
-                >
-                  <q-item v-if="!isNonCompereEvent" v-close-popup>
-                    <q-toggle
-                      v-model="showNames"
-                      v-close-popup
-                      label="Competitor details"
-                      checked-icon="check"
-                      color="positive"
-                      unchecked-icon="clear"
-                    />
-                  </q-item>
-                  <q-item
-                    v-if="showEditHeats"
-                    v-close-popup
-                    clickable
-                    @click="editHeats"
-                  >
-                    <q-item-section avatar>
-                      <q-icon name="edit" color="info" size="sm" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>Edit number of heats</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                  <q-item
-                    v-if="!isNonCompereEvent && isCurrentEvent"
-                    v-close-popup
-                    clickable
-                    @click="restartRound"
-                  >
-                    <q-item-section avatar>
-                      <q-icon name="restart_alt" color="warning" size="sm" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>Restart round</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                  <q-item
-                    v-if="isCurrentEvent"
-                    v-close-popup
-                    clickable
-                    @click="skipRound"
-                  >
-                    <q-item-section avatar>
-                      <q-icon name="skip_next" color="negative" size="sm" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>Skip round</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn> -->
             <div v-if="isResults" class="text-center" style="font-size: 165%">
-              <!-- <div class="row flex-center">
-                Now we announce the results of
-              </div> -->
               <div style="font-size: 125%">
                 {{ roundText }}
               </div>
-              <!-- <div class="text-primary">Next: {{ nextRoundTextResults }}</div> -->
               <div class="text-primary">Next: {{ nextRound.title }}</div>
             </div>
             <div
@@ -270,23 +185,8 @@
               </div>
             </div>
             <div v-else class="text-center" style="font-size: 165%">
-              <!-- <div v-if="!isFinal" style="font-size: 125%">
-                {{ competitors.flat().length }} competitors,
-                recall {{ currentRound?.round?.recall }} from
-                {{
-                  currentRound?.round?.heats > 1
-                    ? `${currentRound?.round?.heats} heats`
-                    : '1 heat'
-                }}
-              </div> -->
               <div v-if="isOffbeat" style="font-size: 125%">
                 {{ computedNumCouples }} teams
-                <!-- <q-btn
-                  color="accent"
-                  flat
-                  label="(Restart)"
-                  @click="restartRound"
-                /> -->
               </div>
               <div v-else-if="isFinal" style="font-size: 100%">
                 Placing {{ computedNumCouples }}
@@ -294,28 +194,11 @@
                 }}<span v-if="isOxbridgeVarsity"
                   >, round {{ heat }} of 9<br />{{ varsityPairs }}</span
                 >
-                <!-- <q-btn
-                  color="accent"
-                  flat
-                  label="(Restart)"
-                  @click="restartRound"
-                /> -->
               </div>
               <div v-else style="font-size: 100%">
                 Heat {{ heat }}/{{ currentRound?.round?.heats }},
                 {{ dance?.name }}: recall {{ currentRound?.round?.recall }}
-                <!-- {{ isTeam ? 'teams' : 'couples' }} -->
-                <!-- <q-btn
-                  color="accent"
-                  flat
-                  label="(Restart)"
-                  @click="restartRound"
-                /> -->
               </div>
-              <!-- <div style="font-size: 90%" class="text-info q-ma-none">
-                {{ floor.name }}
-              </div> -->
-              <!-- <div class="text-primary">Next: {{ nextRound.title }}</div> -->
               <span style="font-size: 225%; font-weight: bold">{{
                 isFinal ? placedCompetitorNumbers.length : marked?.size ?? 0
               }}</span>
@@ -414,10 +297,6 @@
                     {{ competitor.number }}
                   </div>
                 </div>
-                <!-- && !isFinal
-                  v-if="isFirstRound && !isOxbridgeVarsity"
-v-if="(isFinal && isFirstRound) || !isFinal"
-                                  -->
                 <div
                   v-if="isFirstRound && !isOxbridgeVarsity"
                   class="text-center bg-info text-info-inv"
@@ -459,14 +338,6 @@ v-if="(isFinal && isFirstRound) || !isFinal"
                 >
               </div>
               <div class="col q-mx-lg">
-                <!-- <q-btn
-                    v-if="isCurrentEvent && !isNonCompereEvent"
-                    class="bg-info text-info-inv q-mr-lg"
-                    icon="add"
-                    label="Add number(s)"
-                    style="font-size: 150%"
-                    @click="submitMarks"
-                  /> -->
                 <q-btn
                   v-if="
                     isCurrentEvent &&
@@ -504,7 +375,6 @@ v-if="(isFinal && isFirstRound) || !isFinal"
                   style="font-size: 150%"
                   @click="gotoNextHeat"
                 />
-                <!-- :disable="booleanVarSub" -->
                 <q-btn
                   v-else-if="isCurrentEvent && isNonCompereEvent"
                   class="full-width bg-primary text-warning-inv"
@@ -525,29 +395,7 @@ v-if="(isFinal && isFirstRound) || !isFinal"
                   @click="timetableOrder = current.timetableOrder"
                 />
               </div>
-              <!-- <div class="col-auto">
-                <q-btn
-                  round
-                  color="primary"
-                  icon="keyboard_arrow_right"
-                  :disable="
-                    heat === competitors.length ||
-                    isNonCompereEvent ||
-                    endOfDays
-                  "
-                  @click="pageChange(1)"
-                  ><q-tooltip> Next heat </q-tooltip></q-btn
-                >
-              </div> -->
             </div>
-            <!-- <q-btn
-          color="accent"
-          flat
-          label="(Restart)"
-          class="absolute"
-          style="top: 12px; right: 12px"
-          @click="restartRound"
-        /> -->
           </q-card-section>
         </div>
       </q-card-section>
@@ -729,13 +577,24 @@ export default {
   },
   computed: {
     showRefresh() {
+      // console.log(
+      //   'what is wrong with showing the refresh',
+      //   this.isCurrentEvent,
+      //   this.isFinal,
+      //   this.computedCompetitorsSuper,
+      //   this.finalPlacings,
+      //   computedCompetitorsSuper
+      // )
+      if (!this.isCurrentEvent) {
+        return false
+      }
       if (this.isFinal) {
         return (
           this.computedCompetitorsSuper.length == 0 &&
           this.finalPlacings?.size == 0
         )
       }
-      return computedCompetitorsSuper.length == 0
+      return this.computedCompetitorsSuper.length == 0
     },
     computedHeatClass() {
       if (this.isOxbridgeVarsity) {
@@ -937,7 +796,12 @@ export default {
       return true
     },
     noCurrentOrIsNewOrSkippedEvent() {
-      console.log(this.current, this.noCurrentEvent, this.current.status)
+      console.log(
+        'is there a current',
+        this.current,
+        this.noCurrentEvent,
+        this.current.status
+      )
       return (
         this.noCurrentEvent || ['new', 'skipped'].includes(this.current?.status)
       )
@@ -997,10 +861,29 @@ export default {
       // this.$store.getters['command/lastDance']
     },
     dance() {
+      // const danceId = (this.currentRound.round.danceOrder ??
+      //   this.currentRound.round.dances)[this.danceLetterIndex]
+
+      console.log(
+        'do we have a dance',
+        this.timetableOrder,
+        this.current.timetableOrder,
+        this.isCurrentEvent,
+        this.$store.getters['command/dance'],
+        this.currentRound,
+        this.currentRound.round.danceOrder,
+        this.currentRound.round.dances
+        // danceId,
+        // theDance
+      )
       if (this.isCurrentEvent) {
         return this.$store.getters['command/dance']
       } else {
-        return this.currentRound.danceOrder ?? this.currentRound.dances
+        const danceId = (this.currentRound.round.danceOrder ??
+          this.currentRound.round.dances)[this.danceLetterIndex]
+        const theDance = this.$store.getters['command/danceById'](danceId)
+        console.log('we return the dance', danceId, theDance)
+        return theDance
       }
     },
     danceLetterIndex: {
@@ -1531,14 +1414,16 @@ export default {
                 )
                 this.$store.commit('command/setCurrentNext')
                 this.$store.dispatch('command/getNextCompetitors')
-                const currentTimetableIndex = this.timetableOrders.indexOf(
-                  this.timetableOrder
-                )
-                this.timetableOrder =
-                  this.timetableOrders[currentTimetableIndex + 1]
-                if (!this.timetableOrder) {
-                  this.checkForNewTimetable(currentTimetableIndex + 1)
-                }
+                // const currentTimetableIndex = this.timetableOrders.indexOf(
+                //   this.timetableOrder
+                // )
+
+                // this.timetableOrder =
+                //   this.timetableOrders[currentTimetableIndex + 1]
+                // if (!this.timetableOrder) {
+                //   this.checkForNewTimetable(currentTimetableIndex + 1)
+                // }
+                this.$store.commit('command/resetCurrentTimetableOrder')
                 this.announced = new Set()
                 this.getCompetitors()
               } else {
@@ -1550,6 +1435,7 @@ export default {
             }
 
             this.$store.commit('command/setCurrentHeat', this.heat)
+            this.$store.dispatch('echo/shareStatus')
             this.activeHeat = this.heat
             this.marked = new Set()
             this.considering = new Set()
@@ -1563,6 +1449,8 @@ export default {
           })
       } else {
         this.heat++
+        this.$store.commit('command/setCurrentHeat', this.heat)
+        this.$store.dispatch('echo/shareStatus')
       }
     },
     checkNoCurrentEvent() {
@@ -2476,14 +2364,15 @@ export default {
               )
               this.$store.commit('command/setCurrentNext')
               this.$store.dispatch('command/getNextCompetitors')
-              const currentTimetableIndex = this.timetableOrders.indexOf(
-                this.timetableOrder
-              )
-              this.timetableOrder =
-                this.timetableOrders[currentTimetableIndex + 1]
-              if (!this.timetableOrder) {
-                this.checkForNewTimetable(currentTimetableIndex + 1)
-              }
+              // const currentTimetableIndex = this.timetableOrders.indexOf(
+              //   this.timetableOrder
+              // )
+              this.$store.commit('command/resetCurrentTimetableOrder')
+              // this.timetableOrder =
+              //   this.timetableOrders[currentTimetableIndex + 1]
+              // if (!this.timetableOrder) {
+              //   this.checkForNewTimetable(currentTimetableIndex + 1)
+              // }
               this.announced = new Set()
               this.getCompetitors()
             } else {
@@ -2492,6 +2381,7 @@ export default {
             // console.log(loadingDialog)
             setTimeout(() => {
               loadingDialog.hide()
+              this.$store.dispatch('echo/shareStatus')
             }, 350)
           })
       } else {
@@ -2534,13 +2424,14 @@ export default {
           )
           this.$store.commit('command/setCurrentNext')
           this.$store.dispatch('command/getNextCompetitors')
-          const currentTimetableIndex = this.timetableOrders.indexOf(
-            this.timetableOrder
-          )
-          this.timetableOrder = this.timetableOrders[currentTimetableIndex + 1]
-          if (!this.timetableOrder) {
-            this.checkForNewTimetable(currentTimetableIndex + 1)
-          }
+          this.$store.commit('command/resetCurrentTimetableOrder')
+          // const currentTimetableIndex = this.timetableOrders.indexOf(
+          //   this.timetableOrder
+          // )
+          // this.timetableOrder = this.timetableOrders[currentTimetableIndex + 1]
+          // if (!this.timetableOrder) {
+          //   this.checkForNewTimetable(currentTimetableIndex + 1)
+          // }
           this.announced = new Set()
           this.getCompetitors()
         } else {
@@ -2549,6 +2440,7 @@ export default {
         // console.log(loadingDialog)
         setTimeout(() => {
           loadingDialog.hide()
+          this.$store.dispatch('echo/shareStatus')
         }, 350)
       }
     },
@@ -2587,6 +2479,7 @@ export default {
         this.$store.dispatch('command/updateTimetable')
         this.announceRestart = 'Activate display'
         this.danceLetterIndex = 0
+        this.$store.commit('command/setCurrentDance', 0)
         this.heat = 1
         this.$store.commit('command/setCurrentHeat', 1)
         this.activeHeat = 1
@@ -2605,10 +2498,11 @@ export default {
         this.subYes = 'bg-primary text-primary-inv'
         // this.subYes = 'bg-warning text-warning-inv'
         // this.timetableOrder++
-        const currentTimetableIndex = this.timetableOrders.indexOf(
-          this.timetableOrder
-        )
-        this.timetableOrder = this.timetableOrders[currentTimetableIndex + 1]
+        // const currentTimetableIndex = this.timetableOrders.indexOf(
+        //   this.timetableOrder
+        // )
+        // this.timetableOrder = this.timetableOrders[currentTimetableIndex + 1]
+        this.$store.commit('command/resetCurrentTimetableOrder')
         this.announced = new Set()
         // this.subYes = 'bg-warning text-warning-inv'
         this.getCompetitors()

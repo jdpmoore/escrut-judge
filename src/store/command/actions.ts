@@ -425,7 +425,17 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
                 if (noActive && context.state.current.status === 'active') {
                   timetableItem.status = 'active'
                 }
+                // if (noActive && timetableItem.status === 'active') {
                 context.commit('setCurrent', timetableItem)
+                // }
+                // console.log(
+                //   'now we set new current',
+                //   context.state.current,
+                //   timetableItem
+                // )
+                // if (context.state.current.id == timetableItem.id) {
+                //   context.commit('setCurrent', timetableItem)
+                // }
               }
               if (timetableItem.id == context.state.next.id) {
                 context.commit('setNext', timetableItem)
