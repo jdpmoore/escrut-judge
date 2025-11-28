@@ -290,6 +290,9 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           // commit('command/updateNumberHeatsRoundId', payload, { root: true })
         }
       )
+      judges.listenForWhisper('unlock', (payload: { id: number }) => {
+        commit('command/setTimetableIdActive', payload.id, { root: true })
+      })
       judges.listenForWhisper(
         'timetable',
         ({ updateTimetable }: { updateTimetable: boolean }) => {
