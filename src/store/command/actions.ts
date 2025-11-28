@@ -417,11 +417,17 @@ const actions: ActionTree<CommandStateInterface, StateInterface> = {
             const noActive = !data.some((d) => {
               return d.status === 'active'
             })
+            console.log('do we have no active?', noActive)
             data.forEach((timetableItem) => {
               if (timetableItem.danceOrder) {
                 timetableItem.dances = timetableItem.danceOrder
               }
               if (timetableItem.id == context.state.current.id) {
+                console.log(
+                  'this is the item',
+                  context.state.current,
+                  timetableItem
+                )
                 if (noActive && context.state.current.status === 'active') {
                   timetableItem.status = 'active'
                 }
