@@ -510,7 +510,7 @@
         </q-tr>
       </template>
       <!-- <template #body-cell-dance-order="props">
-      
+
       </template> -->
       <template #pagination="scope">
         {{ paginationLabel(scope) }}
@@ -617,7 +617,7 @@
 </template>
 
 <script>
-import FilterList from 'components/FilterList'
+import FilterList from 'components/FilterList.vue'
 import Tabs from 'components/JTabs.vue'
 // import draggable from 'vuedraggable'
 import Sortable from 'sortablejs'
@@ -888,7 +888,7 @@ export default defineComponent({
       // const emit = this.$emit
       // const pagination = this.pagination
       const element = document.querySelector(
-        `#${this.tableRef} tbody.q-virtual-scroll__content`
+        `#${this.tableRef} tbody.q-virtual-scroll__content`,
       ) // grab the element containing the <tr> elements
       // const preExisting = Sortable.get(element)
       // if (preExisting) {
@@ -1138,8 +1138,8 @@ export default defineComponent({
                   o.label === 'undefined' || o.label === 'null'
                     ? ''
                     : o.label
-                    ? o.label.toLowerCase()
-                    : (o + '').toLowerCase()
+                      ? o.label.toLowerCase()
+                      : (o + '').toLowerCase()
                 return haystack?.indexOf(lowerTerms) !== -1
               })
             } else {
@@ -1154,7 +1154,7 @@ export default defineComponent({
               val === 'undefined' || val === 'null' ? '' : val.toLowerCase()
             return haystack.indexOf(lowerTerms) !== -1
           }
-        })
+        }),
       )
     },
     btnClick(props, col) {

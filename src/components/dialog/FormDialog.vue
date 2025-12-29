@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import CustomForm from 'components/Form'
+import CustomForm from 'components/Form.vue'
 import { defineComponent } from 'vue'
 export default defineComponent({
   components: { CustomForm },

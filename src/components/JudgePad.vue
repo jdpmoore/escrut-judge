@@ -35,10 +35,10 @@
 // import { v1, v2 } from 'src/@types/command'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
-// import { Canvas, Rect } from 'fabric' // browser
-import { fabric } from 'fabric'
+import { Canvas, Rect } from 'fabric' // browser
+// import { fabric } from 'fabric'
 
-// interface JudgePadInterface {
+// interface JudgePadInterface {]
 //   selectF: v1.Floor | null
 //   roundIdtoRound: (roundId: number) => string
 //   showCanvas: boolean
@@ -133,7 +133,7 @@ export default defineComponent({
                   return Number(line.text)
                 })
               })
-              .flat()
+              .flat(),
           ).sort((a, b) => a - b)
           this.$common.popup({
             title: 'numbers',
@@ -191,7 +191,7 @@ export default defineComponent({
               'Content-Type': 'application/octet-stream',
               'Ocp-Apim-Subscription-Key': '8ee41f217f384caca024bd97364c93d9',
             },
-          }
+          },
         )
         .then(({ headers }) => {
           setTimeout(() => {
@@ -206,7 +206,7 @@ export default defineComponent({
     },
     configureCanvas() {
       const ref = this.$refs.judgepad
-      this.canvas = new fabric.Canvas(ref, {
+      this.canvas = new Canvas(ref, {
         isDrawingMode: this.isDrawingMode,
       })
       // window.addEventListener('resize', this.resizeCanvas, false)
@@ -230,11 +230,11 @@ export default defineComponent({
       } else {
         this.canvas.setHeight(this.computedHeight, {})
         this.canvas.setWidth(this.computedWidth, {}) //- 58
-        ;(this.sketchProperties = {
+        ;((this.sketchProperties = {
           width: this.computedWidth,
           height: this.computedHeight,
         }),
-          this.canvas.renderAll()
+          this.canvas.renderAll())
       }
       // this.$d3
       //   .selectAll('#avatarSlot')
@@ -244,7 +244,7 @@ export default defineComponent({
     },
     setBackground() {
       // console.log('setting background')
-      var bg = new fabric.Rect({
+      var bg = new Rect({
         width: this.sketchProperties.width,
         height: this.sketchProperties.height,
         stroke: '',

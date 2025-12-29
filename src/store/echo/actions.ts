@@ -19,11 +19,8 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       const authToken = rootState.command.auth.authToken
         ? `Bearer ${rootState.command.auth.authToken}`
         : axiosInstance.defaults.headers.common.Authorization
-      //configure Laravel Echo
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      window.Pusher = Pusher
-      const echo = new Echo({
+      const broadcastDriver = process.env.BROADCAST_DRIVER
+      const echoOptionsPusher = {
         broadcaster: 'pusher',
         key: process.env.PUSHER_APP_KEY,
         cluster: 'eu',
@@ -32,9 +29,34 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
         auth: {
           headers: {
             Authorization: authToken,
+            broadcaster: 'pusher',
           },
         },
-      })
+      }
+      const forceTLS = (process.env.REVERB_SCHEME ?? 'https') === 'https'
+      const echoOptionsReverb = {
+        broadcaster: 'reverb',
+        key: process.env.REVERB_APP_KEY,
+        wsHost: process.env.REVERB_HOST,
+        wsPort: process.env.REVERB_PORT ?? 80,
+        wssPort: process.env.REVERB_PORT ?? 443,
+        forceTLS,
+        enabledTransports: ['ws', 'wss'],
+        authEndpoint: `${process.env.API}/../broadcasting/auth`,
+        auth: {
+          headers: {
+            Authorization: authToken,
+            broadcaster: 'reverb',
+          },
+        },
+      }
+      //configure Laravel Echo
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      window.Pusher = Pusher
+      const echoOptions =
+        broadcastDriver == 'reverb' ? echoOptionsReverb : echoOptionsPusher
+      const echo = new Echo(echoOptions)
       // const echo = new Echo({
       //   broadcaster: 'socket.io',
       //   host: process.env.ECHO,
@@ -99,7 +121,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
       //   `es-comp.${rootState.command.competition.id}.scrutineers`
       // )
       const judges = window.echo.join(
-        `es-comp.${rootState.command.competition.id}.judges`
+        `es-comp.${rootState.command.competition.id}.judges`,
       )
       // commit('saveDisplay', display)
       commit('saveJudges', judges)
@@ -145,7 +167,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
         'recalls',
         (payload: { roundId: number; newRecalls: number }) => {
           commit('command/updateNumberRecallsRoundId', payload, { root: true })
-        }
+        },
       )
       judges.listenForWhisper('forceDanceIndex', (payload) => {
         const judgeUserIds = payload.judgeUserIds
@@ -168,14 +190,14 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           {},
           {
             root: true,
-          }
+          },
         ).then(() => {
           dispatch(
             'command/getFirstRoundCompetitors',
             {},
             {
               root: true,
-            }
+            },
           )
         })
       })
@@ -224,7 +246,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           commit('command/setCurrentNext', {}, { root: true })
           commit('command/resetCurrentTimetableOrder', {}, { root: true })
           dispatch('command/getNextCompetitors', {}, { root: true })
-        }
+        },
       )
       judges.listenForWhisper(
         'markCompletedSetCurrent',
@@ -245,19 +267,19 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           // commit('command/setTimetableOrderToNext')
           dispatch('command/setAllPreviousComplete', round, { root: true })
           commit('command/setCurrentNext', {}, { root: true })
-        }
+        },
       )
       judges.listenForWhisper(
         'heats',
         (payload: { roundId: number; newHeats: number }) => {
           commit('command/updateNumberHeatsRoundId', payload, { root: true })
-        }
+        },
       )
       judges.listenForWhisper(
         'requestJudgeData',
         (payload: { roundId: number; judgeHeat: string }) => {
           dispatch('shareStoredMarks', payload)
-        }
+        },
       )
       judges.listenForWhisper(
         'round',
@@ -288,7 +310,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           // FIXME: If timetable order matches with found Id then go for it - but if not trigger get new timetable immedaitely then do it
           // commit('command/setTimetableOrder', val, { root: true })
           // commit('command/updateNumberHeatsRoundId', payload, { root: true })
-        }
+        },
       )
       judges.listenForWhisper('unlock', (payload: { id: number }) => {
         commit('command/setTimetableIdActive', payload.id, { root: true })
@@ -302,17 +324,17 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
               { updateTimetable },
               {
                 root: true,
-              }
+              },
             )
             dispatch(
               'command/getEvents',
               { updateTimetable },
               {
                 root: true,
-              }
+              },
             )
           }
-        }
+        },
       )
       judges.listenForWhisper(
         'completedRound',
@@ -332,19 +354,19 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
             return o.timetableOrder
           })
           const currentTimetableIndex = timetableOrders.indexOf(
-            rootState.command.compere.timetableOrder
+            rootState.command.compere.timetableOrder,
           )
           commit(
             'command/setTimetableOrder',
             timetableOrders[currentTimetableIndex + 1],
-            { root: true }
+            { root: true },
           )
           dispatch(
             'command/getCompetitorsByRoundId',
             rootState.command.current.round.id,
-            { root: true }
+            { root: true },
           )
-        }
+        },
       )
     })
   },
@@ -589,7 +611,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
   },
   shareStoredMarks(
     { rootState, commit, dispatch, rootGetters },
-    { judgeHeat, roundId, popup }
+    { judgeHeat, roundId, popup },
   ) {
     const theRound = rootState.command.scrutineering.tempMarks[roundId]
     const isFinal = rootGetters['command/isFinal'](roundId)
@@ -660,7 +682,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
             commit('setConnected', true)
             console.log(
               `any members on judges channel for ${rootState.command.competition.title}`,
-              members
+              members,
             )
             // commit('setScrutineers', members)
           })
@@ -675,7 +697,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           commit('setConnected', true)
           console.log(
             `any members on floor ${rootState.command.competition.title}`,
-            members
+            members,
           )
           commit('setScrutineers', members)
         })
@@ -695,7 +717,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
             commit('setConnected', true)
             console.log(
               `any members on judges channel for ${rootState.command.competition.title}`,
-              members
+              members,
             )
             commit('setJudges', members)
           })
@@ -710,7 +732,7 @@ const actions: ActionTree<EchoStateInterface, StateInterface> = {
           commit('setConnected', true)
           console.log(
             `any members on floor ${rootState.command.competition.title}`,
-            members
+            members,
           )
           commit('setJudges', members)
         })

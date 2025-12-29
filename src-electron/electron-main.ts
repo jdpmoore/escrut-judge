@@ -1,17 +1,14 @@
-import { app, BrowserWindow, nativeTheme } from 'electron'
+import { app, BrowserWindow } from 'electron'
+// import { initialize, enable } from '@electron/remote/main' // <-- add this
 import path from 'path'
 import os from 'os'
+import { fileURLToPath } from 'url'
+const currentDir = fileURLToPath(new URL('.', import.meta.url))
+
+// initialize() // <-- add this
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
-
-try {
-  if (platform === 'win32' && nativeTheme.shouldUseDarkColors === true) {
-    require('fs').unlinkSync(
-      path.join(app.getPath('userData'), 'DevTools Extensions')
-    )
-  }
-} catch (_) {}
 
 let mainWindow: BrowserWindow | undefined
 
@@ -20,17 +17,26 @@ function createWindow() {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
-    width: 1000,
-    height: 600,
+    icon: path.resolve(currentDir, 'icons/icon.png'), // tray icon
+    width: 2400,
+    height: 1600,
+    frame: true,
     useContentSize: true,
     webPreferences: {
+      sandbox: false,
       contextIsolation: true,
-      // More info: https://v2.quasar.dev/quasar-cli-webpack/developing-electron-apps/electron-preload-script
-      // preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
-      preload: path.resolve(__dirname, 'electron-preload.js'),
+      // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
+      preload: path.resolve(
+        currentDir,
+        path.join(
+          process.env.QUASAR_ELECTRON_PRELOAD_FOLDER,
+          'electron-preload' + process.env.QUASAR_ELECTRON_PRELOAD_EXTENSION,
+        ),
+      ),
     },
   })
+
+  // enable(mainWindow.webContents) // <-- add this
 
   mainWindow.loadURL(process.env.APP_URL)
 

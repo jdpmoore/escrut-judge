@@ -7,6 +7,7 @@ import {
 } from 'vue-router'
 import { StateInterface } from '../store'
 import routes from './routes'
+import { storeInstance } from 'boot/store'
 
 /*
  * If not building with SSR mode, you can
@@ -17,12 +18,12 @@ import routes from './routes'
  * with the Router instance.
  */
 
-export default route<StateInterface>(function ({ store }) {
+export default route(function ({ store }) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : process.env.VUE_ROUTER_MODE === 'history'
-    ? createWebHistory
-    : createWebHashHistory
+      ? createWebHistory
+      : createWebHashHistory
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
@@ -32,7 +33,7 @@ export default route<StateInterface>(function ({ store }) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(
-      process.env.MODE === 'ssr' ? void 0 : process.env.VUE_ROUTER_BASE
+      process.env.MODE === 'ssr' ? void 0 : process.env.VUE_ROUTER_BASE,
     ),
   })
   Router.beforeEach((to, from, next) => {
@@ -40,7 +41,7 @@ export default route<StateInterface>(function ({ store }) {
     to.matched.some((record) => {
       // check if there is meta data
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const isLoggedIn = (<any>store).state.command.loggedIn
+      const isLoggedIn = storeInstance.state.command.loggedIn
       // if (!isLoggedIn && record.name === 'home') {
       //   next({
       //     path: '/login',
@@ -49,7 +50,7 @@ export default route<StateInterface>(function ({ store }) {
       // }
       console.log('ar we logged in', isLoggedIn)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const user = (<any>store).state.command.userDetails
+      const user = storeInstance.state.command.userDetails
       // const userRoles = user?.roles
       console.log(
         'what is the record',
@@ -57,7 +58,7 @@ export default route<StateInterface>(function ({ store }) {
         record.path,
         record.path == '',
         record.path == '/',
-        record.path.includes('login')
+        record.path.includes('login'),
       )
       const loginPage =
         record.path == '' || record.path == '/' || record.path.includes('login')
@@ -70,7 +71,7 @@ export default route<StateInterface>(function ({ store }) {
         'are we allowed to enter',
         allowedToEnter,
         loginPage,
-        isLoggedIn
+        isLoggedIn,
       )
       if ('meta' in record) {
         // ------------------------------------------------------------

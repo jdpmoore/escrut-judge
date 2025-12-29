@@ -1,27 +1,58 @@
 {
-  "extends": "@quasar/app-webpack/tsconfig-preset",
+  // "extends": "@quasar/app-vite/tsconfig-preset",
+
   "compilerOptions": {
     "baseUrl": ".",
-    "target": "es2020",
-    "lib": ["es2020", "dom"],
-    "module": "esnext", // add this line
     "skipLibCheck": true,
-    "strict": false,
-    "noImplicitAny": false,
-    "noImplicitReturns": true,
-    "typeRoots": ["./src/@types"]
-    // "types": ["./src/@types/common"]
+    "strict": true,
+    "allowJs": true,
+    // `baseUrl` must be placed on the extending configuration in devland, or paths won't be recognized
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    // Needed to address https://github.com/quasarframework/app-extension-typescript/issues/36
+    "noEmit": true,
+    "resolveJsonModule": true,
+    // Avoid cross-os errors due to inconsistent file casing
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true,
+    "target": "esnext",
+    "isolatedModules": true,
+    "useDefineForClassFields": true,
+    // Fix Volar issue https://github.com/johnsoncodehk/volar/issues/1153
+    "jsx": "preserve",
+    "lib": ["esnext", "dom"],
+    "paths": {
+      "src/*": ["src/*"],
+      "app/*": ["*"],
+      "components/*": ["src/components/*"],
+      "layouts/*": ["src/layouts/*"],
+      "pages/*": ["src/pages/*"],
+      "assets/*": ["src/assets/*"],
+      "boot/*": ["src/boot/*"],
+      "stores/*": ["src/stores/*"]
+    }
   },
   "exclude": [
-    // "node_modules/laravel-echo/src/channel/socketio-channel.ts",
-    // "node_modules/laravel-echo/src/channel/pusher-channel.ts",
-    // "node_modules/laravel-echo/src/util/event-formatter.ts",
-    // "node_modules/laravel-echo/src/channel/socketio-presence-channel.ts",
-    // "node_modules/laravel-echo/src/util/event-formatter.ts",
+    "/dist",
+    ".quasar",
     "node_modules",
+    ".git",
+    ".app-cache",
+    ".npm",
+    ".npm-tmp",
+    "dist",
+    "dist*",
+    "node_modules",
+    "subfolder/dist",
+    "subfolder/node_modules",
+    "**/dist/*",
+    "**/node_modules/*",
+    "./dist",
+    "./.quasar",
     "./node_modules",
-    "./node_modules/*",
-    "./node_modules/@types/node/index.d.ts",
-    "./node_modules/laravel-echo/src/**"
+    "./src-capacitor",
+    "./src-cordova",
+    "./quasar.config.*.temporary.compiled*"
   ]
 }

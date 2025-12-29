@@ -1,6 +1,6 @@
 import { boot } from 'quasar/wrappers'
-import { flare } from '@flareapp/flare-client'
-import { flareVue } from '@flareapp/flare-vue'
+import { flare } from '@flareapp/js'
+import { flareVue } from '@flareapp/vue'
 import { routerInstance } from 'boot/router'
 import { storeInstance } from 'boot/store'
 import _ from 'lodash'

@@ -69,39 +69,39 @@
 
 <script>
 import { defineComponent } from 'vue'
-import TextEditor from 'components/TextEditor'
+import TextEditor from 'components/TextEditor.vue'
 export default defineComponent({
   components: {
-    TextEditor
+    TextEditor,
   },
   props: {
     // ...your custom props
     title: {
       type: String,
-      required: true
+      required: true,
     },
     label: {
       type: String,
-      default: ''
+      default: '',
     },
     ok: {
       type: String,
-      default: 'Ok'
+      default: 'Ok',
     },
     cancel: {
       type: String,
-      default: 'cancel'
+      default: 'cancel',
     },
     text: {
       type: String,
-      default: ''
+      default: '',
     },
     persistent: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
-emits: ['hide', 'ok'],
+  emits: ['hide', 'ok'],
   data() {
     return {
       model: '<div style="text-align: left;"><br></div>',
@@ -120,8 +120,8 @@ emits: ['hide', 'ok'],
             label: this.$q.lang.editor.align,
             icon: this.$q.iconSet.editor.align,
             fixedLabel: true,
-            options: ['left', 'center', 'right', 'justify']
-          }
+            options: ['left', 'center', 'right', 'justify'],
+          },
         ],
         // ['print', 'fullscreen'],
         [
@@ -129,7 +129,7 @@ emits: ['hide', 'ok'],
             label: this.$q.lang.editor.formatting,
             icon: this.$q.iconSet.editor.formatting,
             list: 'no-icons',
-            options: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code']
+            options: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code'],
           },
           {
             label: this.$q.lang.editor.fontSize,
@@ -144,8 +144,8 @@ emits: ['hide', 'ok'],
               'size-4',
               'size-5',
               'size-6',
-              'size-7'
-            ]
+              'size-7',
+            ],
           },
           {
             label: this.$q.lang.editor.defaultFont,
@@ -161,16 +161,16 @@ emits: ['hide', 'ok'],
               'impact',
               'lucida_grande',
               'times_new_roman',
-              'verdana'
-            ]
+              'verdana',
+            ],
           },
-          'removeFormat'
+          'removeFormat',
         ],
         ['token', 'hr', 'link', 'custom_btn'],
         ['unordered', 'ordered', 'outdent', 'indent'], //'quote',
 
         ['undo', 'redo'],
-        ['viewsource']
+        ['viewsource'],
       ],
       fonts: {
         arial: 'Arial',
@@ -180,8 +180,8 @@ emits: ['hide', 'ok'],
         impact: 'Impact',
         lucida_grande: 'Lucida Grande',
         times_new_roman: 'Times New Roman',
-        verdana: 'Verdana'
-      }
+        verdana: 'Verdana',
+      },
     }
   },
 
@@ -192,7 +192,7 @@ emits: ['hide', 'ok'],
       } else {
         return this.toMaximize
       }
-    }
+    },
   },
   created() {
     if (this.text) {
@@ -234,7 +234,7 @@ emits: ['hide', 'ok'],
     onCancelClick() {
       // we just need to hide dialog
       this.hide()
-    }
-  }
+    },
+  },
 })
 </script>

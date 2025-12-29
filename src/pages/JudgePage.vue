@@ -200,7 +200,7 @@
                 {{ dance?.name }}: recall {{ currentRound?.round?.recall }}
               </div>
               <span style="font-size: 225%; font-weight: bold">{{
-                isFinal ? placedCompetitorNumbers.length : marked?.size ?? 0
+                isFinal ? placedCompetitorNumbers.length : (marked?.size ?? 0)
               }}</span>
               <span style="font-size: 120%"
                 >/
@@ -616,7 +616,7 @@ export default {
       console.log(
         this.isOxbridgeVarsity,
         this.finalPlacings,
-        this.computedCompetitors
+        this.computedCompetitors,
       )
       return test1 || test2 || test3 || test4
         ? 'bg-positive text-positive-inv'
@@ -724,7 +724,7 @@ export default {
       if (this.isFinal) {
         const toReturn = Math.max(
           Math.ceil((this.computedCompetitors.length + 1) / 6),
-          2
+          2,
         )
         console.log('number of columns', toReturn)
         return toReturn
@@ -800,7 +800,7 @@ export default {
         'is there a current',
         this.current,
         this.noCurrentEvent,
-        this.current.status
+        this.current.status,
       )
       return (
         this.noCurrentEvent || ['new', 'skipped'].includes(this.current?.status)
@@ -833,7 +833,7 @@ export default {
     },
     currentTimetableEntry() {
       return this.$store.getters['command/timetableEntryByTimetableOrder'](
-        this.timetableOrder
+        this.timetableOrder,
       )
     },
     isFinal() {
@@ -845,7 +845,7 @@ export default {
     },
     isCompleted() {
       return this.$store.state.command.compere.completedRounds.has(
-        this.currentRound.roundId
+        this.currentRound.roundId,
       )
     },
     isCurrentEvent() {
@@ -872,7 +872,7 @@ export default {
         this.$store.getters['command/dance'],
         this.currentRound,
         this.currentRound.round.danceOrder,
-        this.currentRound.round.dances
+        this.currentRound.round.dances,
         // danceId,
         // theDance
       )
@@ -982,7 +982,7 @@ export default {
         return this.$store.getters['command/competitorsByRoundId'](
           roundId,
           true,
-          this.dance
+          this.dance,
         )
       }
       let toReturn = this.competitorsInRound
@@ -994,7 +994,7 @@ export default {
           ...this.additionalNumbers[this.heat],
         ])
       } else if (Object.keys(this.additionalNumbers).length > 0) {
-        const test = _.values(this.additionalNumbers)
+        const test = this.$_.values(this.additionalNumbers)
           .map((heatAdditionalNumbers) => {
             return [...heatAdditionalNumbers].map((competitor) => {
               return competitor.number
@@ -1004,7 +1004,7 @@ export default {
         toReturn[this.heat - 1] = toReturn[this.heat - 1].filter(
           (competitor) => {
             return !test.includes(competitor.number)
-          }
+          },
         )
       }
       return toReturn
@@ -1099,7 +1099,7 @@ export default {
     },
     nextRoundTextResults() {
       return this.$store.getters['command/timetableEntryByTimetableOrder'](
-        Number(this.timetableOrder) + 1
+        Number(this.timetableOrder) + 1,
       )?.title
     },
     computedNumCouples() {
@@ -1121,7 +1121,7 @@ export default {
         return this.$store.state.command.current
       } else {
         return this.$store.getters['command/timetableEntryByTimetableOrder'](
-          this.timetableOrder
+          this.timetableOrder,
         )
       }
     },
@@ -1231,7 +1231,7 @@ export default {
         'we have received a new competitor on',
         this.echoRound,
         'who is',
-        this.echoCompetitor
+        this.echoCompetitor,
       )
     },
     currentRound(oldValue, newValue) {
@@ -1328,7 +1328,7 @@ export default {
                     this.$axios.defaults.headers.common.Authorization = `Bearer ${response.headers.authorization}`
                     this.$store.commit(
                       'command/storeAuth',
-                      response.headers.authorization
+                      response.headers.authorization,
                     )
                     this.$store.dispatch('command/getUserDetails').then(() => {
                       this.$store.dispatch('command/getEvents')
@@ -1337,7 +1337,7 @@ export default {
                         .then(() => {
                           this.$store.commit('command/setCurrentNext')
                           this.$store.commit(
-                            'command/resetCurrentTimetableOrder'
+                            'command/resetCurrentTimetableOrder',
                           )
                           this.getCompetitors()
                           loadingDialog.hide()
@@ -1404,13 +1404,13 @@ export default {
                 if (this.currentRound.round) {
                   this.$store.commit(
                     'command/completedRound',
-                    this.currentRound.round.id
+                    this.currentRound.round.id,
                   )
                 }
                 // console.log('completed timetable event', this.timetableId)
                 this.$store.commit(
                   'command/completedTimetableEvent',
-                  this.timetableId
+                  this.timetableId,
                 )
                 this.$store.commit('command/setCurrentNext')
                 this.$store.dispatch('command/getNextCompetitors')
@@ -1506,7 +1506,7 @@ export default {
       //   judgeHeat: 'D1-1',
       // })
       const approx = Math.round(
-        this.currentRound?.round?.recall / this.currentRound?.round?.heats
+        this.currentRound?.round?.recall / this.currentRound?.round?.heats,
       )
       const message = `Recall ${this.currentRound?.round?.recall} from
                 ${
@@ -1760,7 +1760,7 @@ export default {
     roundIdFromTimetableOrder(timetableOrder) {
       const tOrder =
         this.$store.getters['command/timetableEntryByTimetableOrder'](
-          timetableOrder
+          timetableOrder,
         )
       // console.log('tOrder', tOrder)
       return tOrder.round?.id
@@ -1872,7 +1872,7 @@ export default {
       this.$store
         .dispatch(
           'command/getCompetitorsByRoundId',
-          this.$store.state.command.current.round.id
+          this.$store.state.command.current.round.id,
         )
         .then((dat) => {
           this.loadingState = false
@@ -2054,16 +2054,23 @@ export default {
       const savedMarks =
         this.$store.state.command.scrutineering.tempMarks[roundId]
 
-      console.log(savedMarks, judgeHeat)
+      console.log(savedMarks, judgeHeat, toPost.numbers, [
+        ...savedMarks.get(judgeHeat),
+      ])
       // if (!savedMarks.has(judgeHeat)) {
 
       // }
-      const toAdd = _.difference(toPost.numbers, [...savedMarks.get(judgeHeat)])
-      const toRemove = _.difference(
+      const toAdd = this.$_.difference(toPost.numbers, [
+        ...savedMarks.get(judgeHeat),
+      ])
+      console.log('what is to add?', toAdd)
+      const toRemove = this.$_.difference(
         [...savedMarks.get(judgeHeat)],
-        toPost.numbers
+        toPost.numbers,
       )
-      console.log(tapMarked, toAdd, toRemove)
+      console.log(tapMarked, toAdd, toRemove, toPost.numbers, [
+        ...savedMarks.get(judgeHeat),
+      ])
       for (const no of toAdd) {
         this.$store.commit('command/judgeHeatTempMark', {
           roundId,
@@ -2073,6 +2080,7 @@ export default {
         })
         // this.currentJudgeMarks.add(no)
       }
+      console.log('we did the add')
       for (const no of toRemove) {
         this.$store.commit('command/judgeHeatTempMark', {
           roundId,
@@ -2081,6 +2089,7 @@ export default {
           action: 'delete',
         })
       }
+      console.log('we did the remove')
       this.$store.dispatch('echo/judgesMarks', toPost)
     },
     showAdjudicator(adjudicator) {
@@ -2116,7 +2125,7 @@ export default {
               const competitor = this.$store.state.command.competitors.find(
                 (competitor) => {
                   return competitor.number === num
-                }
+                },
               )
               if (competitor) {
                 this.additionalNumbers[this.heat].add(competitor)
@@ -2181,7 +2190,7 @@ export default {
           this.timetableOrders[this.timetableOrders.length - 1]
       } else {
         const currentTimetableIndex = this.timetableOrders.indexOf(
-          this.timetableOrder
+          this.timetableOrder,
         )
         this.timetableOrder =
           this.timetableOrders[currentTimetableIndex + direction]
@@ -2246,8 +2255,8 @@ export default {
       //     judgeHeat,
       //   })
       // }
-      // const toAdd = _.difference(toPost.numbers, [...savedMarks.get(judgeHeat)])
-      // const toRemove = _.difference(
+      // const toAdd = this.$_.difference(toPost.numbers, [...savedMarks.get(judgeHeat)])
+      // const toRemove = this.$_.difference(
       //   [...savedMarks.get(judgeHeat)],
       //   toPost.numbers
       // )
@@ -2354,13 +2363,13 @@ export default {
               if (this.currentRound.round) {
                 this.$store.commit(
                   'command/completedRound',
-                  this.currentRound.round.id
+                  this.currentRound.round.id,
                 )
               }
               // console.log('completed timetable event', this.timetableId)
               this.$store.commit(
                 'command/completedTimetableEvent',
-                this.timetableId
+                this.timetableId,
               )
               this.$store.commit('command/setCurrentNext')
               this.$store.dispatch('command/getNextCompetitors')
@@ -2414,13 +2423,13 @@ export default {
           if (this.currentRound.round) {
             this.$store.commit(
               'command/completedRound',
-              this.currentRound.round.id
+              this.currentRound.round.id,
             )
           }
           // console.log('completed timetable event', this.timetableId)
           this.$store.commit(
             'command/completedTimetableEvent',
-            this.timetableId
+            this.timetableId,
           )
           this.$store.commit('command/setCurrentNext')
           this.$store.dispatch('command/getNextCompetitors')
@@ -2487,7 +2496,7 @@ export default {
         if (this.currentRound.round) {
           this.$store.commit(
             'command/completedRound',
-            this.currentRound.round.id
+            this.currentRound.round.id,
           )
         }
         // console.log('completed timetable event', this.timetableId)
@@ -2582,7 +2591,7 @@ export default {
           let data = response.data
           let oKeys = Object.keys(data)
           let intersection = oKeys.filter((x) =>
-            this.completedRoundIds.includes(parseInt(x, 10))
+            this.completedRoundIds.includes(parseInt(x, 10)),
           )
           let dLen = 0
           let adjLen = 0

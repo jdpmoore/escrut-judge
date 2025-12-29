@@ -10,12 +10,14 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-const { configure } = require('quasar/wrappers')
-require('dotenv').config()
-const fs = require('fs')
+import { defineConfig } from '#q-app/wrappers'
+import 'dotenv/config.js'
+import * as fs from 'fs'
 const packageJson = fs.readFileSync('./package.json')
 const version = JSON.parse(packageJson).version || '0'
-const execSync = require('child_process').execSync
+import { execSync } from 'child_process'
+import flareSourcemapUploader from '@flareapp/vite'
+import { createHash } from 'crypto'
 
 // function getDistDir(process, ctx) {
 //   let distDir = `dist/${ctx.modeName}`
@@ -27,9 +29,10 @@ const execSync = require('child_process').execSync
 //   return distDir
 // }
 
-module.exports = configure(function (ctx) {
+export default defineConfig((ctx) => {
   const isLive = JSON.parse(process.env.LIVE)
   const isLocal = JSON.parse(process.env.LOCAL ?? 'false')
+  const cred = process.env.CREDENTIALS ?? '[{"email": "","password":""}]'
   return {
     // https://v2.quasar.dev/quasar-cli-webpack/supporting-ts
     supportTS: {
@@ -41,7 +44,14 @@ module.exports = configure(function (ctx) {
         },
       },
     },
-
+    eslint: {
+      // fix: true,
+      // include: [],
+      // exclude: [],
+      // rawOptions: {},
+      warnings: true,
+      errors: true,
+    },
     // https://v2.quasar.dev/quasar-cli-webpack/prefetch-feature
     // preFetch: true,
 
@@ -80,66 +90,124 @@ module.exports = configure(function (ctx) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
     build: {
+      target: {
+        browser: ['es2022', 'firefox115', 'chrome115', 'safari14'],
+        // browser: ['esnext'], // , 'edge88', 'firefox78', 'chrome87', 'safari13.1'
+        node: 'node22',
+      },
       env: {
         API: process.env.API,
+        REVERB_APP_KEY: process.env.REVERB_APP_KEY,
+        REVERB_HOST: process.env.REVERB_HOST,
+        REVERB_PORT: process.env.REVERB_PORT,
+        REVERB_SCHEME: process.env.REVERB_SCHEME,
         PUSHER_APP_KEY: process.env.PUSHER_APP_KEY,
         LIVE: isLive,
         LOCAL: isLocal,
         FLARE: process.env.FLARE,
-        credentials: JSON.parse(process.env.CREDENTIALS),
+        credentials: cred,
         version: version,
         VERSION_CHECK: `/system/webapp/version/judge${isLive ? '' : '/dev'}`,
+        BROADCAST_DRIVER: process.env.BROADCAST_DRIVER,
       },
       // distDir: getDistDir(process, ctx),
       distDir: isLive
         ? 'dist/' + ctx.modeName + '/prod'
         : 'dist/' + ctx.modeName + '/dev',
       vueRouterMode: 'hash', // available values: 'hash', 'history'
-      devtool: isLocal ? 'source-map' : 'hidden-source-map',
-      webpackDevtool: isLocal ? 'source-map' : 'hidden-source-map',
-      uglifyOptions: {
-        compress: { drop_console: true },
-        // compress: false,
-        // keep_fnames: true,
-        // // keep_fargs: true,
-        // mangle: false
-        // { drop_console: true },
+      useFilenameHashes: false,
+      typescript: {
+        strict: true, // (recommended) enables strict settings for TypeScript
+        vueShim: true, // required when using ESLint with type-checked rules, will generate a shim file for `*.vue` files
+        extendTsConfig() {
+          //tsConfig
+          // You can use this hook to extend tsConfig dynamically
+          // For basic use cases, you can still update the usual tsconfig.json file to override some settings
+        },
       },
+      vueDevtools: true,
+      devtool: isLocal ? 'source-map' : 'hidden-source-map',
       sourcemap: isLocal ? true : 'hidden',
-      extendWebpack(cfg) {
-        const FlareWebpackPluginSourcemap = require('@flareapp/flare-webpack-plugin-sourcemap')
-        const flarePlugin = new FlareWebpackPluginSourcemap({
-          key: process.env.FLARE,
+      vitePlugins: [
+        flareSourcemapUploader({
+          key: process.env.FLARE ?? '',
           removeSourcemaps: true,
-        })
-        cfg.plugins.push(flarePlugin)
-        cfg.devtool = isLocal ? 'source-map' : 'hidden-source-map'
-        if (!cfg.output) {
-          cfg.output = {}
+        }),
+        // [
+        //   '@intlify/unplugin-vue-i18n/vite',
+        //   {
+        //     // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
+        //     // compositionOnly: false,
+
+        //     // if you want to use named tokens in your Vue I18n messages, such as 'Hello {name}',
+        //     // you need to set `runtimeOnly: false`
+        //     // runtimeOnly: false,
+
+        //     ssr: ctx.modeName === 'ssr',
+
+        //     // you need to set i18n resource including paths !
+        //     // include: [fileURLToPath(new URL('./src/i18n', import.meta.url))],
+        //   },
+        // ],
+        // [
+        //   'vite-plugin-checker',
+        //   {
+        //     vueTsc: {
+        //       tsconfigPath: 'tsconfig.vue-tsc.json',
+        //     },
+        //     eslint: {
+        //       lintCommand: 'eslint "./**/*.{js,ts,mjs,cjs,vue}"',
+        //     },
+        //   },
+        //   { server: false },
+        // ],
+      ],
+      extendViteConf(viteConf) {
+        console.log('we extend', viteConf.define)
+        if (viteConf.define) {
+          viteConf.define['global'] = 'window'
         }
-        cfg.output.filename = 'js/[name].js' //'js/[name].[contenthash:8].js'
-        cfg.output.chunkFilename = 'js/[name].js' //'js/[name].[chunkhash:8].js'
-        cfg.output.cssFilename = 'css/[name].js' //'js/[name].[chunkhash:8].js'
-        cfg.output.cssChunkFilename = 'css/[name].js' //'js/[name].[chunkhash:8].js'
-        cfg.plugins.forEach((plugin) => {
-          // console.log(plugin)
-          if (
-            plugin.options?.filename?.includes('css') &&
-            plugin.options?.chunkFilename?.includes('css')
-          ) {
-            plugin.options.filename = 'css/[name].css'
-            plugin.options.chunkFilename = 'css/[name].css'
+        if (viteConf.build) {
+          viteConf.build.rollupOptions = {
+            output: {
+              assetFileNames: (assetInfo) => {
+                const splitName = assetInfo.name?.split('.')
+                const ext = splitName?.at(-1)
+                if (ext == 'css') {
+                  const hash = createHash('sha256')
+                    .update(assetInfo.name ?? '')
+                    .digest('hex')
+                  return `assets/${hash}.[ext]`
+                }
+                return 'assets/[name].[ext]'
+              },
+              entryFileNames: 'assets/[name].js',
+              chunkFileNames: (assetInfo) => {
+                const theName = assetInfo.moduleIds.join(',')
+                const hash = createHash('sha256').update(theName).digest('hex')
+                return `assets/${hash}.js`
+              },
+              // manualChunks: (id) => {
+              //   if (id.includes('src/pdf-js')) {
+              //     return 'pdf-viewer'
+              //   } else if (id.includes('node_modules')) {
+              //     return 'vendor'
+              //   } else {
+              //     return 'index'
+              //   }
+              // },
+              // manualChunks: (id) => {
+              //   console.log(id)
+              //   return id
+              // },
+            },
           }
-        })
-        // linting is slow in TS projects, we execute it only for production builds
-        // if (ctx.prod) {
-        //   cfg.module.rules.push({
-        //     enforce: 'pre',
-        //     test: /\.(js|vue)$/,.
-        //     loader: 'eslint-loader',
-        //     exclude: /node_modules/,
-        //   })
-        // }
+        }
+        if (isLive) {
+          viteConf.esbuild = {
+            drop: ['console', 'debugger'],
+          }
+        }
       },
       afterBuild(params) {
         // let output = ''
@@ -180,6 +248,7 @@ module.exports = configure(function (ctx) {
       },
       port: 8266,
       open: true, // opens browser window automatically
+      vueDevtools: true,
     },
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-framework
@@ -211,7 +280,16 @@ module.exports = configure(function (ctx) {
     // animations: 'all', // --- includes all animations
     // https://quasar.dev/options/animations
     animations: [],
-
+    sourceFiles: {
+      // rootComponent: 'src/App.vue',
+      // router: 'src/router/index',
+      // store: 'src/store/index',
+      pwaRegisterServiceWorker: 'src-pwa/register-service-worker',
+      pwaServiceWorker: 'src-pwa/custom-service-worker',
+      pwaManifestFile: 'src-pwa/manifest.json',
+      // pwaManifestFile: 'src-pwa/manifest.json',
+      // electronMain: 'src-electron/electron-main',
+    },
     // https://v2.quasar.dev/quasar-cli-webpack/developing-ssr/configuring-ssr
     ssr: {
       pwa: false,
@@ -236,54 +314,30 @@ module.exports = configure(function (ctx) {
     // https://v2.quasar.dev/quasar-cli-webpack/developing-pwa/configuring-pwa
     pwa: {
       workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
-      workboxOptions: {
-        maximumFileSizeToCacheInBytes: 25000000,
-        skipWaiting: true,
-        clientsClaim: true,
-        inlineWorkboxRuntime: true,
-      }, // only for GenerateSW
+      swFilename: 'sw.js',
+      manifestFilename: 'manifest.json',
+      extendManifestJson(json) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        json.version = version
+        return json
+      },
+      useCredentialsForManifestTag: false,
+      injectPwaMetaTags: true,
+      extendGenerateSWOptions(config) {
+        config.inlineWorkboxRuntime = true
+        config.maximumFileSizeToCacheInBytes = 25000000
+      },
+
+      metaVariables: {
+        appleMobileWebAppCapable: 'yes',
+        // appleMobileWebAppStatusBarStyle: 'black-translucent',
+        msapplicationTileColor: '#323386',
+      },
 
       // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
       // if using workbox in InjectManifest mode
       // chainWebpackCustomSW (/* chain */) {},
-
-      manifest: {
-        name: 'eScrut Judges application',
-        version: version, //updateVersion(version, process.env),
-        short_name: 'eScrut Judges application',
-        description: '',
-        display: 'standalone',
-        orientation: 'portrait',
-        background_color: '#333',
-        theme_color: '#333', // '#027be3'
-        icons: [
-          {
-            src: 'icons/icon-128x128.png',
-            sizes: '128x128',
-            type: 'image/png',
-          },
-          {
-            src: 'icons/icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: 'icons/icon-256x256.png',
-            sizes: '256x256',
-            type: 'image/png',
-          },
-          {
-            src: 'icons/icon-384x384.png',
-            sizes: '384x384',
-            type: 'image/png',
-          },
-          {
-            src: 'icons/icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-        ],
-      },
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/developing-cordova-apps/configuring-cordova
@@ -298,6 +352,7 @@ module.exports = configure(function (ctx) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/developing-electron-apps/configuring-electron
     electron: {
+      preloadScripts: ['electron-preload'],
       bundler: 'packager', // 'packager' or 'builder'
 
       packager: {
@@ -315,18 +370,6 @@ module.exports = configure(function (ctx) {
         // https://www.electron.build/configuration/configuration
 
         appId: 'es-judges',
-      },
-
-      // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
-      chainWebpackMain(/* chain */) {
-        // do something with the Electron main process Webpack cfg
-        // extendWebpackMain also available besides this chainWebpackMain
-      },
-
-      // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
-      chainWebpackPreload(/* chain */) {
-        // do something with the Electron main process Webpack cfg
-        // extendWebpackPreload also available besides this chainWebpackPreload
       },
     },
   }
